@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Usuario;
+use App\Models\Organizador;
+use App\Models\Estudiante;
+// use App\Models\Organizador;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -38,30 +41,48 @@ class UsuarioController extends Controller
             "password" => "required|string",
             "telefono" => "required|string",
             "nombre" => "required|required",
-            "imagen" => "string",
+            "biografia" => "required|string|max:250",
+            "rol" => "required|string",
+            "image" => "requiered|string",
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
 
-        $alreadyExists = DB::table("usuarios")->where("email", $req->email)->first();
+        $emailAlreadyExists = DB::table("usuarios")->where("email", $req->email)->first();
 
-        if (isset($alreadyExists)) {
+        if (isset($emailAlreadyExists)) {
             return response()->json([
                 "ok" => false,
                 "msg" => "Ya existe un usuario con este email",
-            ]);
+            ], 401);
+        }
+
+        $nicknameAlreadyExists = DB::table("usuarios")->where("nickname", $req->nickname)->first();
+
+        if (isset($nicknameAlreadyExists)) {
+            return response()->json([
+                "ok" => false,
+                "msg" => "Ya existe un usuario con este nickname",
+            ], 401);
         }
 
         $hashPassword = bcrypt($req->password);
         
-        $user = new Usuario();
+        if($req->rol === 'estudiante'){
+            $user = new Estudiante();
+        }else if($req->rol === 'organizador'){
+            $user = new Organizador();
+        }
+
+        //$user = new Usuario(); // Validar si es organizador o estudiante
         $user->nickname = $req->nickname;
         $user->email = $req->email;
         $user->password = $hashPassword;
         $user->telefono = $req->telefono;
         $user->nombre = $req->nombre;
+        $user->biografia = $req->biografia;
         $user->imagen = $req->imagen;
         $user->creditos_number = isset($req->creditos_number) ? $req->creditos_number : 0;
         $user->status_id = 1;
