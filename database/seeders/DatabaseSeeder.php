@@ -16,5 +16,9 @@ class DatabaseSeeder extends Seeder
         $userStatusSeeder = new UserStatusSeeder();
 
         $userStatusSeeder->run();
+
+        $estudiantesSeeder = new EstudianteSeeder();
+
+        $estudiantesSeeder->run();
     }
 }

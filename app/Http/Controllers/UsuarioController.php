@@ -88,8 +88,8 @@ class UsuarioController extends Controller
         $user->status_id = 1;
         $user->save();
 
-        $mailController = new MailController("Account Activation", $user->email);
-        $mailController->html_email_confirm_account($user->id);
+        // $mailController = new MailController("Account Activation", $user->email);
+        // $mailController->html_email_confirm_account($user->id);
 
         return $this->signin($req);
     }
