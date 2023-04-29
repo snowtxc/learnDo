@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Usuario;
 use App\Models\Organizador;
 use App\Models\Estudiante;
-// use App\Models\Organizador;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -70,13 +69,25 @@ class UsuarioController extends Controller
 
         $hashPassword = bcrypt($req->password);
         
+        // Creo el user en la tabla estudiante / organizador
         if($req->rol === 'estudiante'){
-            $user = new Estudiante();
+            $estudiante = new Estudiante();
+            $statement = DB::select("SHOW TABLE STATUS LIKE 'usuarios'");
+            $nextId = $statement[0]->Auto_increment; // obtengo el siguiente id autogenerado por la secuencia
+            $estudiante->user_id = $nextId;
+            $estudiante->save();
         }else if($req->rol === 'organizador'){
-            $user = new Organizador();
+            $organizador = new Organizador();
+            $statement = DB::select("SHOW TABLE STATUS LIKE 'usuarios'");
+            $nextId = $statement[0]->Auto_increment; // obtengo el siguiente id autogenerado por la secuencia
+            $organizador->user_id = $nextId;
+            $organizador->save();
         }
 
-        //$user = new Usuario(); // Validar si es organizador o estudiante
+        $user = new Usuario();
+
+        // al insertar, pasarle el user_id al new estudiante
+
         $user->nickname = $req->nickname;
         $user->email = $req->email;
         $user->password = $hashPassword;
@@ -85,6 +96,7 @@ class UsuarioController extends Controller
         $user->biografia = $req->biografia;
         $user->imagen = $req->imagen;
         $user->creditos_number = isset($req->creditos_number) ? $req->creditos_number : 0;
+        $user->type = $req->rol;
         $user->status_id = 1;
         $user->save();
 

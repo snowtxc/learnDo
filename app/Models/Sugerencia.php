@@ -2,15 +2,10 @@
 
 namespace App\Models;
 
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Evento extends Model
+class Sugerencia extends Model
 {
     use HasFactory;
-    public function organizador()
-    {
-        return $this->belongsTo(Organizador::class);
-    }
 }

@@ -2,12 +2,19 @@
 
 namespace App\Models;
 
-use Parental\HasParent;
 
 // use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model;
 
 class Estudiante extends Usuario
 {
-    use HasParent;
+    public function certificados()
+    {
+        return $this->hasMany(Certificado::class);
+    }
+    
+    public function evaluaciones()
+    {
+        return $this->hasMany(Evaluacion::class);
+    }
 }
