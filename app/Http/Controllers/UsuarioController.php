@@ -43,7 +43,7 @@ class UsuarioController extends Controller
             "nombre" => "required|required",
             "biografia" => "required|string|max:250",
             "rol" => "required|string",
-            "image" => "requiered|string",
+            "image" => "required|string",
         ]);
 
         if ($validator->fails()) {
@@ -94,13 +94,27 @@ class UsuarioController extends Controller
         return $this->signin($req);
     }
 
+
+    public function checkNickname(Request $req) {
+        $validator = Validator::make($req->all(),[
+            "nickname" => "required|string|max:100",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $user = DB::table("usuarios")->where("nickname", $req->nickname)->first();
+        return response()->json(["existe" => isset($user)]);
+    }
+
      /**
      * Create a new AuthController instance.
      *
      * @return void
      */
     public function __construct() {
-        $this->middleware('jwt', ['except' => ['signin', 'create', 'activate']]);
+        $this->middleware('jwt', ['except' => ['signin', 'create', 'activate', 'checkNickname']]);
     }
     /**
      * Get a JWT via given credentials.
