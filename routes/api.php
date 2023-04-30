@@ -23,8 +23,8 @@ Route::group([
     "prefix" => "auth",
 ], function() {
     Route::post("/login", [UsuarioController::class, "signin"])->name("login");
-    Route::get("/checkNickname", [UsuarioController::class, "checkNickname"])->name("login");
     Route::post("/signup", [UsuarioController::class, "create"])->name("signup");
     Route::put("/activate", [UsuarioController::class, "activate"])->name("activate");
     Route::get("/me", [UsuarioController::class, "me"])->name("me");
+    Route::get("/checkNickname", [UsuarioController::class, "checkNickname"])->name("login");
 });

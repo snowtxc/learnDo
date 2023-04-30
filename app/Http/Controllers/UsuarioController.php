@@ -13,6 +13,7 @@ use Validator;
 use PhpParser\Node\Stmt\Unset_;
 use App\Http\Controllers\MailController;
 use App\Models\UserStatus;
+use Illuminate\Support\Facades\Auth;
 
 class UsuarioController extends Controller
 {
@@ -132,8 +133,17 @@ class UsuarioController extends Controller
         if (! $token = auth()->attempt($validator->validated())) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+        return $this->checkUserStatus($token);
+    }
+
+    public function checkUserStatus($token){
+        $user = auth()->user();
+        if ($user->status_id === 1) {
+            return response()->json(["ok" => false, "message" => "Cuenta desactivada"]);
+        };
         return $this->createNewToken($token);
     }
+
     /**
      * Log the user out (Invalidate the token).
      *
@@ -162,13 +172,33 @@ class UsuarioController extends Controller
     }
 
     public function activate(Request $req) {
-        $uid = $req->uid;
-        $user = Usuario::where("id", $uid)->update(['status_id' => 2]);
+        $userId = strval($req->uid);
+        $userInfo = Usuario::find($userId);
+        // DB::table("usuarios")->where("id", "$req->uid")->first();
+        if ($userId === null || $userInfo === null) {
+            return response()->json([
+                "ok" => false,
+                "message" => "User not found",
+            ]);
+            return;
+        }
+        Usuario::where("id", $userId)->update(['status_id' => 2]);
+        $updatedUserInfo = Usuario::find($userId)->toArray();
+        // echo var_dump($updatedUserInfo);
+        $credentials = [
+            "email" => $updatedUserInfo["email"],
+        ];
+        $token = ($user = Auth::getProvider()->retrieveByCredentials($credentials))
+            ? Auth::login($user)
+            : false;
         
-        return response()->json([
-            "ok" => true,
-            "message" => "Account activated",
-        ]);
+        return $this->createNewToken($token);
+        
+        // return response()->json([
+        //     "ok" => true,
+        //     "message" => "Account activated",
+        //     "userInfo" => $user,
+        // ]);
     }
     /**
      * Get the authenticated User.
@@ -186,11 +216,11 @@ class UsuarioController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     protected function createNewToken($token){
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60,
-            'user' => auth()->user()
-        ]);
+      return response()->json([
+        'access_token' => $token,
+        'token_type' => 'bearer',
+        'expires_in' => auth()->factory()->getTTL() * 60,
+        'user' => auth()->user()
+      ]);
     }
 }
