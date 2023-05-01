@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class Relations extends Migration
+class CreateEvaluacionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,11 @@ class Relations extends Migration
      */
     public function up()
     {
-        Schema::table('usuarios', function (Blueprint $table) {
-            $table->foreign('status_id')
-                ->references('id')
-                ->on('user_statuses');
+        Schema::create('evaluacions', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre');
+            $table->float('maximo_puntuacion');
+            $table->timestamps();
         });
     }
 
@@ -27,6 +28,6 @@ class Relations extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('evaluacions');
     }
 }

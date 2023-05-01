@@ -4,14 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-use Parental\HasChildren;
 
 class Usuario extends \Illuminate\Foundation\Auth\User implements JWTSubject
 {
     use HasFactory;
-    use HasChildren;
 
-    protected $fillable = ['type'];
+    public function publicaciones()
+    {
+        return $this->hasMany(Publicacion::class);
+    }
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
