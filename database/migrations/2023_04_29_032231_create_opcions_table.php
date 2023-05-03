@@ -14,9 +14,10 @@ class CreateOpcionsTable extends Migration
     public function up()
     {
         Schema::create('opcions', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('contenido');
             $table->boolean('es_correcta')->default(0);
+            $table->integer('pregunta_id')->unsigned();
             $table->timestamps();
         });
     }

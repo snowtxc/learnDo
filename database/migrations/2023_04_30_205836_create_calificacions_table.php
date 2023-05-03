@@ -14,9 +14,12 @@ class CreateCalificacionsTable extends Migration
     public function up()
     {
         Schema::create('calificacions', function (Blueprint $table) {
+            $table->increments('id');
             // foreign userid
             // foreign evaluacionid
             $table->float('puntuacion');
+            $table->integer('estudiante_id')->unsigned();
+            $table->integer('evaluacion_id')->unsigned();
             $table->timestamps();
         });
     }

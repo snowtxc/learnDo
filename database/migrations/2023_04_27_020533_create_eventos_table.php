@@ -16,13 +16,12 @@ class CreateEventosTable extends Migration
     public function up()
     {
         Schema::create('eventos', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string("nombre");
             $table->string("descripcion");
             $table->boolean('es_pago')->default(0);
             $table->integer("precio")->default(null)->nullable();
-            $table->foreignIdFor(Organizador::class);
-            $table->foreignIdFor(Categoria::class);
+            $table->integer("organizador_id")->unsigned();
             $table->timestamps();
         });
     }

@@ -14,10 +14,13 @@ class CreateCuponsTable extends Migration
     public function up()
     {
         Schema::create('cupons', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('token');
             $table->float('descuento');
             $table->date('fecha_vencimiento');
+            $table->integer('user_id_from')->unsigned();
+            $table->integer('user_id_to')->unsigned();
+            $table->integer('evento_id')->unsigned();
             $table->timestamps();
         });
     }

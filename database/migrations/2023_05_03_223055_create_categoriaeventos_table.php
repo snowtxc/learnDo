@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMensajeSalasTable extends Migration
+class CreateCategoriaeventosTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,10 @@ class CreateMensajeSalasTable extends Migration
      */
     public function up()
     {
-        Schema::create('mensaje_salas', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('conenido');
-            $table->date('fecha_emision');
-            $table->integer('user_id')->unsigned();
-            $table->integer('seminario_virtual_id')->unsigned();
+        Schema::create('categoriaeventos', function (Blueprint $table) {
+            $table->id();
+            $table->integer("evento_id")->unsigned();
+            $table->integer("categoria_id")->unsigned();
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ class CreateMensajeSalasTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('mensaje_salas');
+        Schema::dropIfExists('categoriaeventos');
     }
 }

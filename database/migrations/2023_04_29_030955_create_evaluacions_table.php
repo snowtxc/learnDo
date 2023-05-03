@@ -14,9 +14,10 @@ class CreateEvaluacionsTable extends Migration
     public function up()
     {
         Schema::create('evaluacions', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('nombre');
             $table->float('maximo_puntuacion');
+            $table->integer('modulo_id')->unsigned();
             $table->timestamps();
         });
     }

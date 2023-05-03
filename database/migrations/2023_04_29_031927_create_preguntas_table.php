@@ -14,8 +14,9 @@ class CreatePreguntasTable extends Migration
     public function up()
     {
         Schema::create('preguntas', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('contenido');
+            $table->integer('evaluacion_id')->unsigned();
             $table->timestamps();
         });
     }

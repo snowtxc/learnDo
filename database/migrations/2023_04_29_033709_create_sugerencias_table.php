@@ -14,9 +14,11 @@ class CreateSugerenciasTable extends Migration
     public function up()
     {
         Schema::create('sugerencias', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->boolean('estado')->default(0); // si esta aprobada o no
             $table->string('contenido');
+            $table->integer('curso_id')->unsigned();
+            $table->integer('estudiante_id')->unsigned();
             $table->timestamps();
         });
     }
