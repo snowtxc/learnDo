@@ -7,6 +7,9 @@ use App\Models\Usuario;
 
 use Illuminate\Http\Request;
 
+use App\Http\Controllers\ModuloController;
+use Validator;
+
 class EventoController extends Controller
 {
     /**
@@ -63,9 +66,50 @@ class EventoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(),[
+            'nombre' => 'required',
+            'descripcion' => 'required',
+            'es_pago' => 'required|boolean',
+            'precio' => 'required_if:es_pago,true',
+            'organizador' => 'required',
+            'categoria' => 'required',
+            /*
+            'modulos' => 'required|array',
+            'modulos.*.nombre' => 'required',
+            'modulos.*.estado' => 'required',
+            'modulos.*.clases' => 'required|array',
+            'modulos.*.clases.*.nombre' => 'required',
+            'modulos.*.clases.*.duracion' => 'required',
+            'modulos.*.clases.*.estado' => 'required',
+            'modulos.*.evaluacion.nombre' => 'required',
+            'modulos.*.evaluacion.maximo_puntuacion' => 'required',
+            'modulos.*.evaluacion.preguntas' => 'required|array',
+            'modulos.*.evaluacion.preguntas.*.texto' => 'required',
+            'modulos.*.evaluacion.preguntas.*.opciones' => 'required|array',
+            'modulos.*.evaluacion.preguntas.*.opciones.*.texto' => 'required',
+            'modulos.*.evaluacion.preguntas.*.opciones.*.correcta' => 'required|boolean',
+            */
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $evento = new Evento();
+        $evento->nombre = $request->input('nombre');
+        $evento->descripcion = $request->input('descripcion');
+        $evento->es_pago = $request->input('es_pago');
+        $evento->precio = $request->input('precio');
+        $evento->organizador_id = $request->input('organizador');
+        $evento->categoria_id  = $request->input('categoria');
+        $evento->save();
+
+        return response()->json([
+            'message' => 'El curso se ha creado correctamente.',
+            'curso' => $evento,
+        ], 201);
     }
 
     /**

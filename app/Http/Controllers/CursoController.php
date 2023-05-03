@@ -45,9 +45,28 @@ class CursoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(),[
+            'porcentaje_aprobacion' => '',
+            'ganancias' => '',
+            'evento_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $curso = new Curso();
+        $curso->porcentaje_aprobacion = $request->input('porcentaje_aprobacion');
+        $curso->ganancias_acumuladas = $request->input('ganancias');
+        $curso->evento_id = $request->input('evento_id');
+        $curso->save();
+        
+        return response()->json([
+            'message' => 'El curso se ha creado correctamente.',
+            'curso' => $curso,
+        ], 201);
     }
 
     /**

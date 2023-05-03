@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Clase;
 use Illuminate\Http\Request;
+use Validator;
 
 class ClaseController extends Controller
 {
@@ -22,9 +23,30 @@ class ClaseController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(),[
+            'nombre' => 'required',
+            'duracion' => 'required',
+            'estado' => 'required',
+            'modulo_id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $clase = new Clase();
+        $clase->nombre = $request->input('nombre');
+        $clase->duracion = $request->input('duracion');
+        $clase->estado = $request->input('estado');
+        $clase->modulo_id = $request->input('modulo_id');
+        $clase->save();
+
+        return response()->json([
+            'message' => 'La clase se ha creado correctamente.',
+            'clase' => $clase,
+        ], 201);
     }
 
     /**
