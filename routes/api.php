@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\EventoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -27,4 +28,12 @@ Route::group([
     Route::put("/activate", [UsuarioController::class, "activate"])->name("activate");
     Route::get("/me", [UsuarioController::class, "me"])->name("me");
     Route::get("/checkNickname", [UsuarioController::class, "checkNickname"])->name("login");
+});
+
+
+Route::group([
+    "prefix" => "eventos",
+], function() {
+    Route::post("/", [EventoController::class, "listar"])->name("listar"); 
+
 });
