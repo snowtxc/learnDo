@@ -187,8 +187,8 @@ class Relations extends Migration
 
         Schema::table('categoriaeventos', function (Blueprint $table) {
             $table->foreign('evento_id')
-                ->references('evento_id_of_curso')
-                ->on('cursos');
+                ->references('id')
+                ->on('eventos');
         });
 
         Schema::table('colaboracions', function (Blueprint $table) {

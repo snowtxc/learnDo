@@ -3,6 +3,7 @@
 use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\CursoController;
+use App\Http\Controllers\EventoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -38,4 +39,14 @@ Route::group([
     Route::get("/", [MensajeController::class, "getMensajes"])->name("create");
 });
 
-Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
+Route::group([
+    "prefix" => "cursos",
+], function () {
+    Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
+});
+
+Route::group([
+    "prefix" => "eventos",
+], function() {
+    Route::get("/", [EventoController::class, "listar"])->name("listar"); 
+});
