@@ -17,8 +17,8 @@ class CreateMensajesTable extends Migration
             $table->increments('id');
             $table->string('contenido');
             $table->date('fecha_emision');
-            $table->integer('user_from_id')->unsigned();
-            $table->integer('user_to_id')->unsigned();
+            $table->integer('user_from_id')->unsigned()->nullable();
+            $table->integer('user_to_id')->unsigned()->nullable();
             $table->timestamps();
         });
     }

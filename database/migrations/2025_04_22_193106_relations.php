@@ -13,6 +13,8 @@ class Relations extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+
         Schema::table('usuarios', function (Blueprint $table) {
             $table->foreign('status_id')
                 ->references('id')
@@ -21,12 +23,14 @@ class Relations extends Migration
         Schema::table('estudiantes', function (Blueprint $table) {
             $table->foreign('user_id')
                 ->references('id')
-                ->on('usuarios');
+                ->on('usuarios')
+                ->onDelete('cascade');
         });
         Schema::table('organizadors', function (Blueprint $table) {
             $table->foreign('user_id')
                 ->references('id')
-                ->on('usuarios');
+                ->on('usuarios')
+                ->onDelete('cascade');
         });
         Schema::table('seminario_virtuals', function (Blueprint $table) {
             $table->foreign('evento_id')
@@ -216,6 +220,7 @@ class Relations extends Migration
                 ->references('id')
                 ->on('eventos');
         });
+        Schema::enableForeignKeyConstraints();
     }
 
     /**

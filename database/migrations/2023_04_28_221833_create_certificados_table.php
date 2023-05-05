@@ -16,7 +16,7 @@ class CreateCertificadosTable extends Migration
         Schema::create('certificados', function (Blueprint $table) {
             $table->increments('id');
             $table->string('nombre');
-            $table->integer('curso_id')->unsigned();
+            $table->integer('curso_id')->unsigned()->nullable();
             $table->timestamps();
         });
     }

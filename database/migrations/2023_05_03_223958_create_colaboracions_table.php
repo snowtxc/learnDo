@@ -15,8 +15,8 @@ class CreateColaboracionsTable extends Migration
     {
         Schema::create('colaboracions', function (Blueprint $table) {
             $table->id();
-            $table->integer("user_id")->unsigned();
-            $table->integer("evento_id")->unsigned();
+            $table->integer("user_id")->unsigned()->nullable();
+            $table->integer("evento_id")->unsigned()->nullable();
             $table->timestamps();
         });
     }

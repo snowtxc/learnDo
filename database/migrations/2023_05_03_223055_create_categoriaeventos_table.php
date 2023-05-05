@@ -15,8 +15,8 @@ class CreateCategoriaeventosTable extends Migration
     {
         Schema::create('categoriaeventos', function (Blueprint $table) {
             $table->id();
-            $table->integer("evento_id")->unsigned();
-            $table->integer("categoria_id")->unsigned();
+            $table->integer("evento_id")->unsigned()->nullable();
+            $table->integer("categoria_id")->unsigned()->nullable();
             $table->timestamps();
         });
     }

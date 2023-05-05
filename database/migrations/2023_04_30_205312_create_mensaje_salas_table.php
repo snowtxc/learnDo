@@ -17,8 +17,8 @@ class CreateMensajeSalasTable extends Migration
             $table->increments('id');
             $table->string('conenido');
             $table->date('fecha_emision');
-            $table->integer('user_id')->unsigned();
-            $table->integer('seminario_virtual_id')->unsigned();
+            $table->integer('user_id')->unsigned()->nullable();
+            $table->integer('seminario_virtual_id')->unsigned()->nullable();
             $table->timestamps();
         });
     }

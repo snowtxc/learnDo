@@ -17,8 +17,8 @@ class CreatePublicacionsTable extends Migration
             $table->increments('id');
             $table->string('nombre');
             $table->string('contenido');
-            $table->integer('user_id')->unsigned();
-            $table->integer('foro_id')->unsigned();
+            $table->integer('user_id')->unsigned()->nullable();
+            $table->integer('foro_id')->unsigned()->nullable();
             $table->timestamps();
         });
     }

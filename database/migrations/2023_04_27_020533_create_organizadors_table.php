@@ -15,7 +15,7 @@ class CreateOrganizadorsTable extends Migration
     public function up()
     {
         Schema::create('organizadors', function (Blueprint $table) {
-            $table->integer('user_id')->unsigned();
+            $table->integer('user_id')->unsigned()->nullable();
             $table->timestamps();
         });
     }

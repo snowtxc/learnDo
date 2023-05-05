@@ -14,7 +14,7 @@ class CreateSeminarioPresencialsTable extends Migration
     public function up()
     {
         Schema::create('seminario_presencials', function (Blueprint $table) {
-            $table->integer('evento_id')->unsigned();
+            $table->integer('evento_id')->unsigned()->nullable();
             $table->string('nombre_ubicacion');
             $table->string('latitud');
             $table->string('longitud');

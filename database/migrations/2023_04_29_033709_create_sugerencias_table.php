@@ -17,8 +17,8 @@ class CreateSugerenciasTable extends Migration
             $table->increments('id');
             $table->boolean('estado')->default(0); // si esta aprobada o no
             $table->string('contenido');
-            $table->integer('curso_id')->unsigned();
-            $table->integer('estudiante_id')->unsigned();
+            $table->integer('curso_id')->unsigned()->nullable();
+            $table->integer('estudiante_id')->unsigned()->nullable();
             $table->timestamps();
         });
     }

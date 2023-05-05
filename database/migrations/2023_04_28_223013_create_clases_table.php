@@ -18,7 +18,7 @@ class CreateClasesTable extends Migration
             $table->string('nombre');
             $table->float('duracion');
             $table->string('estado');
-            $table->integer('modulo_id')->unsigned();
+            $table->integer('modulo_id')->unsigned()->nullable();
             $table->timestamps();
         });
     }
