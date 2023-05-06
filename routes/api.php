@@ -47,6 +47,7 @@ Route::group([
 
 Route::group([
     "prefix" => "eventos",
+    'middleware' => ['cors']
 ], function() {
     Route::get("/", [EventoController::class, "listar"])->name("listar"); 
 });
