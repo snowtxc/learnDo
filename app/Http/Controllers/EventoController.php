@@ -18,18 +18,30 @@ class EventoController extends Controller
      
     public function listar(Request $request)
     {
+        
         $page =  ($request->query('page') != null && $request->query('page') >= 1) ? $request->query('page') :  1;  
         $maxRows =  $request->query('maxRows') != null ? $request->query('maxRows') : 10;  
         $offset = $page == 1 ? 0 :  (($page - 1) * $maxRows);  
         $categoriaFilterIds =$request->query('categoria') != null ? $request->query('categoria') : null; //array con las categorias a filtrar
+        $busqueda = ($request->query('busqueda') != null && $request->query('busqueda') != '') ? $request->query('busqueda') : null; //array con las categorias a filtrar
+
+
         $tipoFilter  = $request->query('categoria') != null ? $request->query('tipo') : null;
 
-        $eventos = Evento::whereHas('categorias', function($query) use ($categoriaFilterIds) {
+        
+        $eventos =  Evento::whereHas('categorias', function($query) use ($categoriaFilterIds) {
             if($categoriaFilterIds != null){
                 $query->whereIn('categorias.id', $categoriaFilterIds);  
             }
            
-        })->skip($offset)->take($maxRows)->get();
+        })->when(isset($busqueda), function ($query) use ($busqueda) {
+            $query->where('nombre', 'like', '%'.$busqueda.'%'); 
+        })
+        ->skip($offset)->take($maxRows)->get();
+
+
+        return response()->json([ "result" => $eventos]);  
+        /*Queda hacer un filtro por tipo */
         
         $result =  array();
         foreach($eventos as $evento){
@@ -43,7 +55,7 @@ class EventoController extends Controller
             $data = array_merge($evento->toArray(), $extraData);  //merge data and retrieve a new result
             array_push($result,$data);
         }
-        return response()->json([ "result" => $result]);  
+        return response()->json([ "result" => $result, "categoriasIds" => $categoriaFilterIds]);    
     }
 
     /**

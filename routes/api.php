@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group([
     "prefix" => "auth",
+    'middleware' => ['cors']
 ], function() {
     Route::post("/login", [UsuarioController::class, "signin"])->name("login");
     Route::post("/signup", [UsuarioController::class, "create"])->name("signup");
@@ -33,7 +34,8 @@ Route::group([
 
 Route::group([
     "prefix" => "eventos",
+    'middleware' => ['cors']
 ], function() {
-    Route::post("/", [EventoController::class, "listar"])->name("listar"); 
+    Route::get("/", [EventoController::class, "listar"])->name("listar"); 
 
 });
