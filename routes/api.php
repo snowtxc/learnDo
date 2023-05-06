@@ -33,7 +33,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::group([
     "prefix" => "auth",
-], function () {
+    'middleware' => ['cors']
+], function() {
     Route::post("/login", [UsuarioController::class, "signin"])->name("login");
     Route::post("/signup", [UsuarioController::class, "create"])->name("signup");
     Route::put("/activate", [UsuarioController::class, "activate"])->name("activate");
@@ -59,11 +60,11 @@ Route::group([
 
 Route::group([
     "prefix" => "eventos",
+    'middleware' => ['cors']
 ], function() {
     Route::post('/createEvento', [EventoController::class, "create"]);
     Route::get("/", [EventoController::class, "listar"])->name("listar");
     Route::post("/comprarEvento", [EventoController::class, "comprarEvento"])->name("comprarEvento");
-
 });
 
 Route::group([
