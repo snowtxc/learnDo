@@ -57,7 +57,7 @@ Route::group([
     "prefix" => "eventos",
 ], function() {
     Route::post('/createEvento', [EventoController::class, "create"]);
-    Route::post("/", [EventoController::class, "listar"])->name("listar"); 
+    Route::post("/", [EventoController::class, "listar"])->name("listar");
 });
 
 Route::group([
