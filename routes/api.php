@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\CursoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -35,5 +36,6 @@ Route::group([
 ], function () {
     Route::post("/create", [MensajeController::class, "create"])->name("create");
     Route::get("/", [MensajeController::class, "getMensajes"])->name("create");
-
 });
+
+Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
