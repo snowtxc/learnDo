@@ -7,11 +7,8 @@ use App\Models\Organizador;
 use App\Models\Estudiante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Validator;
-use PhpParser\Node\Stmt\Unset_;
 use App\Http\Controllers\MailController;
-use App\Models\UserStatus;
 use Illuminate\Support\Facades\Auth;
 
 class UsuarioController extends Controller
@@ -45,7 +42,6 @@ class UsuarioController extends Controller
             "rol" => "required|string",
             "imagen" => "required|string",
         ]);
-
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -21,10 +22,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::group([
     "prefix" => "auth",
-], function() {
+], function () {
     Route::post("/login", [UsuarioController::class, "signin"])->name("login");
     Route::post("/signup", [UsuarioController::class, "create"])->name("signup");
     Route::put("/activate", [UsuarioController::class, "activate"])->name("activate");
     Route::get("/me", [UsuarioController::class, "me"])->name("me");
     Route::get("/checkNickname", [UsuarioController::class, "checkNickname"])->name("login");
+});
+
+Route::group([
+    "prefix" => "messages",
+], function () {
+    Route::post("/create", [MensajeController::class, "create"])->name("create");
+    Route::get("/", [MensajeController::class, "getMensajes"])->name("create");
+
 });

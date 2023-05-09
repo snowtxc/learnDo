@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatEventController;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
