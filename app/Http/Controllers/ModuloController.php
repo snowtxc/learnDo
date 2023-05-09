@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Modulo;
 use Illuminate\Http\Request;
+use Validator;
 
 class ModuloController extends Controller
 {
@@ -22,9 +23,42 @@ class ModuloController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(),[
+            'nombre' => 'required',
+            'estado' => 'required',
+            'evento_id' => 'required',
+            /*
+            'clases' => 'required|array',
+            'clases.*.nombre' => 'required',
+            'clases.*.duracion' => 'required',
+            'clases.*.estado' => 'required',
+            'evaluacion' => 'required',
+            'evaluacion.nombre' => 'required',
+            'evaluacion.maximo_puntuacion' => 'required',
+            'evaluacion.preguntas' => 'required|array',
+            'evaluacion.preguntas.*.texto' => 'required',
+            'evaluacion.preguntas.*.opciones' => 'required|array',
+            'evaluacion.preguntas.*.opciones.*.texto' => 'required',
+            'evaluacion.preguntas.*.opciones.*.correcta' => 'required|boolean',
+            */
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $modulo = new Modulo();
+        $modulo->nombre = $request->input('nombre');
+        $modulo->estado = $request->input('estado');
+        $modulo->evento_id = $request->input('evento_id');
+        $modulo->save();
+
+        return response()->json([
+            'message' => 'El modulo se ha creado correctamente',
+            'modulo' => $modulo,
+        ], 201);
     }
 
     /**

@@ -4,6 +4,11 @@ use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\EventoController;
+use App\Http\Controllers\ModuloController;
+use App\Http\Controllers\OpcionController;
+use App\Http\Controllers\ClaseController;
+use App\Http\Controllers\EvaluacionController;
+use App\Http\Controllers\PreguntaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -42,12 +47,43 @@ Route::group([
 Route::group([
     "prefix" => "cursos",
 ], function () {
+    Route::post('/createCurso', [CursoController::class, "create"]);
     Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
 });
 
 Route::group([
     "prefix" => "eventos",
-    'middleware' => ['cors']
 ], function() {
+    Route::post('/createEvento', [EventoController::class, "create"]);
     Route::get("/", [EventoController::class, "listar"])->name("listar"); 
 });
+
+Route::group([
+    "prefix" => "modulos",
+], function() {
+    Route::post('/createModulo', [ModuloController::class, "create"]);
+});
+
+Route::group([
+    "prefix" => "evaluaciones",
+], function() {
+    Route::post('/createEvaluacion', [EvaluacionController::class, "create"]);
+});
+
+
+Route::group([
+    "prefix" => "preguntas",
+], function() {
+    Route::post('/createPregunta', [PreguntaController::class, "create"]);
+});
+
+Route::group([
+    "prefix" => "opciones",
+], function() {
+    Route::post('/createOpcion', [OpcionController::class, "create"]);
+});
+
+
+
+
+

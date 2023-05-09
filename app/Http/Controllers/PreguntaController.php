@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pregunta;
 use Illuminate\Http\Request;
+use Validator;
 
 class PreguntaController extends Controller
 {
@@ -22,9 +23,29 @@ class PreguntaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(),[
+            'texto' => 'required',
+            'evaluacion_id' => 'required',
+            /*
+            'opciones' => 'required|array|min:4'
+            */
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+    
+        $pregunta = new Pregunta();
+        $pregunta->contenido = $request->input('texto');
+        $pregunta->evaluacion_id = $request->input('evaluacion_id');
+        $pregunta->save();
+
+        return response()->json([
+            'message' => 'La pregunta se ha creado correctamente.',
+            'pregunta' => $pregunta,
+        ], 201);
     }
 
     /**
