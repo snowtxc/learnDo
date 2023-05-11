@@ -117,13 +117,28 @@ class UsuarioController extends Controller
         return response()->json(["existe" => isset($user)]);
     }
 
+    public function filterByNicknameOrEmail(Request $req) {
+        $validator = Validator::make($req->all(),[
+            "value" => "required|string|max:100",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(),500);
+        }
+
+        $users = DB::table("usuarios")->where("nickname", 'LIKE', '%'.$req->value.'%')
+        ->orWhere("email", "LIKE", "%".$req->value."%")
+        ->get();
+        return response()->json($users);
+    }
+
      /**
      * Create a new AuthController instance.
      *
      * @return void
      */
     public function __construct() {
-        $this->middleware('jwt', ['except' => ['signin', 'create', 'activate', 'checkNickname']]);
+        $this->middleware('jwt', ['except' => ['signin', 'create', 'activate', 'checkNickname', 'filterByNicknameOrEmail',]]);
     }
     /**
      * Get a JWT via given credentials.

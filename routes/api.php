@@ -83,6 +83,12 @@ Route::group([
     Route::post('/createOpcion', [OpcionController::class, "create"]);
 });
 
+Route::group([
+    "prefix" => "usuarios",
+], function() {
+    Route::get('/filterByNicknameOrEmail', [UsuarioController::class, "filterByNicknameOrEmail"]);
+});
+
 
 
 
