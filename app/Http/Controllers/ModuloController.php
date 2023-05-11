@@ -28,7 +28,7 @@ class ModuloController extends Controller
         $validator = Validator::make($request->all(),[
             'nombre' => 'required',
             'estado' => 'required',
-            'evento_id' => 'required',
+            'curso_id' => 'required',
             /*
             'clases' => 'required|array',
             'clases.*.nombre' => 'required',
@@ -52,7 +52,7 @@ class ModuloController extends Controller
         $modulo = new Modulo();
         $modulo->nombre = $request->input('nombre');
         $modulo->estado = $request->input('estado');
-        $modulo->evento_id = $request->input('evento_id');
+        $modulo->evento_id = $request->input('curso_id');
         $modulo->save();
 
         return response()->json([
