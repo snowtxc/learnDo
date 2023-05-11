@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Opcion;
 use Illuminate\Http\Request;
+use Validator;
 
 class OpcionController extends Controller
 {
@@ -22,9 +23,29 @@ class OpcionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+
+        $validator = Validator::make($request->all(),[
+            'texto' => 'required',
+            'correcta' => 'required|boolean',
+            'pregunta_id' => 'required|exists:preguntas,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+    
+        $opcion = new Opcion();
+        $opcion->contenido = $request->input('texto');
+        $opcion->es_correcta = $request->input('correcta');
+        $opcion->pregunta_id = $request->input('pregunta_id');
+        $opcion->save();
+        
+        return response()->json([
+            'message' => 'La opción se ha creado correctamente.',
+            'opcion' => $opcion,
+        ], 201);
     }
 
     /**

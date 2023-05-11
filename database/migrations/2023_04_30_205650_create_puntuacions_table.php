@@ -18,8 +18,8 @@ class CreatePuntuacionsTable extends Migration
             // foreign cursoid
             $table->float('puntuacion');
             $table->float('descripcion');
-            $table->integer('estudiante_id')->unsigned();
-            $table->integer('curso_id')->unsigned();
+            $table->integer('estudiante_id')->unsigned()->nullable();
+            $table->integer('curso_id')->unsigned()->nullable();
             $table->timestamps();
         });
     }

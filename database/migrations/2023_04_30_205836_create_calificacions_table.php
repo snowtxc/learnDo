@@ -18,8 +18,8 @@ class CreateCalificacionsTable extends Migration
             // foreign userid
             // foreign evaluacionid
             $table->float('puntuacion');
-            $table->integer('estudiante_id')->unsigned();
-            $table->integer('evaluacion_id')->unsigned();
+            $table->integer('estudiante_id')->unsigned()->nullable();
+            $table->integer('evaluacion_id')->unsigned()->nullable();
             $table->timestamps();
         });
     }

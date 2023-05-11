@@ -17,7 +17,7 @@ class CreateOpcionsTable extends Migration
             $table->increments('id');
             $table->string('contenido');
             $table->boolean('es_correcta')->default(0);
-            $table->integer('pregunta_id')->unsigned();
+            $table->integer('pregunta_id')->unsigned()->nullable();
             $table->timestamps();
         });
     }

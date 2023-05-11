@@ -7,11 +7,8 @@ use App\Models\Organizador;
 use App\Models\Estudiante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Validator;
-use PhpParser\Node\Stmt\Unset_;
 use App\Http\Controllers\MailController;
-use App\Models\UserStatus;
 use Illuminate\Support\Facades\Auth;
 
 class UsuarioController extends Controller
@@ -45,7 +42,6 @@ class UsuarioController extends Controller
             "rol" => "required|string",
             "imagen" => "required|string",
         ]);
-
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
@@ -69,21 +65,6 @@ class UsuarioController extends Controller
         }
 
         $hashPassword = bcrypt($req->password);
-        
-        // Creo el user en la tabla estudiante / organizador
-        if($req->rol === 'estudiante'){
-            $estudiante = new Estudiante();
-            $statement = DB::select("SHOW TABLE STATUS LIKE 'usuarios'");
-            $nextId = $statement[0]->Auto_increment; // obtengo el siguiente id autogenerado por la secuencia
-            $estudiante->user_id = $nextId;
-            $estudiante->save();
-        }else if($req->rol === 'organizador'){
-            $organizador = new Organizador();
-            $statement = DB::select("SHOW TABLE STATUS LIKE 'usuarios'");
-            $nextId = $statement[0]->Auto_increment; // obtengo el siguiente id autogenerado por la secuencia
-            $organizador->user_id = $nextId;
-            $organizador->save();
-        }
 
         $user = new Usuario();
 
@@ -100,6 +81,21 @@ class UsuarioController extends Controller
         $user->type = $req->rol;
         $user->status_id = 1;
         $user->save();
+        
+        // Creo el user en la tabla estudiante / organizador
+        if($req->rol === 'estudiante'){
+            $estudiante = new Estudiante();
+            // $statement = DB::select("SHOW TABLE STATUS LIKE 'usuarios'");
+            // $nextId = $statement[0]->Auto_increment; // obtengo el siguiente id autogenerado por la secuencia
+            $estudiante->user_id = $user->id;
+            $estudiante->save();
+        }else if($req->rol === 'organizador'){
+            $organizador = new Organizador();
+            // $statement = DB::select("SHOW TABLE STATUS LIKE 'usuarios'");
+            // $nextId = $statement[0]->Auto_increment; // obtengo el siguiente id autogenerado por la secuencia
+            $organizador->user_id = $user->id;
+            $organizador->save();
+        }
 
         $mailController = new MailController("Account Activation", $user->email);
         $mailController->html_email_confirm_account($user->id);

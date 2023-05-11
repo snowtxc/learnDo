@@ -1,7 +1,17 @@
 <?php
 
+use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\EventoController;
+use App\Http\Controllers\CursoController;
+use App\Http\Controllers\ModuloController;
+use App\Http\Controllers\OpcionController;
+use App\Http\Controllers\ClaseController;
+use App\Http\Controllers\EvaluacionController;
+use App\Http\Controllers\PreguntaController;
+use App\Http\Controllers\CategoriaController;
+
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,8 +32,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group([
     "prefix" => "auth",
-    'middleware' => ['cors']
-], function() {
+], function () {
     Route::post("/login", [UsuarioController::class, "signin"])->name("login");
     Route::post("/signup", [UsuarioController::class, "create"])->name("signup");
     Route::put("/activate", [UsuarioController::class, "activate"])->name("activate");
@@ -34,8 +43,79 @@ Route::group([
 
 Route::group([
     "prefix" => "eventos",
-    'middleware' => ['cors']
+    'middleware' => ['cors'] 
 ], function() {
     Route::get("/", [EventoController::class, "listar"])->name("listar"); 
 
 });
+
+Route::group([
+    "prefix" => "messages",
+], function () {
+    Route::post("/create", [MensajeController::class, "create"])->name("create");
+    Route::get("/", [MensajeController::class, "getMensajes"])->name("create");
+});
+
+Route::group([
+    "prefix" => "cursos",
+], function () {
+    Route::post('/createCurso', [CursoController::class, "create"]);
+    Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
+});
+
+Route::group([
+    "prefix" => "eventos",
+], function() {
+    Route::post('/createEvento', [EventoController::class, "create"]);
+    Route::get("/", [EventoController::class, "listar"])->name("listar"); 
+});
+
+Route::group([
+    "prefix" => "modulos",
+], function() {
+    Route::post('/createModulo', [ModuloController::class, "create"]);
+});
+
+Route::group([
+    "prefix" => "evaluaciones",
+], function() {
+    Route::post('/createEvaluacion', [EvaluacionController::class, "create"]);
+});
+
+
+Route::group([
+    "prefix" => "preguntas",
+], function() {
+    Route::post('/createPregunta', [PreguntaController::class, "create"]);
+});
+
+Route::group([
+    "prefix" => "opciones",
+], function() {
+    Route::post('/createOpcion', [OpcionController::class, "create"]);
+});
+
+Route::group([
+    "prefix" => "categorias",
+], function() {
+    Route::post('/', [CategoriaController::class, "create"]);
+    Route::get('/', [CategoriaController::class, "getAll"]);
+    Route::delete('/{id}', [CategoriaController::class, "destroy"]);
+    Route::put('/{id}', [CategoriaController::class, "update"]);
+});
+
+Route::group([
+    "prefix" => "modulos",
+], function() {
+    Route::post('/', [ModuloController::class, "create"]);
+    Route::get('/listByEventoId/{eventoId}', [ModuloController::class, "listByEventoId"]);
+    Route::get('/{id}', [ModuloController::class, "show"]);
+    Route::delete('/{id}', [ModuloController::class, "destroy"]);
+    Route::put('/{id}', [ModuloController::class, "update"]);
+}); 
+ 
+ 
+
+
+
+

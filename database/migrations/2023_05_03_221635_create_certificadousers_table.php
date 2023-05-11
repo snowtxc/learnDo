@@ -15,8 +15,8 @@ class CreateCertificadousersTable extends Migration
     {
         Schema::create('certificadousers', function (Blueprint $table) {
             $table->id();
-            $table->integer("estudiante_id")->unsigned();
-            $table->integer("certificado_id")->unsigned();
+            $table->integer("estudiante_id")->unsigned()->nullable();
+            $table->integer("certificado_id")->unsigned()->nullable();
             $table->timestamps();
         });
     }

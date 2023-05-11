@@ -17,7 +17,7 @@ class CreateEvaluacionsTable extends Migration
             $table->increments('id');
             $table->string('nombre');
             $table->float('maximo_puntuacion');
-            $table->integer('modulo_id')->unsigned();
+            $table->integer('modulo_id')->unsigned()->nullable();
             $table->timestamps();
         });
     }

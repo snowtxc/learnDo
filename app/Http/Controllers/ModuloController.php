@@ -3,7 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Modulo;
+use App\Models\Evento;
 use Illuminate\Http\Request;
+use Validator;
+
+
+/*
+Route::get('/listByEventoId/{$eventoId}', [ModuloController::class, "listByEventoId"]);
+Route::put('/{id}', [ModuloController::class, "update"]);*/
 
 class ModuloController extends Controller
 {
@@ -22,42 +29,64 @@ class ModuloController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
-    }
+        $validator = Validator::make($request->all(),[
+            'nombre' => 'required',
+            'estado' => 'required',
+            'evento_id' => 'required',
+            /*
+            'clases' => 'required|array',
+            'clases.*.nombre' => 'required',
+            'clases.*.duracion' => 'required',
+            'clases.*.estado' => 'required',
+            'evaluacion' => 'required',
+            'evaluacion.nombre' => 'required',
+            'evaluacion.maximo_puntuacion' => 'required',
+            'evaluacion.preguntas' => 'required|array',
+            'evaluacion.preguntas.*.texto' => 'required',
+            'evaluacion.preguntas.*.opciones' => 'required|array',
+            'evaluacion.preguntas.*.opciones.*.texto' => 'required',
+            'evaluacion.preguntas.*.opciones.*.correcta' => 'required|boolean',
+            */
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+        $evento = Evento::find($request->input('evento_id')); 
+        if(empty($evento)){
+            return response()->json(["message" => "Evento no existe"] ,404);  
+        }  
+        $modulo = new Modulo();
+        $modulo->nombre = $request->input('nombre');
+        $modulo->estado = $request->input('estado');
+        $modulo->curso_id = $request->input('evento_id');
+        $modulo->save();
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
+        return response()->json([
+            'message' => 'El modulo se ha creado correctamente',
+            'modulo' => $modulo,
+        ], 201);
     }
-
     /**
      * Display the specified resource.
      *
      * @param  \App\Models\Modulo  $modulo
      * @return \Illuminate\Http\Response
      */
-    public function show(Modulo $modulo)
+    public function show($id)
     {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Modulo  $modulo
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Modulo $modulo)
-    {
-        //
+        try{
+            $modulo= Modulo::find($id);
+            if(empty($modulo)){
+                return response()->json(["message" => "Modulo no existe"] ,404);  
+            }  
+            return response()->json($modulo);
+        }catch(Exception $e){
+            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+        }
+       
     }
 
     /**
@@ -67,9 +96,38 @@ class ModuloController extends Controller
      * @param  \App\Models\Modulo  $modulo
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Modulo $modulo)
+    public function update($id, Request $request)
     {
-        //
+        $validator = Validator::make($request->all(),[
+            'nombre' => 'required',
+            'estado' => 'required',
+            'evento_id' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+          
+        try{
+            $evento = Evento::find($request->input('evento_id'));
+            if(empty($evento)){
+                return response()->json(["message" => "Evento no existe"] ,404);  
+            }  
+            $modulo= Modulo::find($id);
+            if(empty($modulo)){
+                return response()->json(["message" => "Modulo no existe"] ,404);  
+            }  
+            $modulo->nombre = $request->input('nombre');
+            $modulo->estado = $request->input('estado');
+            $modulo->curso_id = $request->input('evento_id');
+
+            $modulo->save();
+            
+            return response()->json($modulo);
+
+            
+        }catch(Exception $e){
+            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+        }
     }
 
     /**
@@ -78,8 +136,28 @@ class ModuloController extends Controller
      * @param  \App\Models\Modulo  $modulo
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Modulo $modulo)
+    public function destroy($id)
     {
-        //
+        try{
+            $modulo = Modulo::find($id);
+            if(empty($modulo)){
+                return response()->json(["message" => "Modulo no existe"] ,404);  
+            } 
+            $modulo->delete();
+            return response()->json($modulo); 
+        }catch(Exception $e){
+            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+        }
+    }
+
+    public function listByEventoId($eventoId)
+    {
+        $evento = Evento::find($eventoId); 
+        if(empty($evento)){
+            return response()->json(["message" => "Evento no existe"] ,404);  
+        }  
+        $modulo = Modulo::where("curso_id", "=", $eventoId)->get();
+        return response()->json($modulo); 
+
     }
 }
