@@ -36,6 +36,7 @@ Route::group([
     Route::post("/signup", [UsuarioController::class, "create"])->name("signup");
     Route::put("/activate", [UsuarioController::class, "activate"])->name("activate");
     Route::get("/me", [UsuarioController::class, "me"])->name("me");
+    Route::put("/me", [UsuarioController::class, "editMeInfo"])->name("editMeInfo");
     Route::get("/checkNickname", [UsuarioController::class, "checkNickname"])->name("login");
 });
 
