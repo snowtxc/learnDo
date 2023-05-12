@@ -42,6 +42,7 @@ class UsuarioController extends Controller
             "rol" => "required|string",
             "imagen" => "required|string",
         ]);
+        
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
@@ -202,11 +203,26 @@ class UsuarioController extends Controller
         
         return $this->createNewToken($token);
         
-        // return response()->json([
-        //     "ok" => true,
-        //     "message" => "Account activated",
-        //     "userInfo" => $user,
-        // ]);
+
+    }
+
+    function editMeInfo(Request $request){
+        $user = auth()->user();
+        $userId = $user->id;
+        $validator = Validator::make($request->all(), [
+                           //faltaria el apellido
+            'nombre' => 'required', 
+            'telefono' => 'required',
+            'imagen' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+        Usuario::where("id", $userId)->update(['nombre' => $request->input("nombre"), "telefono" => $request->input("telefono"),"imagen" => $request->input("imagen")]);
+        return response()->json([
+            "message" => "usuario editado correctamente"
+            
+        ]);
     }
     /**
      * Get the authenticated User.
