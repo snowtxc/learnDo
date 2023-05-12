@@ -90,6 +90,7 @@ class EventoController extends Controller
             'fecha' => 'required|string',
             'hora' => 'required|string',
             'link' => 'required_if:tipo,seminarioV',
+            'imagen' => 'required|string',
             /*
             'modulos' => 'required|array',
             'modulos.*.nombre' => 'required',
@@ -115,10 +116,12 @@ class EventoController extends Controller
         $evento = new Evento();
         $evento->nombre = $request->input('nombre');
         $evento->descripcion = $request->input('descripcion');
+        $evento->imagen = $request->input('imagen');
         $evento->es_pago = $request->input('es_pago');
         $evento->precio = $request->input('precio');
         $evento->organizador_id = $request->input('organizador');
         $evento->tipo = $request->input('tipo');
+        // $evento->categoria_id  = $request->input('categoria');
         $evento->save();
 
         if ($request->tipo === 'curso') {
@@ -157,8 +160,8 @@ class EventoController extends Controller
         }
 
         return response()->json([
-            'message' => 'El curso se ha creado correctamente.',
-            'curso' => $evento,
+            'message' => 'El evento se ha creado correctamente.',
+            'evento' => $evento,
         ], 201);
     }
 
