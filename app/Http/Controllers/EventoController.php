@@ -69,12 +69,12 @@ class EventoController extends Controller
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'nombre' => 'required',
-            'descripcion' => 'required',
+            'nombre' => 'required|string',
+            'descripcion' => 'required|string',
+            'imagen' => 'required|string',
             'es_pago' => 'required|boolean',
             'precio' => 'required_if:es_pago,true',
             'organizador' => 'required',
-            'categoria' => 'required',
             /*
             'modulos' => 'required|array',
             'modulos.*.nombre' => 'required',
@@ -100,15 +100,16 @@ class EventoController extends Controller
         $evento = new Evento();
         $evento->nombre = $request->input('nombre');
         $evento->descripcion = $request->input('descripcion');
+        $evento->imagen = $request->input('imagen');
         $evento->es_pago = $request->input('es_pago');
         $evento->precio = $request->input('precio');
         $evento->organizador_id = $request->input('organizador');
-        $evento->categoria_id  = $request->input('categoria');
+        // $evento->categoria_id  = $request->input('categoria');
         $evento->save();
 
         return response()->json([
-            'message' => 'El curso se ha creado correctamente.',
-            'curso' => $evento,
+            'message' => 'El evento se ha creado correctamente.',
+            'evento' => $evento,
         ], 201);
     }
 

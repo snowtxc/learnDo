@@ -16,6 +16,7 @@ class CreateClasesTable extends Migration
         Schema::create('clases', function (Blueprint $table) {
             $table->increments('id');
             $table->string('nombre');
+            $table->string('video');
             $table->float('duracion');
             $table->string('estado');
             $table->integer('modulo_id')->unsigned()->nullable();

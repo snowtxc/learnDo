@@ -65,6 +65,12 @@ Route::group([
 });
 
 Route::group([
+    "prefix" => "clases",
+], function() {
+    Route::post('/createClase', [ClaseController::class, "create"]);
+});
+
+Route::group([
     "prefix" => "evaluaciones",
 ], function() {
     Route::post('/createEvaluacion', [EvaluacionController::class, "create"]);

@@ -126,7 +126,7 @@ class UsuarioController extends Controller
             return response()->json($validator->errors(),500);
         }
 
-        $users = DB::table("usuarios")->where("nickname", 'LIKE', '%'.$req->value.'%')
+        $users = DB::table("usuarios")->select('id', 'nickname', 'email', 'telefono', 'nombre', 'biografia', 'imagen', 'status_id', 'creditos_number', 'type')->where("nickname", 'LIKE', '%'.$req->value.'%')
         ->orWhere("email", "LIKE", "%".$req->value."%")
         ->get();
         return response()->json($users);
