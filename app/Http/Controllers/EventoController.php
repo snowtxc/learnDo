@@ -22,47 +22,48 @@ class EventoController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-     
+
     public function listar(Request $request)
     {
-        
-        $page =  ($request->query('page') != null && $request->query('page') >= 1) ? $request->query('page') :  1;  
-        $maxRows =  $request->query('maxRows') != null ? $request->query('maxRows') : 10;  
-        $offset = $page == 1 ? 0 :  (($page - 1) * $maxRows);  
-        $categoriaFilterIds =$request->query('categoria') != null ? $request->query('categoria') : null; //array con las categorias a filtrar
+
+        $page = ($request->query('page') != null && $request->query('page') >= 1) ? $request->query('page') : 1;
+        $maxRows = $request->query('maxRows') != null ? $request->query('maxRows') : 10;
+        $offset = $page == 1 ? 0 : (($page - 1) * $maxRows);
+        $categoriaFilterIds = $request->query('categoria') != null ? $request->query('categoria') : null; //array con las categorias a filtrar
         $busqueda = ($request->query('busqueda') != null && $request->query('busqueda') != '') ? $request->query('busqueda') : null; //array con las categorias a filtrar
 
 
-        $tipoFilter  = $request->query('categoria') != null ? $request->query('tipo') : null;
+        $tipoFilter = $request->query('categoria') != null ? $request->query('tipo') : null;
 
-        
-        $eventos =  Evento::whereHas('categorias', function($query) use ($categoriaFilterIds) {
-            if($categoriaFilterIds != null){
-                $query->whereIn('categorias.id', $categoriaFilterIds);  
+
+        $eventos = Evento::whereHas('categorias', function ($query) use ($categoriaFilterIds) {
+            if ($categoriaFilterIds != null) {
+                $query->whereIn('categorias.id', $categoriaFilterIds);
             }
-           
+
         })->when(isset($busqueda), function ($query) use ($busqueda) {
-            $query->where('nombre', 'like', '%'.$busqueda.'%'); 
+            $query->where('nombre', 'like', '%' . $busqueda . '%');
         })
-        ->skip($offset)->take($maxRows)->get();
+            ->skip($offset)->take($maxRows)->get();
 
 
-        return response()->json([ "result" => $eventos]);  
+        return response()->json(["result" => $eventos]);
         /*Queda hacer un filtro por tipo */
-        
-        $result =  array();
-        foreach($eventos as $evento){
-            $organizadorID =  $evento['organizador_id'];
+
+        $result = array();
+        foreach ($eventos as $evento) {
+            $organizadorID = $evento['organizador_id'];
             $organizadorData = Usuario::find($organizadorID);
 
             $extraData = array(
                 "organizador" => $organizadorData,
-                "categorias" => $evento->categorias);
+                "categorias" => $evento->categorias
+            );
 
-            $data = array_merge($evento->toArray(), $extraData);  //merge data and retrieve a new result
-            array_push($result,$data);
+            $data = array_merge($evento->toArray(), $extraData); //merge data and retrieve a new result
+            array_push($result, $data);
         }
-        return response()->json([ "result" => $result, "categoriasIds" => $categoriaFilterIds]);    
+        return response()->json(["result" => $result, "categoriasIds" => $categoriaFilterIds]);
     }
 
     /**
@@ -72,20 +73,23 @@ class EventoController extends Controller
      */
     public function create(Request $request)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'nombre' => 'required',
             'descripcion' => 'required',
             'es_pago' => 'required|boolean',
             'precio' => 'required_if:es_pago,true',
-            'organizador' => '',
+            'organizador' => 'required',
             'tipo' => 'required|in:curso,seminarioV,seminarioP',
-            'nombre_foro' => 'required_if:tipo,curso',
+            // 'nombre_foro' => 'required_if:tipo,curso',
             'nombre_ubicacion' => 'required_if:tipo,seminarioP',
             'latitud' => 'required_if:tipo,seminarioP',
             'longitud' => 'required_if:tipo,seminarioP',
             'maximo_participantes' => 'required_if:tipo,seminarioP',
-            'nombre_plataforma' => 'required_if:tipo,seminarioV',
-            'estado' => 'required_if:tipo,seminarioV'
+            // 'nombre_plataforma' => 'required_if:tipo,seminarioV',
+            'estado' => 'string',
+            'fecha' => 'required|string',
+            'hora' => 'required|string',
+            'link' => 'required_if:tipo,seminarioV',
             /*
             'modulos' => 'required|array',
             'modulos.*.nombre' => 'required',
@@ -117,32 +121,41 @@ class EventoController extends Controller
         $evento->tipo = $request->input('tipo');
         $evento->save();
 
-        if($request->tipo === 'curso'){
+        if ($request->tipo === 'curso') {
             $curso = new Curso();
             $curso->evento_id_of_curso = $evento->id;
             $curso->save();
 
             $foro = new Foro();
-            $foro->nombre = $request->nombre_foro;
-            $foro->id_curso = $evento->id;
+            $foro->nombre = $request->nombre;
+            $foro->id_curso = $curso->id;
             $foro->save();
 
-        }else if($request->tipo === 'seminarioV'){
+        } else if ($request->tipo === 'seminarioV') {
             $seminarioV = new SeminarioVirtual();
             $seminarioV->evento_id = $evento->id;
-            $seminarioV->nombre_plataforma = $request->nombre_plataforma;
-            $seminarioV->estado = $request->estado;
+            $seminarioV->nombre_plataforma = $request->nombre;
+            $seminarioV->hora = $request->hora;
+            $seminarioV->fecha = $request->fecha;
+            $seminarioV->link = $request->link;
+            if (isset($request->estado)) {
+                $seminarioV->estado = $request->estado;
+            } else {
+                $seminarioV->estado = "NotLive";
+            }
             $seminarioV->save();
-        }else if($request->tipo === 'seminarioP') {
+        } else if ($request->tipo === 'seminarioP') {
             $seminarioP = new SeminarioPresencial();
             $seminarioP->evento_id = $evento->id;
+            $seminarioP->hora = $request->hora;
+            $seminarioP->fecha = $request->fecha;
             $seminarioP->nombre_ubicacion = $request->nombre_ubicacion;
             $seminarioP->latitud = $request->latitud;
             $seminarioP->longitud = $request->longitud;
             $seminarioP->maximo_participantes = $request->maximo_participantes;
             $seminarioP->save();
         }
-        
+
         return response()->json([
             'message' => 'El curso se ha creado correctamente.',
             'curso' => $evento,

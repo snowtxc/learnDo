@@ -100,7 +100,11 @@ class UsuarioController extends Controller
         $mailController = new MailController("Account Activation", $user->email);
         $mailController->html_email_confirm_account($user->id);
 
-        return $this->signin($req);
+
+        return response()->json([
+            "ok" => true,
+            "message" => "Cuenta creada correctamente"
+        ]);
     }
 
 
