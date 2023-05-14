@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SeminarioVirtual;
 use Illuminate\Http\Request;
+use Validator;
 
 class SeminarioVirtualController extends Controller
 {
@@ -22,9 +23,28 @@ class SeminarioVirtualController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(),[
+            'evento_id' => 'required',
+            'nombre_plataforma' => 'required',
+            'estado' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $seminario = new SeminarioVirtual();
+        $seminario->evento_id = $request->input('evento_id');
+        $seminario->nombre_plataforma = $request->input('nombre_plataforma');
+        $seminario->estado = $request->input('estado');
+        $seminario->save();
+        
+        return response()->json([
+            'message' => 'El seminario se ha creado correctamente.',
+            'curso' => $seminario,
+        ], 201);
     }
 
     /**
