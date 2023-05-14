@@ -98,7 +98,10 @@ Route::group([
     Route::post('/createSeminarioPresencial', [SeminarioPresencialController::class, "create"]);
 });
 
-
-
+Route::group([
+    "prefix" => "usuarios",
+], function() {
+    Route::get('/filterByNicknameOrEmail', [UsuarioController::class, "filterByNicknameOrEmail"]);
+});
 
 
