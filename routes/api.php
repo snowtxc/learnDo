@@ -9,6 +9,8 @@ use App\Http\Controllers\OpcionController;
 use App\Http\Controllers\ClaseController;
 use App\Http\Controllers\EvaluacionController;
 use App\Http\Controllers\PreguntaController;
+use App\Http\Controllers\SeminarioPresencialController;
+use App\Http\Controllers\SeminarioVirtualController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -90,9 +92,10 @@ Route::group([
 });
 
 Route::group([
-    "prefix" => "usuarios",
+    "prefix" => "seminarios",
 ], function() {
-    Route::get('/filterByNicknameOrEmail', [UsuarioController::class, "filterByNicknameOrEmail"]);
+    Route::post('/createSeminarioVirtual', [SeminarioVirtualController::class, "create"]);
+    Route::post('/createSeminarioPresencial', [SeminarioPresencialController::class, "create"]);
 });
 
 

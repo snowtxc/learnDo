@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Evento;
 use App\Models\Usuario;
+use App\Models\Curso;
+use App\Models\SeminarioPresencial;
+use App\Models\SeminarioVirtual;
+use App\Models\Foro;
 
 use Illuminate\Http\Request;
 
@@ -74,7 +78,15 @@ class EventoController extends Controller
             'imagen' => 'required|string',
             'es_pago' => 'required|boolean',
             'precio' => 'required_if:es_pago,true',
-            'organizador' => 'required',
+            'organizador' => '',
+            'tipo' => 'required|in:curso,seminarioV,seminarioP',
+            'nombre_foro' => 'required_if:tipo,curso',
+            'nombre_ubicacion' => 'required_if:tipo,seminarioP',
+            'latitud' => 'required_if:tipo,seminarioP',
+            'longitud' => 'required_if:tipo,seminarioP',
+            'maximo_participantes' => 'required_if:tipo,seminarioP',
+            'nombre_plataforma' => 'required_if:tipo,seminarioV',
+            'estado' => 'required_if:tipo,seminarioV'
             /*
             'modulos' => 'required|array',
             'modulos.*.nombre' => 'required',
@@ -104,9 +116,34 @@ class EventoController extends Controller
         $evento->es_pago = $request->input('es_pago');
         $evento->precio = $request->input('precio');
         $evento->organizador_id = $request->input('organizador');
-        // $evento->categoria_id  = $request->input('categoria');
+        $evento->categoria_id  = $request->input('categoria');
         $evento->save();
+        if($request->tipo === 'curso'){
+            $curso = new Curso();
+            $curso->evento_id_of_curso = $evento->id;
+            $curso->save();
 
+            $foro = new Foro();
+            $foro->nombre = $request->nombre_foro;
+            $foro->id_curso = $evento->id;
+            $foro->save();
+
+        }else if($request->tipo === 'seminarioV'){
+            $seminarioV = new SeminarioVirtual();
+            $seminarioV->evento_id = $evento->id;
+            $seminarioV->nombre_plataforma = $request->nombre_plataforma;
+            $seminarioV->estado = $request->estado;
+            $seminarioV->save();
+        }else if($request->tipo === 'seminarioP') {
+            $seminarioP = new SeminarioPresencial();
+            $seminarioP->evento_id = $evento->id;
+            $seminarioP->nombre_ubicacion = $request->nombre_ubicacion;
+            $seminarioP->latitud = $request->latitud;
+            $seminarioP->longitud = $request->longitud;
+            $seminarioP->maximo_participantes = $request->maximo_participantes;
+            $seminarioP->save();
+        }
+        
         return response()->json([
             'message' => 'El evento se ha creado correctamente.',
             'evento' => $evento,

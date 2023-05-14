@@ -23,6 +23,7 @@ class CreateEventosTable extends Migration
             $table->boolean('es_pago')->default(0);
             $table->integer("precio")->default(null)->nullable();
             $table->integer("organizador_id")->unsigned()->nullable();
+            $table->string("tipo");
             $table->timestamps();
         });
     }
