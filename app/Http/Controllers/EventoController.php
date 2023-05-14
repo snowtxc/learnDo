@@ -116,7 +116,8 @@ class EventoController extends Controller
         $evento->es_pago = $request->input('es_pago');
         $evento->precio = $request->input('precio');
         $evento->organizador_id = $request->input('organizador');
-        $evento->categoria_id  = $request->input('categoria');
+        $evento->tipo = $request->input('tipo');
+        // $evento->categoria_id  = $request->input('categoria');
         $evento->save();
         if($request->tipo === 'curso'){
             $curso = new Curso();
