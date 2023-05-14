@@ -52,7 +52,7 @@ class ModuloController extends Controller
         $modulo = new Modulo();
         $modulo->nombre = $request->input('nombre');
         $modulo->estado = $request->input('estado');
-        $modulo->evento_id = $request->input('curso_id');
+        $modulo->curso_id = $request->input('curso_id');
         $modulo->save();
 
         return response()->json([
