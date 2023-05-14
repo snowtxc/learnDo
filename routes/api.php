@@ -50,7 +50,6 @@ Route::group([
 Route::group([
     "prefix" => "cursos",
 ], function () {
-    Route::post('/createCurso', [CursoController::class, "create"]);
     Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
 });
 
