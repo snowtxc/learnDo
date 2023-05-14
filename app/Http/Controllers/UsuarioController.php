@@ -204,7 +204,7 @@ class UsuarioController extends Controller
         return $this->createNewToken($token);
         
 
-    }
+    }  
 
     function editMeInfo(Request $request){
         $user = auth()->user();
