@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Clase;
 use App\Models\Modulo;
 use Illuminate\Http\Request;
 use Validator;
@@ -29,20 +30,7 @@ class ModuloController extends Controller
             'nombre' => 'required',
             'estado' => 'required',
             'curso_id' => 'required',
-            /*
-            'clases' => 'required|array',
-            'clases.*.nombre' => 'required',
-            'clases.*.duracion' => 'required',
-            'clases.*.estado' => 'required',
-            'evaluacion' => 'required',
-            'evaluacion.nombre' => 'required',
-            'evaluacion.maximo_puntuacion' => 'required',
-            'evaluacion.preguntas' => 'required|array',
-            'evaluacion.preguntas.*.texto' => 'required',
-            'evaluacion.preguntas.*.opciones' => 'required|array',
-            'evaluacion.preguntas.*.opciones.*.texto' => 'required',
-            'evaluacion.preguntas.*.opciones.*.correcta' => 'required|boolean',
-            */
+            'clases' => 'array',
         ]);
 
         if ($validator->fails()) {
@@ -54,6 +42,17 @@ class ModuloController extends Controller
         $modulo->estado = $request->input('estado');
         $modulo->curso_id = $request->input('curso_id');
         $modulo->save();
+
+        $clases = $request->input('clases');
+        foreach ($clases as $clase) {
+            $claseToSave = new Clase();
+            $claseToSave->nombre = $clase['nombre'];
+            $claseToSave->video = $clase['video'];
+            $claseToSave->duracion = $clase['duracion'];
+            $claseToSave->estado = $clase['estado'];
+            $claseToSave->modulo_id = $modulo->id;
+            $claseToSave->save();
+        }
 
         return response()->json([
             'message' => 'El modulo se ha creado correctamente',
