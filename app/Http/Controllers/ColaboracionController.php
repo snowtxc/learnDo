@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\colaboracion;
 use Illuminate\Http\Request;
+use Validator;
 
 class ColaboracionController extends Controller
 {
@@ -22,9 +23,28 @@ class ColaboracionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'evento_id' => 'required|integer',
+            'colaboradores' => 'required|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $colaboradores = $request->input('colaboradores');
+        foreach ($colaboradores as $colaborador) {
+            $colabToSave = new colaboracion();
+            $colabToSave->user_id = $colaborador['id'];
+            $colabToSave->evento_id = $request->input('evento_id');
+            $colabToSave->save();
+        }
+
+        return response()->json([
+            'message' => 'Las colaboraciones fueron creadas exitosamente.',
+        ], 201);
     }
 
     /**

@@ -49,7 +49,7 @@ class ModuloController extends Controller
             $claseToSave->nombre = $clase['nombre'];
             $claseToSave->video = $clase['video'];
             $claseToSave->duracion = $clase['duracion'];
-            $claseToSave->estado = $clase['estado'];
+            $claseToSave->estado = 'aprobado';
             $claseToSave->modulo_id = $modulo->id;
             $claseToSave->save();
         }

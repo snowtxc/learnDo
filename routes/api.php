@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ColaboracionController;
 use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\CursoController;
@@ -108,6 +109,12 @@ Route::group([
     "prefix" => "usuarios",
 ], function() {
     Route::get('/filterByNicknameOrEmail', [UsuarioController::class, "filterByNicknameOrEmail"]);
+});
+
+Route::group([
+    "prefix" => "colaboraciones",
+], function() {
+    Route::get('/createColaboraciones', [ColaboracionController::class, "create"]);
 });
 
 
