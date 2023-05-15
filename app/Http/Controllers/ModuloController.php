@@ -28,7 +28,7 @@ class ModuloController extends Controller
     {
         $validator = Validator::make($request->all(),[
             'nombre' => 'required',
-            'estado' => 'required',
+            'estado' => 'required|in:aprobado,rechazado,pendiente',
             'curso_id' => 'required',
             'clases' => 'array',
         ]);
