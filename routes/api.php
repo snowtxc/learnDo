@@ -44,6 +44,7 @@ Route::group([
 ], function () {
     Route::post("/create", [MensajeController::class, "create"])->name("create");
     Route::get("/", [MensajeController::class, "getMensajes"])->name("create");
+    Route::post("/changeIsRead", [MensajeController::class, "changeMessageIsRead"])->name("changeIsRead");
 });
 
 Route::group([
@@ -88,6 +89,12 @@ Route::group([
     "prefix" => "opciones",
 ], function() {
     Route::post('/createOpcion', [OpcionController::class, "create"]);
+});
+
+Route::group([
+    "prefix" => "usuarios",
+], function() {
+    Route::get('/filterByNicknameOrEmail', [UsuarioController::class, "filterByNicknameOrEmail"]);
 });
 
 Route::group([
