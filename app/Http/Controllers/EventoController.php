@@ -115,10 +115,10 @@ class EventoController extends Controller
             $curso->porcentaje_aprobacion = $request->input('porcentaje_aprobacion');
             $curso->save();
 
-            // $foro = new Foro();
-            // $foro->nombre = $request->nombre;
-            // $foro->id_curso = $curso->id;
-            // $foro->save();
+            $foro = new Foro();
+            $foro->nombre = $request->nombre;
+            $foro->id_curso = $evento->id;
+            $foro->save();
 
         } else if ($request->tipo === 'seminarioV') {
             $seminarioV = new SeminarioVirtual();

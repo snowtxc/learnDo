@@ -114,7 +114,7 @@ Route::group([
 Route::group([
     "prefix" => "colaboraciones",
 ], function() {
-    Route::get('/createColaboraciones', [ColaboracionController::class, "create"]);
+    Route::post('/createColaboraciones', [ColaboracionController::class, "create"]);
 });
 
 
