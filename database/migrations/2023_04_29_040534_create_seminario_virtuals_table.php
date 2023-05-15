@@ -16,7 +16,11 @@ class CreateSeminarioVirtualsTable extends Migration
         Schema::create('seminario_virtuals', function (Blueprint $table) {
             $table->integer('evento_id')->unsigned()->nullable();
             $table->string('nombre_plataforma');
-            $table->boolean('estado'); // live or not
+            $table->string('fecha');
+            $table->string('hora');
+            $table->string('link');
+            $table->enum('estado', ["Live", "NotLive"]); // live or not
+            
             $table->timestamps();
         });
     }

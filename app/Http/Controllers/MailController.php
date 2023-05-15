@@ -27,7 +27,11 @@ class MailController extends Controller {
     });
    }
    public function html_email_confirm_account($uid) {
-      $link = 'http://' . env("APP_FRONTEND_DOMAIN_URL") . "/activate/" . $uid;
+      $userActivate = new UserActivateJWT();
+      $userActivate->uid = $uid;
+
+      $token = $userActivate->createJWT();
+      $link = "http://localhost:3000" . "/activate/" . $token;
       $data = array('link'=> $link);
       Mail::send(['html' => "accountConfirmation"], $data, function($message) {
 

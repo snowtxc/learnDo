@@ -10,6 +10,30 @@ use Validator;
 
 class MensajeController extends Controller
 {
+
+    public function changeMessageIsRead(Request $req){
+        try {
+            $validator = Validator::make($req->all(), [
+                "message_id" => "required|integer",
+                "value" => "required|boolean",
+            ]);
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+            $msgId = $req->message_id;
+            $value = $req->value;
+            Mensaje::where("id", $msgId)->update(['isRead' => $value == true ? "1" : "0"]);
+            return response()->json([
+                "ok" => true,
+                "message" => "Mensaje actualizado correctamente"
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => "Error al actualizar el mensaje"
+            ]);
+        }
+    }
     /**
      * Display a listing of the resource.
      *
@@ -54,7 +78,7 @@ class MensajeController extends Controller
                 $lastMessage = null;
                 $isMyLastMessage = false;
                 if (count($messagesWithUser) > 0) {
-                    $lastMessage = end($messagesWithUser)["contenido"];
+                    $lastMessage = end($messagesWithUser);
                     $isMyLastMessage = end($messagesWithUser)['user_from_id'] == $uid;
                 }
                 $formattedChat = array(
