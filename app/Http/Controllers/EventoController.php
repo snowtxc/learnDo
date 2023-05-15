@@ -87,8 +87,8 @@ class EventoController extends Controller
             'maximo_participantes' => 'required_if:tipo,seminarioP',
             // 'nombre_plataforma' => 'required_if:tipo,seminarioV',
             'estado' => 'string',
-            'fecha' => 'required|string',
-            'hora' => 'required|string',
+            'fecha' => 'string',
+            'hora' => 'string',
             'link' => 'required_if:tipo,seminarioV',
             'imagen' => 'required|string',
             /*
