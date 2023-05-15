@@ -50,7 +50,6 @@ Route::group([
 Route::group([
     "prefix" => "cursos",
 ], function () {
-    Route::post('/createCurso', [CursoController::class, "create"]);
     Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
 });
 
@@ -65,6 +64,12 @@ Route::group([
     "prefix" => "modulos",
 ], function() {
     Route::post('/createModulo', [ModuloController::class, "create"]);
+});
+
+Route::group([
+    "prefix" => "clases",
+], function() {
+    Route::post('/createClase', [ClaseController::class, "create"]);
 });
 
 Route::group([
@@ -87,13 +92,21 @@ Route::group([
 });
 
 Route::group([
+    "prefix" => "usuarios",
+], function() {
+    Route::get('/filterByNicknameOrEmail', [UsuarioController::class, "filterByNicknameOrEmail"]);
+});
+
+Route::group([
     "prefix" => "seminarios",
 ], function() {
     Route::post('/createSeminarioVirtual', [SeminarioVirtualController::class, "create"]);
     Route::post('/createSeminarioPresencial', [SeminarioPresencialController::class, "create"]);
 });
 
-
-
-
+Route::group([
+    "prefix" => "usuarios",
+], function() {
+    Route::get('/filterByNicknameOrEmail', [UsuarioController::class, "filterByNicknameOrEmail"]);
+});
 

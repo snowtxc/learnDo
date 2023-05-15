@@ -60,7 +60,7 @@ class CursoController extends Controller
         $curso = new Curso();
         $curso->porcentaje_aprobacion = $request->input('porcentaje_aprobacion');
         $curso->ganancias_acumuladas = $request->input('ganancias');
-        $curso->evento_id = $request->input('evento_id');
+        $curso->evento_id_of_curso = $request->input('evento_id');
         $curso->save();
         
         return response()->json([
