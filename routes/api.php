@@ -37,6 +37,7 @@ Route::group([
     Route::post("/signup", [UsuarioController::class, "create"])->name("signup");
     Route::put("/activate", [UsuarioController::class, "activate"])->name("activate");
     Route::get("/me", [UsuarioController::class, "me"])->name("me");
+    Route::put("/me", [UsuarioController::class, "editMeInfo"])->name("editMeInfo");
     Route::get("/checkNickname", [UsuarioController::class, "checkNickname"])->name("login");
 });
 
@@ -58,7 +59,7 @@ Route::group([
     "prefix" => "eventos",
 ], function() {
     Route::post('/createEvento', [EventoController::class, "create"]);
-    Route::get("/", [EventoController::class, "listar"])->name("listar"); 
+    Route::post("/", [EventoController::class, "listar"])->name("listar");
 });
 
 Route::group([
