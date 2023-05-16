@@ -24,11 +24,11 @@ class ClaseController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function uploadFile(Request $request) {
-        echo $path = $request->file('video')->storeAs(
-            'videos', $request->image->getClientOriginalName()
-        );
-    }
+    // public function uploadFile(Request $request) {
+    //     echo $path = $request->file('video')->storeAs(
+    //         'videos', $request->image->getClientOriginalName()
+    //     );
+    // }
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(),[
@@ -46,11 +46,11 @@ class ClaseController extends Controller
         $clase = new Clase();
         $clase->nombre = $request->input('nombre');
 
-        echo $path = $request->file('video')->storeAs(
-            'videos', $request->video->getClientOriginalName()
-        );
+        // echo $path = $request->file('video')->storeAs(
+        //     'videos', $request->video->getClientOriginalName()
+        // );
         
-        $clase->video = $path;
+        // $clase->video = $path;
 
         $clase->duracion = $request->input('duracion');
         $clase->estado = $request->input('estado');

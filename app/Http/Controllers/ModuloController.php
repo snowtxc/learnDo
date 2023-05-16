@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Clase;
+use App\Models\Evaluacion;
 use App\Models\Modulo;
 use Illuminate\Http\Request;
 use Validator;
@@ -30,6 +31,7 @@ class ModuloController extends Controller
             'nombre' => 'required',
             'estado' => 'required|in:aprobado,rechazado,pendiente',
             'curso_id' => 'required',
+            'evaluacion' => '',
             'clases' => 'array',
         ]);
 
@@ -42,6 +44,13 @@ class ModuloController extends Controller
         $modulo->estado = $request->input('estado');
         $modulo->curso_id = $request->input('curso_id');
         $modulo->save();
+
+        $evaluacion = $request->input('evaluacion');
+        if(isset($evaluacion)){
+            $evController = new EvaluacionController();
+            $evController->createWithoutRequest($modulo->id, $evaluacion);
+        }
+
 
         $clases = $request->input('clases');
         foreach ($clases as $clase) {

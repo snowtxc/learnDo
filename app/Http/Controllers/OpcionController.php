@@ -47,6 +47,26 @@ class OpcionController extends Controller
             'opcion' => $opcion,
         ], 201);
     }
+    
+    public function createWithoutRequest($pregunta_id, $opcionACrear)
+    {
+
+        $validator = Validator::make($opcionACrear,[
+            'contenido' => 'required',
+            'correcta' => 'required|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+    
+        $opcion = new Opcion();
+        $opcion->contenido = $opcionACrear['contenido'];
+        $opcion->es_correcta = $opcionACrear['correcta'];
+        $opcion->pregunta_id = $pregunta_id;
+        $opcion->save();
+        
+    }
 
     /**
      * Store a newly created resource in storage.
