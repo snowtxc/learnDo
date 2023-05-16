@@ -276,6 +276,7 @@ class UsuarioController extends Controller
             "message" => "usuario editado correctamente"
             
         ]);
+    }
     /**
      * Get the authenticated User.
      *
