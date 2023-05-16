@@ -74,11 +74,13 @@ class EventoController extends Controller
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nombre' => 'required',
-            'descripcion' => 'required',
+            'nombre' => 'required|string',
+            'descripcion' => 'required|string',
+            'imagen' => 'required|string',
             'es_pago' => 'required|boolean',
             'precio' => 'required_if:es_pago,true',
             'organizador' => 'required',
+            'porcentaje_aprobacion' => 'required_if:tipo,curso',
             'tipo' => 'required|in:curso,seminarioV,seminarioP',
             // 'nombre_foro' => 'required_if:tipo,curso',
             'nombre_ubicacion' => 'required_if:tipo,seminarioP',
@@ -90,23 +92,6 @@ class EventoController extends Controller
             'fecha' => 'string',
             'hora' => 'string',
             'link' => 'required_if:tipo,seminarioV',
-            'imagen' => 'required|string',
-            /*
-            'modulos' => 'required|array',
-            'modulos.*.nombre' => 'required',
-            'modulos.*.estado' => 'required',
-            'modulos.*.clases' => 'required|array',
-            'modulos.*.clases.*.nombre' => 'required',
-            'modulos.*.clases.*.duracion' => 'required',
-            'modulos.*.clases.*.estado' => 'required',
-            'modulos.*.evaluacion.nombre' => 'required',
-            'modulos.*.evaluacion.maximo_puntuacion' => 'required',
-            'modulos.*.evaluacion.preguntas' => 'required|array',
-            'modulos.*.evaluacion.preguntas.*.texto' => 'required',
-            'modulos.*.evaluacion.preguntas.*.opciones' => 'required|array',
-            'modulos.*.evaluacion.preguntas.*.opciones.*.texto' => 'required',
-            'modulos.*.evaluacion.preguntas.*.opciones.*.correcta' => 'required|boolean',
-            */
         ]);
 
         if ($validator->fails()) {
@@ -124,14 +109,15 @@ class EventoController extends Controller
         // $evento->categoria_id  = $request->input('categoria');
         $evento->save();
 
-        if ($request->tipo === 'curso') {
+        if($request->tipo === 'curso'){
             $curso = new Curso();
             $curso->evento_id_of_curso = $evento->id;
+            $curso->porcentaje_aprobacion = $request->input('porcentaje_aprobacion');
             $curso->save();
 
             $foro = new Foro();
             $foro->nombre = $request->nombre;
-            $foro->id_curso = $curso->id;
+            $foro->id_curso = $evento->id;
             $foro->save();
 
         } else if ($request->tipo === 'seminarioV') {
