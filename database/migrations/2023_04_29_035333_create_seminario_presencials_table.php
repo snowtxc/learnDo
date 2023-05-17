@@ -20,6 +20,7 @@ class CreateSeminarioPresencialsTable extends Migration
             $table->string('longitud');
             $table->string('fecha');
             $table->string('hora');
+            $table->integer('duracion');
             $table->integer('maximo_participantes');
             $table->timestamps();
         });

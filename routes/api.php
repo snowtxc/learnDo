@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ColaboracionController;
 use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\UsuarioController;
@@ -117,5 +118,12 @@ Route::group([
 ], function() {
     Route::post('/createColaboraciones', [ColaboracionController::class, "create"]);
 });
+
+Route::group([
+    "prefix" => "categorias",
+], function() {
+    Route::get('/', [CategoriaController::class, "litarCategorias"]);
+});
+
 
 

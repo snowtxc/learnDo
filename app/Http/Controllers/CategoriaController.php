@@ -17,6 +17,21 @@ class CategoriaController extends Controller
         //
     }
 
+        /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function litarCategorias()
+    {
+        $categorias = Categoria::all();
+
+        return response()->json([
+            "ok" => true,
+            "categorias" => $categorias,
+        ]);
+    }
+
     /**
      * Show the form for creating a new resource.
      *

@@ -12,6 +12,7 @@ use App\Models\Foro;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\ModuloController;
+use App\Models\categoriaevento;
 use Validator;
 
 class EventoController extends Controller
@@ -86,7 +87,9 @@ class EventoController extends Controller
             'nombre_ubicacion' => 'required_if:tipo,seminarioP',
             'latitud' => 'required_if:tipo,seminarioP',
             'longitud' => 'required_if:tipo,seminarioP',
+            'duracion' => 'required_if:tipo,seminarioP,seminarioV',
             'maximo_participantes' => 'required_if:tipo,seminarioP',
+            'categorias' => 'required',
             // 'nombre_plataforma' => 'required_if:tipo,seminarioV',
             'estado' => 'string',
             'fecha' => 'string',
@@ -109,7 +112,14 @@ class EventoController extends Controller
         // $evento->categoria_id  = $request->input('categoria');
         $evento->save();
 
-        if($request->tipo === 'curso'){
+        foreach ($request->categorias as $categoria) {
+            $categoriaEvento = new categoriaevento();
+            $categoriaEvento->evento_id = $evento->id;
+            $categoriaEvento->categoria_id = $categoria;
+            $categoriaEvento->save();
+        }
+
+        if ($request->tipo === 'curso') {
             $curso = new Curso();
             $curso->evento_id_of_curso = $evento->id;
             $curso->porcentaje_aprobacion = $request->input('porcentaje_aprobacion');
@@ -126,6 +136,7 @@ class EventoController extends Controller
             $seminarioV->nombre_plataforma = $request->nombre;
             $seminarioV->hora = $request->hora;
             $seminarioV->fecha = $request->fecha;
+            $seminarioV->duracion = $request->duracion;
             $seminarioV->link = $request->link;
             if (isset($request->estado)) {
                 $seminarioV->estado = $request->estado;
@@ -140,6 +151,7 @@ class EventoController extends Controller
             $seminarioP->fecha = $request->fecha;
             $seminarioP->nombre_ubicacion = $request->nombre_ubicacion;
             $seminarioP->latitud = $request->latitud;
+            $seminarioP->duracion = $request->duracion;
             $seminarioP->longitud = $request->longitud;
             $seminarioP->maximo_participantes = $request->maximo_participantes;
             $seminarioP->save();

@@ -18,6 +18,7 @@ class CreateSeminarioVirtualsTable extends Migration
             $table->string('nombre_plataforma');
             $table->string('fecha');
             $table->string('hora');
+            $table->integer('duracion');
             $table->string('link');
             $table->enum('estado', ["Live", "NotLive"]); // live or not
             
