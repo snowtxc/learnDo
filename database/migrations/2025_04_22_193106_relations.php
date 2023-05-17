@@ -80,9 +80,10 @@ class Relations extends Migration
                 ->on('publicacions');
         });
         Schema::table('comentarios', function (Blueprint $table) {
-            $table->foreign('comentario_id')
+            $table->foreign('user_id')
                 ->references('id')
-                ->on('comentarios');
+                ->on('usuarios');
+                
         });
         Schema::table('publicacions', function (Blueprint $table) {
             $table->foreign('foro_id')
@@ -215,23 +216,19 @@ class Relations extends Migration
                 ->on('usuarios');
         });
 
-        Schema::table('cupons', function (Blueprint $table) {
+        Schema::table('compraevento', function (Blueprint $table) {
             $table->foreign('evento_id')
                 ->references('id')
                 ->on('eventos');
+            $table->foreign('estudiante_id')
+            ->references('user_id')
+            ->on('estudiantes');
         });
-        Schema::table('estudiantes_eventos', function (Blueprint $table) {
-            $table->foreign('evento_id')
-                ->references('id')
-                ->on('eventos');
-        });
-        Schema::table('estudiantes_eventos', function (Blueprint $table) {
-            $table->foreign('user_id')
-                ->references('id')
-                ->on('usuarios');
-        });
+
         Schema::enableForeignKeyConstraints();
     }
+
+    
 
     /**
      * Reverse the migrations.

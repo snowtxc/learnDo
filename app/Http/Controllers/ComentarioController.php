@@ -3,10 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comentario;
+use App\Models\Publicacion;
+use App\Models\CompraEvento;
+use App\Models\Evento;
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Validator;
 
 class ComentarioController extends Controller
 {
+
+    public function __construct() {
+        $this->middleware('jwt');
+    }
+
+    
     /**
      * Display a listing of the resource.
      *
@@ -22,32 +34,52 @@ class ComentarioController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+       
+        try{
+            $validator = Validator::make($request->all(),[
+                'contenido' => 'required',
+                'publicacionId' => 'required'
+            ]);   
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+            $publicacion = Publicacion::find($request->input('publicacionId'));
+            if(!isset($publicacion)){
+                return response()->json(["message" => "La publicacion no existe"] ,404);
+            }
+            $foro =  $publicacion->foro;
+            $cursoId = $foro->id_curso;
+            $userInfo = auth()->user();
+            $userId  = $userInfo["id"];
+    
+            $userAlreadyHasEvento = CompraEvento::where(["evento_id" => $cursoId, "estudiante_id" => $userId])->count() > 0 ? true : false; //check if user is student of event
+            $userIsOwner =  Evento::where(["id" => $cursoId, "organizador_id" => $userId])->count() > 0 ? true : false;  //check if user is owner of event
+    
+            if(!$userAlreadyHasEvento && !$userIsOwner){
+                return response()->json(["message" => "No perteneces al curso ya que no eres estudiante ni organizador."] ,400);
+            }
+    
+            $newComment = new Comentario();
+            $newComment->contenido = $request->input("contenido");
+            $newComment->publicacion_id = $request->input("publicacionId");
+            $newComment->user_id = $userId;
+
+            $newComment->save();
+
+            return response()->json($newComment);
+
+        }catch(Exception $e){
+            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+
+
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+   
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Comentario  $comentario
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Comentario $comentario)
-    {
-        //
-    }
+   
 
     /**
      * Show the form for editing the specified resource.
@@ -55,9 +87,33 @@ class ComentarioController extends Controller
      * @param  \App\Models\Comentario  $comentario
      * @return \Illuminate\Http\Response
      */
-    public function edit(Comentario $comentario)
+    public function edit($id,Request $request)
     {
-        //
+        try{
+            $validator = Validator::make($request->all(),[
+                'contenido' => 'required'
+            ]);   
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+            $comment = Comentario::find($id);
+            if(!isset($comment)){
+                return response()->json(["message" => "El comentario no existe"] ,404);
+            }
+            $userInfo = auth()->user();
+            $userId  = $userInfo["id"];
+
+            if($comment->user_id != $userId){
+                return response()->json(["message" => "No puedes editar la publicacion por que no eres dueño"] ,404);
+            }
+
+            $comment->update(["contenido" => $request->input("contenido")]);
+
+            return response()->json($comment);
+        }catch(Exception $e){
+            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+
+        }
     }
 
     /**
@@ -78,8 +134,32 @@ class ComentarioController extends Controller
      * @param  \App\Models\Comentario  $comentario
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Comentario $comentario)
+    public function destroy($id)
     {
-        //
+        try{
+            
+            $comment = Comentario::find($id);
+            if(!isset($comment)){
+                return response()->json(["message" => "El comentario no existe"] ,404);
+            }
+            $userInfo = auth()->user();
+            $userId  = $userInfo["id"];
+            $post = $comment->publicacion;
+            $foro = $post->foro;
+            $cursoId = $foro->id_curso;
+
+            $userIsCourseOwner =  Evento::where(["id" => $cursoId, "organizador_id" => $userId])->count() > 0 ? true : false;  //check if user is owner of event
+
+
+            if($comment->user_id != $userId && !$userIsCourseOwner){
+                return response()->json(["message" => "No puedes eliminar este comentario por que no eres propietario ni administrador del curso"] ,404);
+            }
+
+            $comment->delete();
+            return response()->json(["message" => "Comentario eliminado correctamente"] ,200);
+        }catch(Exception $e){
+            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+
+        }
     }
 }

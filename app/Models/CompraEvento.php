@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\Evento;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Model;
 
-class Curso extends Evento
+class CompraEvento extends Model
 {
     use HasFactory;
+    protected $table = 'compraevento';
 
     public function foro(): HasOne
     {
@@ -16,3 +16,4 @@ class Curso extends Evento
     }
 
 }
+
