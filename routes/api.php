@@ -105,6 +105,7 @@ Route::group([
 ], function() {
     Route::post('/createSeminarioVirtual', [SeminarioVirtualController::class, "create"]);
     Route::post('/createSeminarioPresencial', [SeminarioPresencialController::class, "create"]);
+    Route::get('/presenciales', [SeminarioPresencialController::class, "listarSeminariosPresenciales"]);
 });
 
 Route::group([
