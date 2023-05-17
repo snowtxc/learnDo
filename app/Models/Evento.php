@@ -20,4 +20,10 @@ class Evento extends Model
         return $this->belongsToMany(Categoria::class, 'categoriaeventos', 'evento_id', 'categoria_id');
 
     }
+
+    public function compras()
+    {
+        return $this->belongsToMany(Estudiante::class, 'compra_evento', 'evento_id', 'estudiante_id');
+    }
+
 }

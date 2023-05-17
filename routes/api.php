@@ -10,6 +10,8 @@ use App\Http\Controllers\ClaseController;
 use App\Http\Controllers\EvaluacionController;
 use App\Http\Controllers\PreguntaController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\PublicacionController;
+use App\Http\Controllers\ComentarioController;
 
 
 use Illuminate\Http\Request;
@@ -114,7 +116,24 @@ Route::group([
     Route::delete('/{id}', [ModuloController::class, "destroy"]);
     Route::put('/{id}', [ModuloController::class, "update"]);
 }); 
- 
+
+Route::group([
+    "prefix" => "publicaciones",
+], function() {
+    Route::post('/', [PublicacionController::class, "create"]);
+    Route::put('/{id}', [PublicacionController::class, "edit"]);
+    Route::delete('/{id}', [PublicacionController::class, "destroy"]);
+});  
+
+Route::group([
+    "prefix" => "comentarios",
+], function() {
+    Route::post('/', [ComentarioController::class, "create"]);
+    Route::put('/{id}', [ComentarioController::class, "edit"]);
+    Route::delete('/{id}', [ComentarioController::class, "destroy"]);
+
+
+});  
  
 
 
