@@ -89,7 +89,6 @@ class EventoController extends Controller
             'longitud' => 'required_if:tipo,seminarioP',
             'duracion' => 'required_if:tipo,seminarioP,seminarioV',
             'maximo_participantes' => 'required_if:tipo,seminarioP',
-            'categorias' => 'required',
             // 'nombre_plataforma' => 'required_if:tipo,seminarioV',
             'estado' => 'string',
             'fecha' => 'string',
@@ -112,7 +111,9 @@ class EventoController extends Controller
         // $evento->categoria_id  = $request->input('categoria');
         $evento->save();
 
-        foreach ($request->categorias as $categoria) {
+        $categorias = $request->categorias ? $request->categorias : array();
+
+        foreach ($categorias as $categoria) {
             $categoriaEvento = new categoriaevento();
             $categoriaEvento->evento_id = $evento->id;
             $categoriaEvento->categoria_id = $categoria;
