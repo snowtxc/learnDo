@@ -54,6 +54,7 @@ Route::group([
     "prefix" => "cursos",
 ], function () {
     Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
+    Route::get("/getCompleteInfoCurso", [CursoController::class, "getCursoInfo"])->name("getCursoInfo");
 });
 
 Route::group([
@@ -61,6 +62,8 @@ Route::group([
 ], function() {
     Route::post('/createEvento', [EventoController::class, "create"]);
     Route::get("/", [EventoController::class, "listar"])->name("listar");
+    Route::post("/comprarEvento", [EventoController::class, "comprarEvento"])->name("comprarEvento");
+
 });
 
 Route::group([
@@ -125,6 +128,3 @@ Route::group([
 ], function() {
     Route::get('/', [CategoriaController::class, "litarCategorias"]);
 });
-
-
-

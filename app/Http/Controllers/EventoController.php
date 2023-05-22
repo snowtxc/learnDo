@@ -8,11 +8,15 @@ use App\Models\Curso;
 use App\Models\SeminarioPresencial;
 use App\Models\SeminarioVirtual;
 use App\Models\Foro;
+use Spatie\GoogleCalendar\Event;
 
+use Exception;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\ModuloController;
 use App\Models\categoriaevento;
+use App\Models\estudiantes_eventos;
+use Carbon\Carbon;
 use Validator;
 
 class EventoController extends Controller
@@ -22,6 +26,71 @@ class EventoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function comprarEvento(Request $req)
+    {
+        try {
+            $uid = $req->uid;
+            $eventoId = $req->eventoId;
+            if (!isset($uid) || !isset($eventoId)) {
+                throw new Exception("Datos invalidos");
+            }
+            $userInfo = Usuario::find($uid);
+            $eventoInfo = Evento::find($eventoId);
+            if (!isset($userInfo) || !isset($eventoInfo)) {
+                throw new Exception("Usuario o evento invalido");
+            }
+            if ($userInfo->type == "organizador") {
+                throw new Exception("Los organizadores no pueden comprar eventos");
+            }
+
+            $existsSeminarioPresencial = SeminarioPresencial::where("evento_id", $eventoId)->first();
+            $existsSeminarioVirtual = SeminarioVirtual::where("evento_id", $eventoId)->first();
+
+            $isSeminario = isset($existsSeminarioPresencial) || isset($existsSeminarioVirtual);
+
+            if ($isSeminario == true) {
+                $gcc = new GoogleCalendarController();
+
+                if (isset($existsSeminarioPresencial)) {
+                    $gcc->MakeEvent(
+                        $existsSeminarioPresencial->fecha,
+                        $existsSeminarioPresencial->hora,
+                        $existsSeminarioPresencial->duracion,
+                        $userInfo->email,
+                        $eventoInfo->nombre,
+                        $eventoInfo->descripcion,
+                    );
+                } else if (isset($existsSeminarioVirtual)) {
+                    $gcc->MakeEvent(
+                        $existsSeminarioVirtual->fecha,
+                        $existsSeminarioVirtual->hora,
+                        $existsSeminarioVirtual->duracion,
+                        $userInfo->email,
+                        $eventoInfo->nombre,
+                        $eventoInfo->descripcion,
+                    );
+                }
+
+            }
+            // $buyedEvent = new estudiantes_eventos();
+            // $buyedEvent->user_id = $uid;
+            // $buyedEvent->curso_id = $eventoId;
+            // $buyedEvent->save();
+
+            return response()->json([
+                "ok" => true,
+                "message" => "Evento comprado correctamente"
+            ]);
+
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage()
+            ]);
+        }
+    }
 
 
     public function listar(Request $request)

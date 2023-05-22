@@ -220,6 +220,16 @@ class Relations extends Migration
                 ->references('id')
                 ->on('eventos');
         });
+        Schema::table('estudiantes_eventos', function (Blueprint $table) {
+            $table->foreign('evento_id')
+                ->references('id')
+                ->on('eventos');
+        });
+        Schema::table('estudiantes_eventos', function (Blueprint $table) {
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('usuarios');
+        });
         Schema::enableForeignKeyConstraints();
     }
 
