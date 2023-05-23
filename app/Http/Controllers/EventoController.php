@@ -11,7 +11,6 @@ use App\Models\Foro;
 use Spatie\GoogleCalendar\Event;
 
 use Exception;
-
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\ModuloController;
