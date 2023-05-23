@@ -17,7 +17,8 @@ class CreateComentariosTable extends Migration
             $table->increments('id');
             $table->string('contenido');
             $table->integer('publicacion_id')->unsigned()->nullable();
-            $table->integer('comentario_id')->unsigned()->nullable();
+            $table->integer('user_id')->unsigned()->nullable();
+
             $table->timestamps();
         });
     }

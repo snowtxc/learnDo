@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompraEvento;
 use App\Models\Evento;
 use App\Models\Usuario;
 use App\Models\Curso;
@@ -15,8 +16,6 @@ use Illuminate\Http\Request;
 
 use App\Http\Controllers\ModuloController;
 use App\Models\categoriaevento;
-use App\Models\estudiantes_eventos;
-use Carbon\Carbon;
 use Validator;
 
 class EventoController extends Controller
@@ -73,10 +72,10 @@ class EventoController extends Controller
                 }
 
             }
-            // $buyedEvent = new estudiantes_eventos();
-            // $buyedEvent->user_id = $uid;
-            // $buyedEvent->curso_id = $eventoId;
-            // $buyedEvent->save();
+            $buyedEvent = new CompraEvento();
+            $buyedEvent->user_id = $uid;
+            $buyedEvent->curso_id = $eventoId;
+            $buyedEvent->save();
 
             return response()->json([
                 "ok" => true,
@@ -117,8 +116,7 @@ class EventoController extends Controller
             ->skip($offset)->take($maxRows)->get();
 
 
-        return response()->json(["result" => $eventos]);
-        /*Queda hacer un filtro por tipo */
+        //Queda hacer un filtro por tipo/
 
         $result = array();
         foreach ($eventos as $evento) {

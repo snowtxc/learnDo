@@ -16,5 +16,10 @@ class Estudiante extends Usuario
     public function evaluaciones()
     {
         return $this->hasMany(Evaluacion::class);
+    }  
+    
+    public function compras()
+    {
+        return $this->belongsToMany(Evento::class, 'compra_evento', 'estudiante_id','evento_id');
     }
 }
