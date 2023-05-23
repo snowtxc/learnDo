@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Clase;
+use App\Models\Evaluacion;
 use App\Models\Modulo;
 use App\Models\Evento;
 use Illuminate\Http\Request;
@@ -33,22 +35,10 @@ class ModuloController extends Controller
     {
         $validator = Validator::make($request->all(),[
             'nombre' => 'required',
-            'estado' => 'required',
-            'evento_id' => 'required',
-            /*
-            'clases' => 'required|array',
-            'clases.*.nombre' => 'required',
-            'clases.*.duracion' => 'required',
-            'clases.*.estado' => 'required',
-            'evaluacion' => 'required',
-            'evaluacion.nombre' => 'required',
-            'evaluacion.maximo_puntuacion' => 'required',
-            'evaluacion.preguntas' => 'required|array',
-            'evaluacion.preguntas.*.texto' => 'required',
-            'evaluacion.preguntas.*.opciones' => 'required|array',
-            'evaluacion.preguntas.*.opciones.*.texto' => 'required',
-            'evaluacion.preguntas.*.opciones.*.correcta' => 'required|boolean',
-            */
+            'estado' => 'required|in:aprobado,rechazado,pendiente',
+            'curso_id' => 'required',
+            'evaluacion' => '',
+            'clases' => 'array',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors());
@@ -60,8 +50,26 @@ class ModuloController extends Controller
         $modulo = new Modulo();
         $modulo->nombre = $request->input('nombre');
         $modulo->estado = $request->input('estado');
-        $modulo->curso_id = $request->input('evento_id');
+        $modulo->curso_id = $request->input('curso_id');
         $modulo->save();
+
+        $evaluacion = $request->input('evaluacion');
+        if(isset($evaluacion)){
+            $evController = new EvaluacionController();
+            $evController->createWithoutRequest($modulo->id, $evaluacion);
+        }
+
+
+        $clases = $request->input('clases');
+        foreach ($clases as $clase) {
+            $claseToSave = new Clase();
+            $claseToSave->nombre = $clase['nombre'];
+            $claseToSave->video = $clase['video'];
+            $claseToSave->duracion = $clase['duracion'];
+            $claseToSave->estado = 'aprobado';
+            $claseToSave->modulo_id = $modulo->id;
+            $claseToSave->save();
+        }
 
         return response()->json([
             'message' => 'El modulo se ha creado correctamente',

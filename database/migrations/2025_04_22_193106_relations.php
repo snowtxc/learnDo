@@ -77,7 +77,7 @@ class Relations extends Migration
         Schema::table('comentarios', function (Blueprint $table) {
             $table->foreign('publicacion_id')
                 ->references('id')
-                ->on('publicacions');
+                ->on('publicacions')->onDelete('cascade');
         });
         Schema::table('comentarios', function (Blueprint $table) {
             $table->foreign('user_id')

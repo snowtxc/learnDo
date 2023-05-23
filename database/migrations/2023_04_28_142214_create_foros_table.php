@@ -17,6 +17,7 @@ class CreateForosTable extends Migration
             $table->increments('id');
             $table->integer('id_curso')->unsigned()->nullable();
             $table->string("nombre");
+            $table->timestamps();
         });
     }
 

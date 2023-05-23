@@ -31,8 +31,8 @@ class UsuarioController extends Controller
     public function create(Request $req)
     {
         //
-         //
-        $validator = Validator::make($req->all(),[
+        //
+        $validator = Validator::make($req->all(), [
             "nickname" => "required|string|max:100",
             "email" => "required|string",
             "password" => "required|string",
@@ -82,15 +82,15 @@ class UsuarioController extends Controller
         $user->type = $req->rol;
         $user->status_id = 1;
         $user->save();
-        
+
         // Creo el user en la tabla estudiante / organizador
-        if($req->rol === 'estudiante'){
+        if ($req->rol === 'estudiante') {
             $estudiante = new Estudiante();
             // $statement = DB::select("SHOW TABLE STATUS LIKE 'usuarios'");
             // $nextId = $statement[0]->Auto_increment; // obtengo el siguiente id autogenerado por la secuencia
             $estudiante->user_id = $user->id;
             $estudiante->save();
-        }else if($req->rol === 'organizador'){
+        } else if ($req->rol === 'organizador') {
             $organizador = new Organizador();
             // $statement = DB::select("SHOW TABLE STATUS LIKE 'usuarios'");
             // $nextId = $statement[0]->Auto_increment; // obtengo el siguiente id autogenerado por la secuencia
@@ -101,12 +101,17 @@ class UsuarioController extends Controller
         $mailController = new MailController("Account Activation", $user->email);
         $mailController->html_email_confirm_account($user->id);
 
-        return $this->signin($req);
+
+        return response()->json([
+            "ok" => true,
+            "message" => "Cuenta creada correctamente"
+        ]);
     }
 
 
-    public function checkNickname(Request $req) {
-        $validator = Validator::make($req->all(),[
+    public function checkNickname(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
             "nickname" => "required|string|max:100",
         ]);
 
@@ -118,38 +123,56 @@ class UsuarioController extends Controller
         return response()->json(["existe" => isset($user)]);
     }
 
+    public function filterByNicknameOrEmail(Request $req) {
+        $validator = Validator::make($req->all(),[
+            "value" => "required|string|max:100",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(),500);
+        }
+
+        $users = DB::table("usuarios")->select('id', 'nickname', 'email', 'telefono', 'nombre', 'biografia', 'imagen', 'status_id', 'creditos_number', 'type')->where("nickname", 'LIKE', '%'.$req->value.'%')
+        ->orWhere("email", "LIKE", "%".$req->value."%")
+        ->get();
+        return response()->json($users);
+    }
+
      /**
      * Create a new AuthController instance.
      *
      * @return void
      */
     public function __construct() {
-        $this->middleware('jwt', ['except' => ['signin', 'create', 'activate', 'checkNickname']]);
+        $this->middleware('jwt', ['except' => ['signin', 'create', 'activate', 'checkNickname', 'filterByNicknameOrEmail',]]);
     }
     /**
      * Get a JWT via given credentials.
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function signin(Request $request){
-    	$validator = Validator::make($request->all(), [
+    public function signin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string|min:6',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-        if (! $token = auth()->attempt($validator->validated())) {
+        if (!$token = auth()->attempt($validator->validated())) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         return $this->checkUserStatus($token);
     }
 
-    public function checkUserStatus($token){
+    public function checkUserStatus($token)
+    {
         $user = auth()->user();
         if ($user->status_id === 1) {
             return response()->json(["ok" => false, "message" => "Cuenta desactivada"]);
-        };
+        }
+        ;
         return $this->createNewToken($token);
     }
 
@@ -158,7 +181,8 @@ class UsuarioController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function logout() {
+    public function logout()
+    {
         auth()->logout();
         return response()->json(['message' => 'User successfully signed out']);
     }
@@ -167,11 +191,13 @@ class UsuarioController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function refresh() {
+    public function refresh()
+    {
         return $this->createNewToken(auth()->refresh());
     }
 
-    public function me() {
+    public function me()
+    {
         $userInfo = auth()->user();
         unset($userInfo['password']);
 
@@ -180,16 +206,14 @@ class UsuarioController extends Controller
         ]);
     }
 
-    public function activate(Request $req) {
-        $userId = strval($req->uid);
-        $userInfo = Usuario::find($userId);
-        // DB::table("usuarios")->where("id", "$req->uid")->first();
-        if ($userId === null || $userInfo === null) {
+    public function activate(Request $req)
+    {
+        $token = $req->uid;
+        if (!isset($token) || $token == null) {
             return response()->json([
                 "ok" => false,
-                "message" => "User not found",
+                "message" => "Error validando token",
             ]);
-            return;
         }
         Usuario::where("id", $userId)->update(['status_id' => 2]);
         $updatedUserInfo = Usuario::find($userId)->toArray();
@@ -224,12 +248,15 @@ class UsuarioController extends Controller
             
         ]);
     }
+
+    
     /**
      * Get the authenticated User.
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function userProfile() {
+    public function userProfile()
+    {
         return response()->json(auth()->user());
     }
     /**
@@ -239,12 +266,13 @@ class UsuarioController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function createNewToken($token){
-      return response()->json([
-        'access_token' => $token,
-        'token_type' => 'bearer',
-        'expires_in' => auth()->factory()->getTTL() * 60,
-        'user' => auth()->user()
-      ]);
+    protected function createNewToken($token)
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60,
+            'user' => auth()->user()
+        ]);
     }
 }

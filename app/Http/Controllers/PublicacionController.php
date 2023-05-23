@@ -25,6 +25,48 @@ class PublicacionController extends Controller
      * @return \Illuminate\Http\Response
      */
    
+     
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function list($foroId, Request $request)
+    {
+        try{
+            $maxRows = $request->query('maxRows') != null ? $request->query('maxRows') : 10;
+
+            $publicaciones = Publicacion::where("foro_id", "=", $foroId)->orderBy('created_at', 'desc')->get();
+
+
+            $userInfo = auth()->user();
+            $userId  = $userInfo["id"];
+
+          //  $cursoId = Foro::find($foroId)->curso->evento_id_of_curso;
+
+
+            $userIsEventoOwner = Evento::find(Foro::find($foroId)->id_curso)->organizador_id == $userId;
+
+            $result = array();
+            foreach($publicaciones as $post){
+               $userData = $post->user;
+               unset($userData->password);
+               $post->user = $userData;
+
+               $post->enableDelete = ($post->user_id == $userId || $userIsEventoOwner) ? true: false;   //bool que determina si puede eliminar la publicaicon en caso de ser organizador del evento o propietario de la publicacion
+               array_push($result,$post);
+            }
+            return response()->json($result);
+
+        }catch(Exception $e){
+            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+
+
+        }
+       
+
+    }
+
 
     /**
      * Show the form for creating a new resource.
@@ -65,9 +107,19 @@ class PublicacionController extends Controller
             $newPost->foro_id = $request->input("foroId");
             $newPost->user_id = $userId;
 
+
             $newPost->save();
 
-            return response()->json($newPost);
+            $result = [
+                'enableDelete' => true,
+                'nombre' => $newPost->nombre, 
+                'contenido' => $newPost->contenido, 
+                "id" => $newPost->id,
+                "created_at" => $newPost->created_at,
+                "user" => $newPost->user
+            ];
+
+            return response()->json($result);
 
         }catch(Exception $e){
             return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
@@ -79,17 +131,7 @@ class PublicacionController extends Controller
     }
 
    
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Publicacion  $publicacion
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Publicacion $publicacion)
-    {
-        //muestre los comentarios asociados
-    }
-
+   
     /**
      * Show the form for editing the specified resource.
      *

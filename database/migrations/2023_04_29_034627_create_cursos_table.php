@@ -17,7 +17,7 @@ class CreateCursosTable extends Migration
         Schema::create('cursos', function (Blueprint $table) {
             $table->integer('evento_id_of_curso')->unsigned()->nullable();
             $table->float('porcentaje_aprobacion');
-            $table->float('ganancias_acumuladas');
+            $table->float('ganancias_acumuladas')->default(0);
             $table->timestamps();
         });
     }

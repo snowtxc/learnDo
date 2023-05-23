@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Evaluacion;
+use App\Models\Pregunta;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -25,10 +26,11 @@ class EvaluacionController extends Controller
      */
     public function create(Request $request)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->evaluacion,[ // para enviar en el body evaluacion: data,
             'nombre' => 'required',
             'maximo_puntuacion' => 'required',
-            'modulo_id' => 'required',
+            'preguntas' => 'required|array',
+            'modulo_id' => '',
             /*
             'preguntas' => 'required|array|min:1',
             'preguntas.*.texto' => 'required',
@@ -43,24 +45,62 @@ class EvaluacionController extends Controller
         }
 
         $evaluacion = new Evaluacion();
-        $evaluacion->nombre = $request->input('nombre');
-        $evaluacion->maximo_puntuacion = $request->input('maximo_puntuacion');
-        $evaluacion->modulo_id = $request->input('modulo_id');
+        // echo $request->evaluacion['nombre'];
+        // echo var_dump($request->evaluacion);
+        $evaluacion->nombre = $request->evaluacion['nombre'];
+        $evaluacion->maximo_puntuacion = $request->evaluacion['maximo_puntuacion'];
+        $evaluacion->modulo_id = $request->evaluacion['modulo_id'];
         $evaluacion->save();
     
-        foreach ($request->input('preguntas') as $preguntaData) {
-            $pregunta = new PreguntaController();
-            $preguntaController = new Request();
-            $preguntaController->texto = $preguntaData['texto'];
-            $preguntaController->evaluacion_id = $request['$id'];
-            $preguntaController->opciones = $preguntaData['opciones'];
-            $pregunta->create($preguntaController);
+        $preguntas = $request->evaluacion['preguntas'];
+        foreach ($preguntas as $preguntaData) {
+            echo var_dump($preguntaData['texto']);
+            $preguntaToSave = new Pregunta();
+            $preguntaToSave->texto = $preguntaData['texto'];
+            $preguntaToSave->evaluacion_id = $evaluacion->id;
+            $preguntaToSave->save();
+            $preguntaToSave->opciones = $preguntaData['opciones'];
         }
 
         return response()->json([
             'message' => 'La evaluación se ha creado correctamente.',
             'evaluacion' => $evaluacion,
         ], 201);
+    }
+    
+    public function createWithoutRequest($modulo_id, $evaluacionACrear)
+    {
+        $validator = Validator::make($evaluacionACrear,[
+            'nombre' => 'required',
+            'maximo_puntuacion' => 'required',
+            'preguntas' => 'required|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $evaluacion = new Evaluacion();
+        // echo $request->evaluacion['nombre'];
+        // echo var_dump($evaluacion);
+        $evaluacion->nombre = $evaluacionACrear['nombre'];
+        $evaluacion->maximo_puntuacion = $evaluacionACrear['maximo_puntuacion'];
+        $evaluacion->modulo_id = $modulo_id;
+        $evaluacion->save();
+    
+        $preguntas = $evaluacionACrear['preguntas'];
+        foreach ($preguntas as $preguntaData) {
+            // echo var_dump($preguntaData['texto']);
+            $preguntaToSave = new Pregunta();
+            $preguntaToSave->contenido = $preguntaData['contenido'];
+            $preguntaToSave->evaluacion_id = $evaluacion->id;
+            $preguntaToSave->save();
+            $preguntaToSave->opciones = $preguntaData['opciones'];
+            foreach ($preguntaData['opciones'] as $opcion){
+                $opController = new OpcionController();
+                $opController->createWithoutRequest($preguntaToSave->id, $opcion);
+            }
+        }
     }
 
     /**

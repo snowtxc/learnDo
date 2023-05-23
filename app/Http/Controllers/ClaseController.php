@@ -23,10 +23,17 @@ class ClaseController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    // public function uploadFile(Request $request) {
+    //     echo $path = $request->file('video')->storeAs(
+    //         'videos', $request->image->getClientOriginalName()
+    //     );
+    // }
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(),[
             'nombre' => 'required',
+            'video' => 'required|file',
             'duracion' => 'required',
             'estado' => 'required',
             'modulo_id' => 'required'
@@ -38,6 +45,13 @@ class ClaseController extends Controller
 
         $clase = new Clase();
         $clase->nombre = $request->input('nombre');
+
+        // echo $path = $request->file('video')->storeAs(
+        //     'videos', $request->video->getClientOriginalName()
+        // );
+        
+        // $clase->video = $path;
+
         $clase->duracion = $request->input('duracion');
         $clase->estado = $request->input('estado');
         $clase->modulo_id = $request->input('modulo_id');
