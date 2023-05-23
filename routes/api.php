@@ -17,6 +17,7 @@ use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\ComentarioController;
 
 
+use App\Http\Controllers\VideoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -155,4 +156,10 @@ Route::group([
     "prefix" => "categorias",
 ], function () {
     Route::get('/', [CategoriaController::class, "litarCategorias"]);
+});
+
+Route::group([
+    "prefix" => "videos",
+], function() {
+    Route::post('/upload-video', [VideoController::class, 'uploadVideo']);
 });

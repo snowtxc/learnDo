@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Clase;
 use App\Models\Evaluacion;
 use App\Models\Modulo;
+use App\Http\Controllers\VideoController;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -32,7 +34,7 @@ class ModuloController extends Controller
             'estado' => 'required|in:aprobado,rechazado,pendiente',
             'curso_id' => 'required',
             'evaluacion' => '',
-            'clases' => 'array',
+            'clases' => '',
         ]);
 
         if ($validator->fails()) {
@@ -45,27 +47,43 @@ class ModuloController extends Controller
         $modulo->curso_id = $request->input('curso_id');
         $modulo->save();
 
+        $clases = $request->input('clases');
         $evaluacion = $request->input('evaluacion');
         if(isset($evaluacion)){
             $evController = new EvaluacionController();
             $evController->createWithoutRequest($modulo->id, $evaluacion);
         }
-
-
-        $clases = $request->input('clases');
+        
+        $clasesCreated = array();
         foreach ($clases as $clase) {
             $claseToSave = new Clase();
             $claseToSave->nombre = $clase['nombre'];
-            $claseToSave->video = $clase['video'];
+
+            // $video = $clase['video'];
+            // echo var_dump($video);
+
+
+            //$url = url('/videos/upload-video');
+            //$response = Http::attach('video', file_get_contents($video), "video")
+            //->post($url);
+            //$videoPath = $response->json()['video_path'];
+
+            $videoController = new VideoController();
+            // $videoPath = $videoController->saveVideo($video);
+            
+            $claseToSave->video = "";
+
             $claseToSave->duracion = $clase['duracion'];
             $claseToSave->estado = 'aprobado';
             $claseToSave->modulo_id = $modulo->id;
             $claseToSave->save();
+            array_push($clasesCreated, $claseToSave);
         }
 
         return response()->json([
             'message' => 'El modulo se ha creado correctamente',
             'modulo' => $modulo,
+            'clases' => $clasesCreated,
         ], 201);
     }
 
