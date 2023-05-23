@@ -13,10 +13,6 @@ use App\Http\Controllers\EvaluacionController;
 use App\Http\Controllers\PreguntaController;
 use App\Http\Controllers\SeminarioPresencialController;
 use App\Http\Controllers\SeminarioVirtualController;
-use App\Http\Controllers\PublicacionController;
-use App\Http\Controllers\ComentarioController;
-
-
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\ComentarioController;
