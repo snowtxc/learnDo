@@ -103,7 +103,7 @@ class CursoController extends Controller
                 ->select('categorias.nombre')
                 ->where("categoriaeventos.evento_id", $cursoId)->get();
 
-            $esComprado = DB::table("estudiantes_eventos")->where("evento_id", "=", $cursoId)
+            $esComprado = DB::table("compraevento")->where("evento_id", "=", $cursoId)
                 ->where("user_id", "=", $myId)->first();
 
             $puntuaciones = DB::table("puntuacions")->where("curso_id", "=", $cursoId)->get();
