@@ -13,6 +13,7 @@ use App\Http\Controllers\EvaluacionController;
 use App\Http\Controllers\PreguntaController;
 use App\Http\Controllers\SeminarioPresencialController;
 use App\Http\Controllers\SeminarioVirtualController;
+use App\Http\Controllers\VideoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -123,6 +124,12 @@ Route::group([
     "prefix" => "categorias",
 ], function() {
     Route::get('/', [CategoriaController::class, "litarCategorias"]);
+});
+
+Route::group([
+    "prefix" => "videos",
+], function() {
+    Route::post('/upload-video', [VideoController::class, 'uploadVideo']);
 });
 
 
