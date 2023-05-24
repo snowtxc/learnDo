@@ -33,7 +33,9 @@ class EventoController extends Controller
         try {
             $uid = $req->uid;
             $eventoId = $req->eventoId;
-            if (!isset($uid) || !isset($eventoId)) {
+            $monto = $req->monto;
+            $metodoPago = $req->metodoPago;
+            if (!isset($uid) || !isset($metodoPago) || !isset($monto) || !isset($eventoId)) {
                 throw new Exception("Datos invalidos");
             }
             $userInfo = Usuario::find($uid);
@@ -75,8 +77,10 @@ class EventoController extends Controller
 
             }
             $buyedEvent = new CompraEvento();
-            $buyedEvent->user_id = $uid;
-            $buyedEvent->curso_id = $eventoId;
+            $buyedEvent->estudiante_id = $uid;
+            $buyedEvent->evento_id = $eventoId;
+            $buyedEvent->metodoPago = $metodoPago;
+            $buyedEvent->monto = $monto;
             $buyedEvent->save();
 
             return response()->json([

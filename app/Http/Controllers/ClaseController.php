@@ -3,7 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Clase;
+use App\Models\Curso;
+use App\Models\Evento;
+use App\Models\Modulo;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Validator;
 
 class ClaseController extends Controller
@@ -31,7 +39,7 @@ class ClaseController extends Controller
     // }
     public function create(Request $request)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'nombre' => 'required',
             'video' => 'required|file',
             'duracion' => 'required',
@@ -49,7 +57,7 @@ class ClaseController extends Controller
         // echo $path = $request->file('video')->storeAs(
         //     'videos', $request->video->getClientOriginalName()
         // );
-        
+
         // $clase->video = $path;
 
         $clase->duracion = $request->input('duracion');
@@ -69,9 +77,63 @@ class ClaseController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function getClaseInfo(Request $request)
     {
-        //
+        try {
+            $validator = Validator::make($request->all(), [
+                'clase_id' => 'required|string',
+                'curso_id' => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+            $cursoInfo = Curso::where("evento_id_of_curso", $request->curso_id)->first();
+            if (!isset($cursoInfo)) {
+                throw new Exception("Error al obtener el curso");
+            }
+
+            $eventoInfo = Evento::where("id", $request->curso_id)->first();
+            if (!isset($eventoInfo)) {
+                throw new Exception("Error al obtener el evento");
+            }
+
+            $meInfo = auth()->user();
+            $myId = $meInfo->id;
+
+            $esComprado = DB::table("compraevento")->where("evento_id", "=", $eventoInfo->id)
+                ->where("estudiante_id", "=", $myId)->first();
+
+            if (!isset($esComprado)) {
+                throw new Exception("Permiso denegado");
+            }
+
+            $claseInfo = Clase::find($request->clase_id);
+            if (!isset($claseInfo)) {
+                throw new Exception("Error al obtener la clase");
+            }
+            $moduloInfo = Modulo::find($claseInfo->modulo_id);
+            if (!isset($moduloInfo)) {
+                throw new Exception("Error al obtener el modulo");
+            }
+
+            if ($moduloInfo->curso_id !== $cursoInfo->evento_id_of_curso) {
+                throw new Exception("Error al obtener la informacion de la clase");
+            }
+
+            return response()->json([
+                "ok" => true,
+                "clase" => $claseInfo,
+                "moduloName" => $moduloInfo->nombre,
+                "cursoName" => $eventoInfo->nombre
+            ]);
+
+        } catch (\Throwable $th) {
+                return response()->json([
+                    "ok" => false,
+                    "message" => $th->getMessage()
+                ]);
+        }
     }
 
     /**

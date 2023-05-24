@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Curso;
+use App\Models\Foro;
 use App\Models\Modulo;
 use App\Models\Organizador;
 use App\Models\Usuario;
@@ -10,6 +11,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Support\Facades\DB;
+use App\Http\Utils\CursoUtils;
 
 class CursoController extends Controller
 {
@@ -104,7 +106,7 @@ class CursoController extends Controller
                 ->where("categoriaeventos.evento_id", $cursoId)->get();
 
             $esComprado = DB::table("compraevento")->where("evento_id", "=", $cursoId)
-                ->where("user_id", "=", $myId)->first();
+                ->where("estudiante_id", "=", $myId)->first();
 
             $puntuaciones = DB::table("puntuacions")->where("curso_id", "=", $cursoId)->get();
             // echo $puntuaciones;
@@ -127,15 +129,37 @@ class CursoController extends Controller
             if (isset($modulos) && sizeof($modulos) > 0) {
                 foreach ($modulos as $modulo) {
                     $clasesOfModulo = DB::table("clases")->where("modulo_id", "=", $modulo->id)->get();
+                    $evaluacionOfModulo = DB::table("evaluacions")->where("modulo_id", "=", $modulo->id)->first();
+
                     if (isset($clasesOfModulo) && sizeof($clasesOfModulo) > 0) {
                         $modulo->clases = $clasesOfModulo;
                     } else {
                         $modulo->clases = array();
                     }
+
+                    if (isset($evaluacionOfModulo)) {
+                        $cursoUtils = new CursoUtils();
+                        $myBestCalification = $cursoUtils->myBestCalification($myId, $evaluacionOfModulo->id);
+                        if (isset($myBestCalification)) {
+                            $modulo->calificacion = $myBestCalification->puntuacion;
+                        } else {
+                            $modulo->calificacion = 0;
+                        }
+                        
+
+                        $modulo->evaluacionId = $evaluacionOfModulo->id;
+                    } else {
+                        $modulo->evaluacionId = null;
+                    }
+
                     array_push($formattedModulos, $modulo);
                 }
             }
-
+            $foro = Foro::where("id_curso", $cursoId)->first();
+            $foroId = 0;
+            if (isset($foro)) {
+                $foroId = $foro->id;
+            }
             return response()->json([
                 "ok" => true,
                 "curso" => $cursoInfo,
@@ -146,6 +170,7 @@ class CursoController extends Controller
                 "modulos" => $formattedModulos,
                 "puntuaciones" => $puntuaciones,
                 "profesor" => $organizadorInfo->nombre,
+                "foroId" => $foroId,
             ]);
         } catch (\Throwable $th) {
             return response()->json([
