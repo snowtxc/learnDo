@@ -225,8 +225,6 @@ class Relations extends Migration
             ->on('estudiantes');
         });
 
-        
-
         Schema::enableForeignKeyConstraints();
     }
 

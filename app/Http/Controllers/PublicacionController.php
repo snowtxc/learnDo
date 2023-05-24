@@ -34,18 +34,15 @@ class PublicacionController extends Controller
     public function list($foroId, Request $request)
     {
         try{
+            
+            if(Foro::find($foroId) == null){
+                return response()->json(["message" => "El curso no existe"] ,404);
+            }
             $maxRows = $request->query('maxRows') != null ? $request->query('maxRows') : 10;
-
             $publicaciones = Publicacion::where("foro_id", "=", $foroId)->orderBy('created_at', 'desc')->get();
-
-
             $userInfo = auth()->user();
             $userId  = $userInfo["id"];
-
-          //  $cursoId = Foro::find($foroId)->curso->evento_id_of_curso;
-
-
-            $userIsEventoOwner = Evento::find(Foro::find($foroId)->id_curso)->organizador_id == $userId;
+            $userIsEventoOwner = Evento::find(Foro::find($foroId)->id_curso)->organizador_id == $userId;  
 
             $result = array();
             foreach($publicaciones as $post){
@@ -111,7 +108,7 @@ class PublicacionController extends Controller
             $newPost->save();
 
             $result = [
-                'enableDelete' => true,
+                'enableDelete' => true, 
                 'nombre' => $newPost->nombre, 
                 'contenido' => $newPost->contenido, 
                 "id" => $newPost->id,

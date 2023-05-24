@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompraEvento;
 use App\Models\Evento;
 use App\Models\Usuario;
 use App\Models\Curso;
 use App\Models\SeminarioPresencial;
 use App\Models\SeminarioVirtual;
 use App\Models\Foro;
+use Spatie\GoogleCalendar\Event;
+use Illuminate\Support\Facades\Auth;
 
+
+use Exception;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\ModuloController;
@@ -23,6 +28,71 @@ class EventoController extends Controller
      * @return \Illuminate\Http\Response
      */
 
+    public function comprarEvento(Request $req)
+    {
+        try {
+            $uid = $req->uid;
+            $eventoId = $req->eventoId;
+            if (!isset($uid) || !isset($eventoId)) {
+                throw new Exception("Datos invalidos");
+            }
+            $userInfo = Usuario::find($uid);
+            $eventoInfo = Evento::find($eventoId);
+            if (!isset($userInfo) || !isset($eventoInfo)) {
+                throw new Exception("Usuario o evento invalido");
+            }
+            if ($userInfo->type == "organizador") {
+                throw new Exception("Los organizadores no pueden comprar eventos");
+            }
+
+            $existsSeminarioPresencial = SeminarioPresencial::where("evento_id", $eventoId)->first();
+            $existsSeminarioVirtual = SeminarioVirtual::where("evento_id", $eventoId)->first();
+
+            $isSeminario = isset($existsSeminarioPresencial) || isset($existsSeminarioVirtual);
+
+            if ($isSeminario == true) {
+                $gcc = new GoogleCalendarController();
+
+                if (isset($existsSeminarioPresencial)) {
+                    $gcc->MakeEvent(
+                        $existsSeminarioPresencial->fecha,
+                        $existsSeminarioPresencial->hora,
+                        $existsSeminarioPresencial->duracion,
+                        $userInfo->email,
+                        $eventoInfo->nombre,
+                        $eventoInfo->descripcion,
+                    );
+                } else if (isset($existsSeminarioVirtual)) {
+                    $gcc->MakeEvent(
+                        $existsSeminarioVirtual->fecha,
+                        $existsSeminarioVirtual->hora,
+                        $existsSeminarioVirtual->duracion,
+                        $userInfo->email,
+                        $eventoInfo->nombre,
+                        $eventoInfo->descripcion,
+                    );
+                }
+
+            }
+            $buyedEvent = new CompraEvento();
+            $buyedEvent->user_id = $uid;
+            $buyedEvent->curso_id = $eventoId;
+            $buyedEvent->save();
+
+            return response()->json([
+                "ok" => true,
+                "message" => "Evento comprado correctamente"
+            ]);
+
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage()
+            ]);
+        }
+    }
+
 
     public function listar(Request $request)
     {
@@ -33,23 +103,25 @@ class EventoController extends Controller
         $categoriaFilterIds = $request->query('categoria') != null ? $request->query('categoria') : null; //array con las categorias a filtrar
         $busqueda = ($request->query('busqueda') != null && $request->query('busqueda') != '') ? $request->query('busqueda') : null; //array con las categorias a filtrar
 
-
-        $tipoFilter = $request->query('categoria') != null ? $request->query('tipo') : null;
-
-
+        $tipo = $request->query('tipo') != null ? $request->query('tipo') : null;
+      
         $eventos = Evento::whereHas('categorias', function ($query) use ($categoriaFilterIds) {
             if ($categoriaFilterIds != null) {
                 $query->whereIn('categorias.id', $categoriaFilterIds);
             }
 
         })->when(isset($busqueda), function ($query) use ($busqueda) {
-            $query->where('nombre', 'like', '%' . $busqueda . '%');
+            $query->where('nombre', 'like', '%' . $busqueda . '%'); 
+        })->when(isset($tipo), function ($query) use ($tipo) {
+          
+
+            $query->where("tipo","=",$tipo);
         })
             ->skip($offset)->take($maxRows)->get();
 
 
-        /*Queda hacer un filtro por tipo */
-
+        //Queda hacer un filtro por tipo/
+ 
         $result = array();
         foreach ($eventos as $evento) {
             $organizadorID = $evento['organizador_id'];
@@ -88,7 +160,6 @@ class EventoController extends Controller
             'longitud' => 'required_if:tipo,seminarioP',
             'duracion' => 'required_if:tipo,seminarioP,seminarioV',
             'maximo_participantes' => 'required_if:tipo,seminarioP',
-            'categorias' => 'required',
             // 'nombre_plataforma' => 'required_if:tipo,seminarioV',
             'estado' => 'string',
             'fecha' => 'string',
@@ -111,7 +182,9 @@ class EventoController extends Controller
         // $evento->categoria_id  = $request->input('categoria');
         $evento->save();
 
-        foreach ($request->categorias as $categoria) {
+        $categorias = $request->categorias ? $request->categorias : array();
+
+        foreach ($categorias as $categoria) {
             $categoriaEvento = new categoriaevento();
             $categoriaEvento->evento_id = $evento->id;
             $categoriaEvento->categoria_id = $categoria;
@@ -160,6 +233,28 @@ class EventoController extends Controller
             'message' => 'El evento se ha creado correctamente.',
             'evento' => $evento,
         ], 201);
+    }
+    
+
+    public function userIsStudentOrOwner($eventoID, Request $req)
+    {
+        try{
+            $userInfo = auth()->user();
+            $userId  = $userInfo["id"];
+
+            $eventoInfo = Evento::find($eventoID);
+            if(!isset($eventoInfo)){
+                return response()->json(["message" => "El evento no existe"] ,404);
+            }
+            $userAlreadyHasEvento = CompraEvento::where(["evento_id" => $eventoID, "estudiante_id" => $userId])->count() > 0 ? true : false; //check if user is student of event
+            $userIsOwner =  Evento::where(["id" => $eventoID, "organizador_id" => $userId])->count() > 0 ? true : false;  //check if user is owner of event
+            return response()->json(["result" => $userAlreadyHasEvento || $userIsOwner],200);
+
+        } catch(Exception $e){
+            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+
+        }
+        
     }
 
     /**

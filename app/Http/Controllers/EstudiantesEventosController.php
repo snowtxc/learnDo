@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Puntuacion;
+use App\Models\estudiantes_eventos;
 use Illuminate\Http\Request;
 
-class PuntuacionController extends Controller
+class EstudiantesEventosController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -41,10 +41,10 @@ class PuntuacionController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Puntuacion  $puntuacion
+     * @param  \App\Models\estudiantes_eventos  $estudiantes_eventos
      * @return \Illuminate\Http\Response
      */
-    public function show(Puntuacion $puntuacion)
+    public function show(estudiantes_eventos $estudiantes_eventos)
     {
         //
     }
@@ -52,10 +52,10 @@ class PuntuacionController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Puntuacion  $puntuacion
+     * @param  \App\Models\estudiantes_eventos  $estudiantes_eventos
      * @return \Illuminate\Http\Response
      */
-    public function edit(Puntuacion $puntuacion)
+    public function edit(estudiantes_eventos $estudiantes_eventos)
     {
         //
     }
@@ -64,10 +64,10 @@ class PuntuacionController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Puntuacion  $puntuacion
+     * @param  \App\Models\estudiantes_eventos  $estudiantes_eventos
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Puntuacion $puntuacion)
+    public function update(Request $request, estudiantes_eventos $estudiantes_eventos)
     {
         //
     }
@@ -75,10 +75,10 @@ class PuntuacionController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Puntuacion  $puntuacion
+     * @param  \App\Models\estudiantes_eventos  $estudiantes_eventos
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Puntuacion $puntuacion)
+    public function destroy(estudiantes_eventos $estudiantes_eventos)
     {
         //
     }

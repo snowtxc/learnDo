@@ -15,6 +15,8 @@ use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\ComentarioController;
 use App\Http\Controllers\SeminarioPresencialController;
 use App\Http\Controllers\SeminarioVirtualController;
+
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +37,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group([
     "prefix" => "auth",
+    'middleware' => ['cors']
 ], function () {
     Route::post("/login", [UsuarioController::class, "signin"])->name("login");
     Route::post("/signup", [UsuarioController::class, "create"])->name("signup");
@@ -50,6 +53,7 @@ Route::group([
     'middleware' => ['cors'] 
 ], function() {
     Route::get("/", [EventoController::class, "listar"])->name("listar"); 
+    Route::get("{id}/userIsStudentOrOwner", [EventoController::class, "userIsStudentOrOwner"])->name("userIsStudentOrOwner");  
 
 });
 
@@ -65,85 +69,102 @@ Route::group([
     "prefix" => "cursos",
 ], function () {
     Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
+    Route::get("/getCompleteInfoCurso", [CursoController::class, "getCursoInfo"])->name("getCursoInfo");
 });
 
 Route::group([
     "prefix" => "eventos",
-], function() {
+    'middleware' => ['cors']
+], function () {
     Route::post('/createEvento', [EventoController::class, "create"]);
     Route::get("/", [EventoController::class, "listar"])->name("listar");
+    Route::post("/comprarEvento", [EventoController::class, "comprarEvento"])->name("comprarEvento");
 });
 
-
+Route::group([
+    "prefix" => "modulos",
+], function () { 
+    Route::post('/createModulo', [ModuloController::class, "create"]);
+    Route::get('/listByEventoId/{eventoId}', [ModuloController::class, "listByEventoId"]);
+    Route::get('/{id}', [ModuloController::class, "show"]);
+    Route::delete('/{id}', [ModuloController::class, "destroy"]);
+    Route::put('/{id}', [ModuloController::class, "update"]);
+});
 
 Route::group([
     "prefix" => "clases",
-], function() {
+], function () {
     Route::post('/createClase', [ClaseController::class, "create"]);
 });
 
 Route::group([
     "prefix" => "evaluaciones",
-], function() {
+], function () {
     Route::post('/createEvaluacion', [EvaluacionController::class, "create"]);
 });
 
 
 Route::group([
     "prefix" => "preguntas",
-], function() {
+], function () {
     Route::post('/createPregunta', [PreguntaController::class, "create"]);
 });
 
 Route::group([
     "prefix" => "opciones",
-], function() {
+], function () {
     Route::post('/createOpcion', [OpcionController::class, "create"]);
 });
 
 Route::group([
-    "prefix" => "categorias",
-], function() {
-    Route::post('/', [CategoriaController::class, "create"]);
-    Route::get('/', [CategoriaController::class, "getAll"]);
-    Route::delete('/{id}', [CategoriaController::class, "destroy"]);
-    Route::put('/{id}', [CategoriaController::class, "update"]);
+    "prefix" => "usuarios",
+], function () {
+    Route::get('/filterByNicknameOrEmail', [UsuarioController::class, "filterByNicknameOrEmail"]);
 });
 
 Route::group([
-    "prefix" => "modulos",
-], function() {
-    Route::post('/', [ModuloController::class, "create"]);
-    Route::get('/listByEventoId/{eventoId}', [ModuloController::class, "listByEventoId"]);
-    Route::get('/{id}', [ModuloController::class, "show"]);
-    Route::delete('/{id}', [ModuloController::class, "destroy"]);
-    Route::put('/{id}', [ModuloController::class, "update"]);
-}); 
+    "prefix" => "seminarios",
+], function () {
+    Route::post('/createSeminarioVirtual', [SeminarioVirtualController::class, "create"]);
+    Route::post('/createSeminarioPresencial', [SeminarioPresencialController::class, "create"]);
+    Route::get('/presenciales', [SeminarioPresencialController::class, "listarSeminariosPresenciales"]);
+});
+
+
 
 Route::group([
     "prefix" => "publicaciones",
-    'middleware' => ['cors'] 
-], function() {
-    Route::get('/listByForoId/{foroId}', [PublicacionController::class, "list"]);
+], function () {
+    Route::get('/listByForoId/{foroId}', [PublicacionController::class, "list"]); 
     Route::post('/', [PublicacionController::class, "create"]);
     Route::put('/{id}', [PublicacionController::class, "edit"]);
     Route::delete('/{id}', [PublicacionController::class, "destroy"]);
-});  
+});
 
 Route::group([
     "prefix" => "comentarios",
-    
-], function() {
+], function () {
+    Route::get('/listByPublicacionId/{publicacionId}', [ComentarioController::class, "listByPublicacionId"]);
     Route::post('/', [ComentarioController::class, "create"]);
     Route::put('/{id}', [ComentarioController::class, "edit"]);
     Route::delete('/{id}', [ComentarioController::class, "destroy"]);
-    Route::get('/listByPublicacionId/{publicacionId}', [ComentarioController::class, "listByPublicacionId"]);
+});
 
 
+Route::group([
+    "prefix" => "usuarios",
+], function () {
+    Route::get('/filterByNicknameOrEmail', [UsuarioController::class, "filterByNicknameOrEmail"]);
+});
 
-});  
- 
+Route::group([
+    "prefix" => "colaboraciones",
+], function () {
+    Route::post('/createColaboraciones', [ColaboracionController::class, "create"]);
+});
 
-
-
-
+Route::group([
+    "prefix" => "categorias",
+], function () {
+    Route::get('/', [CategoriaController::class, "getAll"]);
+});

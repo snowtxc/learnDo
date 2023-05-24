@@ -65,16 +65,18 @@ class ComentarioController extends Controller
             $newComment->contenido = $request->input("contenido");
             $newComment->publicacion_id = $request->input("publicacionId");
             $newComment->user_id = $userId;
-            
+
+            $newComment->user;
 
             $newComment->save();
 
             $result = [
-                "id"  => $newComment->id,
-                "user" => $newComment->user,
-                "contenido" => $newComment->contenido,
-                "enableDelete" => true
-            ];
+                'enableDelete' => true, 
+                'contenido' => $newComment->contenido, 
+                "id" => $newComment->id,
+                "created_at" => $newComment->created_at,
+                "user" => $newComment->user
+            ]; 
 
             return response()->json($result);
 
@@ -175,7 +177,7 @@ class ComentarioController extends Controller
         try{
             $comments = Comentario::where("publicacion_id", "=", $publicacionId)->orderBy("created_at","DESC")->get();
             $result = array();
-
+ 
             $userInfo = auth()->user();
             $userId  = $userInfo["id"];
 
