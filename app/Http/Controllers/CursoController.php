@@ -11,6 +11,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Support\Facades\DB;
+use App\Http\Utils\CursoUtils;
 
 class CursoController extends Controller
 {
@@ -128,11 +129,29 @@ class CursoController extends Controller
             if (isset($modulos) && sizeof($modulos) > 0) {
                 foreach ($modulos as $modulo) {
                     $clasesOfModulo = DB::table("clases")->where("modulo_id", "=", $modulo->id)->get();
+                    $evaluacionOfModulo = DB::table("evaluacions")->where("modulo_id", "=", $modulo->id)->first();
+
                     if (isset($clasesOfModulo) && sizeof($clasesOfModulo) > 0) {
                         $modulo->clases = $clasesOfModulo;
                     } else {
                         $modulo->clases = array();
                     }
+
+                    if (isset($evaluacionOfModulo)) {
+                        $cursoUtils = new CursoUtils();
+                        $myBestCalification = $cursoUtils->myBestCalification($myId, $evaluacionOfModulo->id);
+                        if (isset($myBestCalification)) {
+                            $modulo->calificacion = $myBestCalification->puntuacion;
+                        } else {
+                            $modulo->calificacion = 0;
+                        }
+                        
+
+                        $modulo->evaluacionId = $evaluacionOfModulo->id;
+                    } else {
+                        $modulo->evaluacionId = null;
+                    }
+
                     array_push($formattedModulos, $modulo);
                 }
             }

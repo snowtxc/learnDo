@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CalificacionController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ColaboracionController;
 use App\Http\Controllers\MensajeController;
@@ -93,6 +94,8 @@ Route::group([
     "prefix" => "evaluaciones",
 ], function () {
     Route::post('/createEvaluacion', [EvaluacionController::class, "create"]);
+    Route::get('/', [EvaluacionController::class, "getInfo"]);
+
 });
 
 
@@ -170,4 +173,10 @@ Route::group([
     "prefix" => "puntuacion",
 ], function() {
     Route::post('/', [PuntuacionController::class, 'puntuarCurso']);
+});
+
+Route::group([
+    "prefix" => "calificacion",
+], function () {
+    Route::post('/', [CalificacionController::class, "correjirCalificacion"]);
 });
