@@ -48,7 +48,6 @@ class EventoController extends Controller
             ->skip($offset)->take($maxRows)->get();
 
 
-        return response()->json(["result" => $eventos]);
         /*Queda hacer un filtro por tipo */
 
         $result = array();
