@@ -28,8 +28,7 @@ class ConnectOauthController extends Controller
         if ($client->isAccessTokenExpired()) {
             $client->setApplicationName('Learn Do');
             $client->setAuthConfig($credentialsPath);
-            $client->fetchAccessTokenWithRefreshToken($oauthToken['refresh_token']);
-
+            $client->fetchAccessTokenWithRefreshToken($oauthToken['access_token']);
             $token = $client->getAccessToken();
             file_put_contents($pathToTokenStored, json_encode($token));
         }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Curso;
+use App\Models\Foro;
 use App\Models\Modulo;
 use App\Models\Organizador;
 use App\Models\Usuario;
@@ -135,7 +136,11 @@ class CursoController extends Controller
                     array_push($formattedModulos, $modulo);
                 }
             }
-
+            $foro = Foro::where("id_curso", $cursoId)->first();
+            $foroId = 0;
+            if (isset($foro)) {
+                $foroId = $foro->id;
+            }
             return response()->json([
                 "ok" => true,
                 "curso" => $cursoInfo,
@@ -146,6 +151,7 @@ class CursoController extends Controller
                 "modulos" => $formattedModulos,
                 "puntuaciones" => $puntuaciones,
                 "profesor" => $organizadorInfo->nombre,
+                "foroId" => $foroId,
             ]);
         } catch (\Throwable $th) {
             return response()->json([
