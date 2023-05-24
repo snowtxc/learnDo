@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CalificacionController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ColaboracionController;
 use App\Http\Controllers\MensajeController;
@@ -16,8 +17,7 @@ use App\Http\Controllers\SeminarioVirtualController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\ComentarioController;
-
-
+use App\Http\Controllers\PuntuacionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -86,12 +86,16 @@ Route::group([
     "prefix" => "clases",
 ], function () {
     Route::post('/createClase', [ClaseController::class, "create"]);
+    Route::get('/', [ClaseController::class, "getClaseInfo"]);
+
 });
 
 Route::group([
     "prefix" => "evaluaciones",
 ], function () {
     Route::post('/createEvaluacion', [EvaluacionController::class, "create"]);
+    Route::get('/', [EvaluacionController::class, "getInfo"]);
+
 });
 
 
@@ -162,4 +166,17 @@ Route::group([
     "prefix" => "videos",
 ], function() {
     Route::post('/upload-video', [VideoController::class, 'uploadVideo']);
+});
+
+
+Route::group([
+    "prefix" => "puntuacion",
+], function() {
+    Route::post('/', [PuntuacionController::class, 'puntuarCurso']);
+});
+
+Route::group([
+    "prefix" => "calificacion",
+], function () {
+    Route::post('/', [CalificacionController::class, "correjirCalificacion"]);
 });

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Evaluacion;
+use App\Models\Opcion;
 use App\Models\Pregunta;
+use Exception;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -26,7 +28,8 @@ class EvaluacionController extends Controller
      */
     public function create(Request $request)
     {
-        $validator = Validator::make($request->evaluacion,[ // para enviar en el body evaluacion: data,
+        $validator = Validator::make($request->evaluacion, [
+            // para enviar en el body evaluacion: data,
             'nombre' => 'required',
             'maximo_puntuacion' => 'required',
             'preguntas' => 'required|array',
@@ -51,7 +54,7 @@ class EvaluacionController extends Controller
         $evaluacion->maximo_puntuacion = $request->evaluacion['maximo_puntuacion'];
         $evaluacion->modulo_id = $request->evaluacion['modulo_id'];
         $evaluacion->save();
-    
+
         $preguntas = $request->evaluacion['preguntas'];
         foreach ($preguntas as $preguntaData) {
             echo var_dump($preguntaData['texto']);
@@ -67,10 +70,10 @@ class EvaluacionController extends Controller
             'evaluacion' => $evaluacion,
         ], 201);
     }
-    
+
     public function createWithoutRequest($modulo_id, $evaluacionACrear)
     {
-        $validator = Validator::make($evaluacionACrear,[
+        $validator = Validator::make($evaluacionACrear, [
             'nombre' => 'required',
             'maximo_puntuacion' => 'required',
             'preguntas' => 'required|array',
@@ -87,7 +90,7 @@ class EvaluacionController extends Controller
         $evaluacion->maximo_puntuacion = $evaluacionACrear['maximo_puntuacion'];
         $evaluacion->modulo_id = $modulo_id;
         $evaluacion->save();
-    
+
         $preguntas = $evaluacionACrear['preguntas'];
         foreach ($preguntas as $preguntaData) {
             // echo var_dump($preguntaData['texto']);
@@ -96,7 +99,7 @@ class EvaluacionController extends Controller
             $preguntaToSave->evaluacion_id = $evaluacion->id;
             $preguntaToSave->save();
             $preguntaToSave->opciones = $preguntaData['opciones'];
-            foreach ($preguntaData['opciones'] as $opcion){
+            foreach ($preguntaData['opciones'] as $opcion) {
                 $opController = new OpcionController();
                 $opController->createWithoutRequest($preguntaToSave->id, $opcion);
             }
@@ -109,9 +112,56 @@ class EvaluacionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function getInfo(Request $request)
     {
-        //
+        try {
+            $validator = Validator::make($request->all(), [
+                'evaluacionId' => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+
+            $evaluacionInfo = Evaluacion::find($request->evaluacionId);
+
+            if (!isset($evaluacionInfo)) {
+                throw new Exception("Error , evaluacion invalida");
+            }
+
+            $preguntas = Pregunta::where("evaluacion_id", "=", $evaluacionInfo->id)->get();
+            $filterPreguntas = array();
+
+            if (isset($preguntas) && sizeof($preguntas) > 0) {
+                foreach ($preguntas as $pregunta) {
+                    $opciones = Opcion::where("pregunta_id", "=", $pregunta->id)->get();
+                    $filterOpciones = array();
+                    foreach($opciones as $opcion) {
+                        $newPregunta = [
+                            "id" =>  $opcion->id,
+                            "contenido" => $opcion->contenido,
+                        ];
+                        array_push($filterOpciones, $newPregunta);
+                    }
+                    $pregunta->opciones = $filterOpciones;
+                    array_push($filterPreguntas, $pregunta);
+                }
+            }
+           
+            
+
+            return response()->json([
+                "ok" => true,
+                "evaluacion" => $evaluacionInfo,
+                "preguntas" => $filterPreguntas
+            ]);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage()
+            ]);
+        }
     }
 
     /**

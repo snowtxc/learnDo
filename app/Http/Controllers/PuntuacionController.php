@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Curso;
+use App\Models\Estudiante;
 use App\Models\Puntuacion;
+use Exception;
 use Illuminate\Http\Request;
+use Validator;
 
 class PuntuacionController extends Controller
 {
@@ -22,9 +26,46 @@ class PuntuacionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function puntuarCurso(Request $req)
     {
-        //
+        try {
+            $validator = Validator::make($req->all(), [
+                "description" => "required|string",
+                "userId" => "required",
+                "cursoId" => "required",
+                "rating" => "required",
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+
+            $userExists = Estudiante::where("user_id", $req->userId);
+            if (!isset($userExists)) {
+                throw new Exception("Error, el usuario no existe");
+            }
+            $cursoExists = Curso::where("evento_id_of_curso",$req->cursoId);
+            if (!isset($cursoExists)) {
+                throw new Exception("Error, el curso no existe");
+            }
+
+            $puntuacion = new Puntuacion();
+            $puntuacion->puntuacion = $req->rating;
+            $puntuacion->descripcion = $req->description;
+            $puntuacion->estudiante_id = $req->userId;
+            $puntuacion->curso_id = $req->cursoId;
+            $puntuacion->save();
+
+            return response()->json([
+                "ok" => true,
+                "message" => "Calificacion creada correctamente",
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage(),
+            ]);
+        }
     }
 
     /**
