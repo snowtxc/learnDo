@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\colaboracion;
+use App\Models\Evento;
+use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -38,8 +40,15 @@ class ColaboracionController extends Controller
         foreach ($colaboradores as $colaborador) {
             $colabToSave = new colaboracion();
             $colabToSave->user_id = $colaborador['id'];
+            $userInfo = Usuario::find($colaborador['id']);
+
             $colabToSave->evento_id = $request->input('evento_id');
+            $eventoInfo = Evento::find($request->input('evento_id'));
+            $me = Usuario::find($eventoInfo->organizador_id);
+
             $colabToSave->save();
+            $mailController = new MailController("Colaboracion - Learndo", $userInfo->email);
+            $mailController->add_colaborador_email($userInfo->nombre, $me->nombre, $eventoInfo->nombre);
         }
 
         return response()->json([

@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Comentario extends Model
 {
     use HasFactory;
+    protected $fillable = ['contenido'];
 
-    public function subcomentarios() {
-        return $this->hasMany(Comentario::class);
+    public function publicacion(){
+        return $this->belongsTo(Publicacion::class);
+
     }
 }

@@ -257,7 +257,20 @@ class UsuarioController extends Controller
         //     "message" => "Account activated",
         //     "userInfo" => $user,
         // ]);
-    }
+        Usuario::where("id", $userId)->update(['status_id' => 2]);
+        $updatedUserInfo = Usuario::find($userId)->toArray();
+        // echo var_dump($updatedUserInfo);
+        $credentials = [
+            "email" => $updatedUserInfo["email"],
+        ];
+        $token = ($user = Auth::getProvider()->retrieveByCredentials($credentials))
+            ? Auth::login($user)
+            : false;
+        
+        return $this->createNewToken($token);
+        
+
+    }  
 
     function editMeInfo(Request $request){
         $user = auth()->user();
@@ -277,6 +290,7 @@ class UsuarioController extends Controller
             
         ]);
     }
+
     /**
      * Get the authenticated User.
      *

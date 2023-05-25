@@ -3,9 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Curso;
+use App\Models\Foro;
+use App\Models\Modulo;
+use App\Models\Organizador;
+use App\Models\Usuario;
+use Exception;
 use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Support\Facades\DB;
+use App\Http\Utils\CursoUtils;
 
 class CursoController extends Controller
 {
@@ -19,8 +25,9 @@ class CursoController extends Controller
         //
     }
 
-    public function getInfoCurso(Request $req) {
-        $validator = Validator::make($req->all(),[
+    public function getInfoCurso(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
             "id" => "required|string",
         ]);
 
@@ -29,17 +36,17 @@ class CursoController extends Controller
         }
 
         $curso = DB::table('eventos')
-        ->join('cursos', 'cursos.evento_id', '=', 'eventos.id')
-        ->select('eventos.id', 'eventos.nombre', 'eventos.descripcion', 'eventos.es_pago', 'eventos.precio', 'eventos.organizador_id', 'eventos.categoria_id', 'cursos.porcentaje_aprobacion', 'cursos.ganancias_acumuladas')
-        ->where("evento_id", $req->id)->first();
+            ->join('cursos', 'cursos.id', '=', 'eventos.id')
+            ->select('eventos.id', 'eventos.nombre', 'eventos.descripcion', 'eventos.es_pago', 'eventos.precio', 'eventos.organizador_id', 'eventos.categoria_id', 'cursos.porcentaje_aprobacion', 'cursos.ganancias_acumuladas')
+            ->where("id", $req->id)->first();
 
-        if (!isset($curso)){
+        if (!isset($curso)) {
             return response([], 404);
         }
 
         return response()->json($curso, 200);
     }
-    
+
     /**
      * Show the form for creating a new resource.
      *
@@ -47,7 +54,7 @@ class CursoController extends Controller
      */
     public function create(Request $request)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'porcentaje_aprobacion' => '',
             'ganancias' => '',
             'evento_id' => 'required',
@@ -62,12 +69,118 @@ class CursoController extends Controller
         $curso->ganancias_acumuladas = $request->input('ganancias');
         $curso->evento_id_of_curso = $request->input('evento_id');
         $curso->save();
-        
+
         return response()->json([
             'message' => 'El curso se ha creado correctamente.',
             'curso' => $curso,
         ], 201);
     }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Models\Curso  $curso
+     * @return \Illuminate\Http\Response
+     */
+    public function getCursoInfo(Request $req)
+    {
+        try {
+            $cursoId = $req->cursoId;
+            if (!isset($cursoId)) {
+                throw new Exception("Error al obtener la informacion del curso");
+            }
+            $meInfo = auth()->user();
+            $myId = $meInfo->id;
+            $cursoInfo = DB::table('eventos')
+                ->join('cursos', 'cursos.evento_id_of_curso', '=', 'eventos.id')
+                ->select('eventos.id', 'eventos.nombre', 'eventos.imagen', 'eventos.descripcion', 'eventos.es_pago', 'eventos.precio', 'eventos.organizador_id', 'cursos.porcentaje_aprobacion', 'eventos.organizador_id')
+                ->where("id", $cursoId)->first();
+            if (!isset($cursoInfo)) {
+                throw new Exception("Error al obtener la informacion del curso");
+            }
+
+            $organizadorInfo = Usuario::where("id",$cursoInfo->organizador_id)->first();
+            $categorias = DB::table('categoriaeventos')
+                ->join('categorias', 'categoriaeventos.categoria_id', '=', 'categorias.id')
+                ->select('categorias.nombre')
+                ->where("categoriaeventos.evento_id", $cursoId)->get();
+
+            $esComprado = DB::table("compraevento")->where("evento_id", "=", $cursoId)
+                ->where("estudiante_id", "=", $myId)->first();
+
+            $puntuaciones = DB::table("puntuacions")->where("curso_id", "=", $cursoId)->get();
+            // echo $puntuaciones;
+            $averageCalificaciones = 0;
+            $countPuntuaciones = 0;
+            if (isset($puntuaciones) && sizeof($puntuaciones) > 0) {
+                $sumPuntuaciones = 0;
+                $countPuntuaciones = sizeof($puntuaciones);
+                foreach ($puntuaciones as $puntuacion) {
+                    $userInfo = Usuario::find($puntuacion->estudiante_id);
+                    $puntuacion->userName = $userInfo->nickname;
+                    $puntuacion->userImage = $userInfo->imagen;
+                    $sumPuntuaciones += $puntuacion->puntuacion;
+                }
+                $averageCalificaciones = $sumPuntuaciones / $countPuntuaciones;
+            }
+
+            $modulos = DB::table("modulos")->where("curso_id", "=", $cursoId)->get();
+            $formattedModulos = array();
+            if (isset($modulos) && sizeof($modulos) > 0) {
+                foreach ($modulos as $modulo) {
+                    $clasesOfModulo = DB::table("clases")->where("modulo_id", "=", $modulo->id)->get();
+                    $evaluacionOfModulo = DB::table("evaluacions")->where("modulo_id", "=", $modulo->id)->first();
+
+                    if (isset($clasesOfModulo) && sizeof($clasesOfModulo) > 0) {
+                        $modulo->clases = $clasesOfModulo;
+                    } else {
+                        $modulo->clases = array();
+                    }
+
+                    if (isset($evaluacionOfModulo)) {
+                        $cursoUtils = new CursoUtils();
+                        $myBestCalification = $cursoUtils->myBestCalification($myId, $evaluacionOfModulo->id);
+                        if (isset($myBestCalification)) {
+                            $modulo->calificacion = $myBestCalification->puntuacion;
+                        } else {
+                            $modulo->calificacion = 0;
+                        }
+                        
+
+                        $modulo->evaluacionId = $evaluacionOfModulo->id;
+                    } else {
+                        $modulo->evaluacionId = null;
+                    }
+
+                    array_push($formattedModulos, $modulo);
+                }
+            }
+            $foro = Foro::where("id_curso", $cursoId)->first();
+            $foroId = 0;
+            if (isset($foro)) {
+                $foroId = $foro->id;
+            }
+            return response()->json([
+                "ok" => true,
+                "curso" => $cursoInfo,
+                "categorias" => $categorias,
+                "comprado" => isset($esComprado),
+                "stars" => $averageCalificaciones,
+                "countPuntuaciones" => $countPuntuaciones,
+                "modulos" => $formattedModulos,
+                "puntuaciones" => $puntuaciones,
+                "profesor" => $organizadorInfo->nombre,
+                "foroId" => $foroId,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage(),
+            ]);
+        }
+        //
+    }
+
 
     /**
      * Store a newly created resource in storage.
