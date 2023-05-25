@@ -7,11 +7,17 @@ use App\Models\Foro;
 use App\Models\Modulo;
 use App\Models\Organizador;
 use App\Models\Usuario;
+use App\Models\CompraEvento;
+use App\Models\Evaluacion;
+use App\Models\Calificacion;
+
+
 use Exception;
 use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Support\Facades\DB;
 use App\Http\Utils\CursoUtils;
+use Illuminate\Support\Facades\Auth;
 
 class CursoController extends Controller
 {
@@ -24,6 +30,11 @@ class CursoController extends Controller
     {
         //
     }
+
+    public function __construct() {
+        $this->middleware('jwt');
+    }
+
 
     public function getInfoCurso(Request $req)
     {
@@ -236,5 +247,46 @@ class CursoController extends Controller
     public function destroy(Curso $curso)
     {
         //
+    }
+
+    public function canGetCertificate($cursoId, Request $req){
+
+       /* try{*/
+            $userInfo = auth()->user();
+            $userId  = $userInfo["id"];
+    
+            $curso = Curso::where(["evento_id_of_curso" => $cursoId])->first();
+            if($curso == null){
+                return response()->json(["message" => "El curso no existe"] ,404);
+            }
+            $userHasPurchasedCourse =  CompraEvento::where(["estudiante_id" => $userId, "evento_id" => $cursoId])->count() ? true : false;
+            if(!$userHasPurchasedCourse){
+                return response()->json(["message" => "No tienes comprado el curso"] ,400);
+            }
+
+            $countEvaluations = Modulo::where(["curso_id" => $cursoId])->count();  //la cantidad de modulos es igual a la cantidad de evaluaciones
+
+            if($countEvaluations <= 0){
+                return response()->json(["message" => "El curso debe tener al menos una evaluacion"] ,400);
+            }
+            $approvalRate = $curso->porcentaje_aprobacion;
+            $califications = Calificacion::where(["estudiante_id" => $userId])->get();
+            $sumCalifications = 0;
+            foreach($califications as $calification){
+                $sumCalifications += $calification->puntuacion;
+            }
+            
+            $avgCalifications  = floor($sumCalifications/$countEvaluations);
+
+            $isApproved = $avgCalifications >= $approvalRate;
+
+            return response()->json(["result" => $isApproved] ,200);
+
+       /* }catch(Exception $e){
+            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+        }
+         */   
+
+        
     }
 }

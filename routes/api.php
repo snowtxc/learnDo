@@ -1,10 +1,8 @@
 <?php
 
-<<<<<<< HEAD
-=======
+
 use App\Http\Controllers\CalificacionController;
 use App\Http\Controllers\CategoriaController;
->>>>>>> 176466798e522ea3a7f7f56bac316df4122888e2
 use App\Http\Controllers\ColaboracionController;
 use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\UsuarioController;
@@ -15,22 +13,14 @@ use App\Http\Controllers\OpcionController;
 use App\Http\Controllers\ClaseController;
 use App\Http\Controllers\EvaluacionController;
 use App\Http\Controllers\PreguntaController;
-<<<<<<< HEAD
-use App\Http\Controllers\CategoriaController;
+
 use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\ComentarioController;
 use App\Http\Controllers\SeminarioPresencialController;
 use App\Http\Controllers\SeminarioVirtualController;
 
-
-=======
-use App\Http\Controllers\SeminarioPresencialController;
-use App\Http\Controllers\SeminarioVirtualController;
 use App\Http\Controllers\VideoController;
-use App\Http\Controllers\PublicacionController;
-use App\Http\Controllers\ComentarioController;
 use App\Http\Controllers\PuntuacionController;
->>>>>>> 176466798e522ea3a7f7f56bac316df4122888e2
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -82,8 +72,9 @@ Route::group([
 Route::group([
     "prefix" => "cursos",
 ], function () {
-    Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
+    Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso"); 
     Route::get("/getCompleteInfoCurso", [CursoController::class, "getCursoInfo"])->name("getCursoInfo");
+    Route::get("/{id}/canGetCertificate", [CursoController::class, "canGetCertificate"])->name("canGetCertificate");
 });
 
 Route::group([
@@ -184,11 +175,7 @@ Route::group([
 Route::group([
     "prefix" => "categorias",
 ], function () {
-<<<<<<< HEAD
-    Route::get('/', [CategoriaController::class, "getAll"]);
-});
-=======
-    Route::get('/', [CategoriaController::class, "litarCategorias"]);
+    Route::get('/', [CategoriaController::class, "gettAll"]);
 });
 
 Route::group([
@@ -209,4 +196,3 @@ Route::group([
 ], function () {
     Route::post('/', [CalificacionController::class, "correjirCalificacion"]);
 });
->>>>>>> 176466798e522ea3a7f7f56bac316df4122888e2
