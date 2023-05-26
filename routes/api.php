@@ -61,6 +61,7 @@ Route::group([
 ], function () {
     Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
     Route::get("/getCompleteInfoCurso", [CursoController::class, "getCursoInfo"])->name("getCursoInfo");
+    Route::get("/getCursosComprados", [CursoController::class, "getCursosComprados"])->name("getCursosComprados");
 });
 
 Route::group([
@@ -167,7 +168,6 @@ Route::group([
 ], function() {
     Route::post('/upload-video', [VideoController::class, 'uploadVideo']);
 });
-
 
 Route::group([
     "prefix" => "puntuacion",
