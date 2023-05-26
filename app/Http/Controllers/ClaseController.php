@@ -41,8 +41,8 @@ class ClaseController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nombre' => 'required',
+            'descripcion' => 'required',
             'video' => 'required|file',
-            'duracion' => 'required',
             'estado' => 'required',
             'modulo_id' => 'required'
         ]);
@@ -53,14 +53,7 @@ class ClaseController extends Controller
 
         $clase = new Clase();
         $clase->nombre = $request->input('nombre');
-
-        // echo $path = $request->file('video')->storeAs(
-        //     'videos', $request->video->getClientOriginalName()
-        // );
-
-        // $clase->video = $path;
-
-        $clase->duracion = $request->input('duracion');
+        $clase->descripcion = $request->input('descripcion');
         $clase->estado = $request->input('estado');
         $clase->modulo_id = $request->input('modulo_id');
         $clase->save();

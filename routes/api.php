@@ -169,7 +169,6 @@ Route::group([
     Route::post('/upload-video', [VideoController::class, 'uploadVideo']);
 });
 
-
 Route::group([
     "prefix" => "puntuacion",
 ], function() {
