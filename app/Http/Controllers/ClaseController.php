@@ -50,10 +50,14 @@ class ClaseController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
-
+        $description = $request->input('descripcion');
         $clase = new Clase();
         $clase->nombre = $request->input('nombre');
-        $clase->descripcion = $request->input('descripcion');
+        if (isset($description)) {
+            $clase->descripcion = $description;
+        } else {
+            $clase->descripcion = "";
+        }
         $clase->estado = $request->input('estado');
         $clase->modulo_id = $request->input('modulo_id');
         $clase->save();

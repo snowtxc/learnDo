@@ -109,21 +109,12 @@ class CursoController extends Controller
             $esComprado = DB::table("compraevento")->where("evento_id", "=", $cursoId)
                 ->where("estudiante_id", "=", $myId)->first();
 
-            $puntuaciones = DB::table("puntuacions")->where("curso_id", "=", $cursoId)->get();
-            // echo $puntuaciones;
-            $averageCalificaciones = 0;
-            $countPuntuaciones = 0;
-            if (isset($puntuaciones) && sizeof($puntuaciones) > 0) {
-                $sumPuntuaciones = 0;
-                $countPuntuaciones = sizeof($puntuaciones);
-                foreach ($puntuaciones as $puntuacion) {
-                    $userInfo = Usuario::find($puntuacion->estudiante_id);
-                    $puntuacion->userName = $userInfo->nickname;
-                    $puntuacion->userImage = $userInfo->imagen;
-                    $sumPuntuaciones += $puntuacion->puntuacion;
-                }
-                $averageCalificaciones = $sumPuntuaciones / $countPuntuaciones;
-            }
+            $cursoUtils = new CursoUtils();
+            $calificacionCurso = $cursoUtils->calificacionesOfCurso($cursoId);
+            $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
+            $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
+            $puntuaciones = $calificacionCurso["puntuaciones"];
+            
 
             $modulos = DB::table("modulos")->where("curso_id", "=", $cursoId)->get();
             $formattedModulos = array();
@@ -207,16 +198,41 @@ class CursoController extends Controller
             if (!isset($estudianteInfo)) {
                 throw new Exception("El estudiante no existe");
             }
-            $misCursos = DB::table("compraevento")->where("estudiante_id" , "=", $req->estudianteId)->get();
+            $misCursos = DB::table("compraevento")->where("estudiante_id", "=", $req->estudianteId)->get();
             $foramtResponse = array();
 
             if (isset($misCursos) && sizeof($misCursos) > 0) {
-                foreach
+                foreach ($misCursos as $miCurso) {
+                    $cursoInfo = DB::table('cursos')
+                        ->join('eventos', 'cursos.evento_id_of_curso', '=', 'eventos.id')
+                        ->select(
+                            'eventos.id',
+                            'eventos.nombre',
+                            'eventos.descripcion',
+                            'eventos.imagen',
+                            'eventos.es_pago',
+                            'eventos.precio',
+                            'eventos.organizador_id',
+                            'eventos.tipo',
+                        )
+                        ->where("cursos.evento_id_of_curso", $miCurso->evento_id)->first();
+                    $cursoUtils = new CursoUtils();
+                    $calificacionCurso = $cursoUtils->calificacionesOfCurso($miCurso->evento_id);
+                    $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
+                    $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
+
+                    if (isset($cursoInfo)) {
+                        $cursoInfo->starts = $averageCalificaciones;
+                        $cursoInfo->countPuntuaciones = $countPuntuaciones;
+
+                        array_push($foramtResponse, $cursoInfo);
+                    }
+                }
             }
 
             return response()->json([
                 "ok" => true,
-                "cursos" => $misCursos
+                "cursos" => $foramtResponse
             ]);
 
         } catch (\Throwable $th) {
