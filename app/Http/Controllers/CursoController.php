@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Support\Facades\DB;
 use App\Http\Utils\CursoUtils;
+use App\Models\Estudiante;
 
 class CursoController extends Controller
 {
@@ -99,7 +100,7 @@ class CursoController extends Controller
                 throw new Exception("Error al obtener la informacion del curso");
             }
 
-            $organizadorInfo = Usuario::where("id",$cursoInfo->organizador_id)->first();
+            $organizadorInfo = Usuario::where("id", $cursoInfo->organizador_id)->first();
             $categorias = DB::table('categoriaeventos')
                 ->join('categorias', 'categoriaeventos.categoria_id', '=', 'categorias.id')
                 ->select('categorias.nombre')
@@ -145,7 +146,7 @@ class CursoController extends Controller
                         } else {
                             $modulo->calificacion = 0;
                         }
-                        
+
 
                         $modulo->evaluacionId = $evaluacionOfModulo->id;
                     } else {
@@ -191,6 +192,39 @@ class CursoController extends Controller
     public function store(Request $request)
     {
         //
+    }
+
+    public function getCursosComprados(Request $req)
+    {
+        try {
+            $validator = Validator::make($req->all(), [
+                "estudianteId" => "required|string",
+            ]);
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+            $estudianteInfo = Estudiante::where("user_id", "=", $req->estudianteId)->first();
+            if (!isset($estudianteInfo)) {
+                throw new Exception("El estudiante no existe");
+            }
+            $misCursos = DB::table("compraevento")->where("estudiante_id" , "=", $req->estudianteId)->get();
+            $foramtResponse = array();
+
+            if (isset($misCursos) && sizeof($misCursos) > 0) {
+                foreach
+            }
+
+            return response()->json([
+                "ok" => true,
+                "cursos" => $misCursos
+            ]);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage()
+            ]);
+        }
     }
 
     /**
