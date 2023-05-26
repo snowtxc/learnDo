@@ -22,7 +22,7 @@ class CategoriaSeeder extends Seeder
             'id' => 2,
             'nombre' => 'Cocina',
         ]);
-        DB::table('Economia')->insert([
+        DB::table('categorias')->insert([
             'id' => 3,
             'nombre' => 'Economia',
         ]);

@@ -20,5 +20,9 @@ class DatabaseSeeder extends Seeder
         $estudiantesSeeder = new EstudianteSeeder();
 
         $estudiantesSeeder->run();
+
+        $categoriasSeeder = new CategoriaSeeder();
+
+        $categoriasSeeder->run();
     }
 }

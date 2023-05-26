@@ -58,7 +58,11 @@ class ModuloController extends Controller
         foreach ($clases as $clase) {
             $claseToSave = new Clase();
             $claseToSave->nombre = $clase['nombre'];
-            $claseToSave->descripcion = $clase['descripcion'];
+            if (isset($clase['descripcion'])) {
+                $claseToSave->descripcion = $clase['descripcion'];
+            } else {
+                $claseToSave->descripcion = "";
+            }
             $claseToSave->video = "";
             $claseToSave->estado = 'aprobado';
             $claseToSave->modulo_id = $modulo->id;
