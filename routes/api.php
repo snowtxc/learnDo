@@ -46,6 +46,8 @@ Route::group([
     Route::get("/me", [UsuarioController::class, "me"])->name("me");
     Route::put("/me", [UsuarioController::class, "editMeInfo"])->name("editMeInfo");
     Route::get("/checkNickname", [UsuarioController::class, "checkNickname"])->name("login");
+    Route::post("/signupWithOauth", [UsuarioController::class, "createUserWithOauth"])->name("createUserWithOauth");
+    Route::put("/changeRole", [UsuarioController::class, "changeUserRole"])->name("changeRole");
 });
 
 Route::group([
@@ -144,12 +146,6 @@ Route::group([
     Route::delete('/{id}', [ComentarioController::class, "destroy"]);
 });
 
-
-Route::group([
-    "prefix" => "usuarios",
-], function () {
-    Route::get('/filterByNicknameOrEmail', [UsuarioController::class, "filterByNicknameOrEmail"]);
-});
 
 Route::group([
     "prefix" => "colaboraciones",
