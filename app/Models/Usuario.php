@@ -14,6 +14,11 @@ class Usuario extends \Illuminate\Foundation\Auth\User implements JWTSubject
         return $this->hasMany(Publicacion::class);
     }
 
+    public function comentarios()
+    {
+        return $this->hasMany(Comentario::class);
+    }
+
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *
@@ -35,4 +40,5 @@ class Usuario extends \Illuminate\Foundation\Auth\User implements JWTSubject
     {
         return $this->belongsTo(UserStatus::class);
     }
+
 }

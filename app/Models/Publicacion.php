@@ -20,4 +20,8 @@ class Publicacion extends Model
         return $this->belongsTo(Foro::class);
 
     }
+
+    public function user(){
+        return $this->belongsTo(Usuario::class); 
+    }
 }
