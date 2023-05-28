@@ -18,6 +18,7 @@ class CreateModulosTable extends Migration
             $table->string('nombre');
             $table->string('estado');
             $table->integer('curso_id')->unsigned()->nullable();
+            $table->integer('sugerencia_id')->unsigned()->nullable();
             $table->timestamps();
         });
     }

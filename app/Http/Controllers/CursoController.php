@@ -173,6 +173,57 @@ class CursoController extends Controller
         //
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Models\Curso  $curso
+     * @return \Illuminate\Http\Response
+     */
+    public function getCursoAndClases(Request $req)
+    {
+        try {
+            $cursoId = $req->cursoId;
+            if (!isset($cursoId)) {
+                throw new Exception("Error al obtener la informacion del curso");
+            }
+            $meInfo = auth()->user();
+            $myId = $meInfo->id;
+            $cursoInfo = DB::table('eventos')
+                ->join('cursos', 'cursos.evento_id_of_curso', '=', 'eventos.id')
+                ->select('eventos.id', 'eventos.nombre', 'eventos.imagen', 'eventos.descripcion', 'eventos.es_pago', 'eventos.precio', 'eventos.organizador_id', 'cursos.porcentaje_aprobacion', 'eventos.organizador_id')
+                ->where("id", $cursoId)->first();
+            if (!isset($cursoInfo)) {
+                throw new Exception("Error al obtener la informacion del curso");
+            }
+
+            $modulos = DB::table("modulos")->where("curso_id", "=", $cursoId)->get();
+            $formattedModulos = array();
+            if (isset($modulos) && sizeof($modulos) > 0) {
+                foreach ($modulos as $modulo) {
+                    $clasesOfModulo = DB::table("clases")->where("modulo_id", "=", $modulo->id)->get();
+
+                    if (isset($clasesOfModulo) && sizeof($clasesOfModulo) > 0) {
+                        $modulo->clases = $clasesOfModulo;
+                    } else {
+                        $modulo->clases = array();
+                    }
+
+                    array_push($formattedModulos, $modulo);
+                }
+            }
+            return response()->json([
+                "ok" => true,
+                "curso" => $cursoInfo,
+                "modulos" => $formattedModulos,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage(),
+            ]);
+        }
+        //
+    }
 
     /**
      * Store a newly created resource in storage.

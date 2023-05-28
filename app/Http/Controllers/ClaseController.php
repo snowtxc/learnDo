@@ -44,7 +44,8 @@ class ClaseController extends Controller
             'descripcion' => 'required',
             'video' => 'required|file',
             'estado' => 'required',
-            'modulo_id' => 'required'
+            'modulo_id' => 'required',
+            'sugerencia_id' => '',
         ]);
 
         if ($validator->fails()) {
@@ -60,6 +61,10 @@ class ClaseController extends Controller
         }
         $clase->estado = $request->input('estado');
         $clase->modulo_id = $request->input('modulo_id');
+        $sugerencia = $request->input('sugerencia_id');
+        if(isset($sugerencia)){
+            $clase->sugerencia_id = $sugerencia;
+        }
         $clase->save();
 
         return response()->json([
