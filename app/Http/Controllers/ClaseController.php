@@ -41,28 +41,30 @@ class ClaseController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nombre' => 'required',
+            'descripcion' => 'required',
             'video' => 'required|file',
-            'duracion' => 'required',
             'estado' => 'required',
-            'modulo_id' => 'required'
+            'modulo_id' => 'required',
+            'sugerencia_id' => '',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
-
+        $description = $request->input('descripcion');
         $clase = new Clase();
         $clase->nombre = $request->input('nombre');
-
-        // echo $path = $request->file('video')->storeAs(
-        //     'videos', $request->video->getClientOriginalName()
-        // );
-
-        // $clase->video = $path;
-
-        $clase->duracion = $request->input('duracion');
+        if (isset($description)) {
+            $clase->descripcion = $description;
+        } else {
+            $clase->descripcion = "";
+        }
         $clase->estado = $request->input('estado');
         $clase->modulo_id = $request->input('modulo_id');
+        $sugerencia = $request->input('sugerencia_id');
+        if(isset($sugerencia)){
+            $clase->sugerencia_id = $sugerencia;
+        }
         $clase->save();
 
         return response()->json([

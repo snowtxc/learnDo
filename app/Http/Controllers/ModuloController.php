@@ -33,18 +33,24 @@ class ModuloController extends Controller
             'nombre' => 'required',
             'estado' => 'required|in:aprobado,rechazado,pendiente',
             'curso_id' => 'required',
+            'sugerencia_id' => '',
             'evaluacion' => '',
             'clases' => '',
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors());
+            return response()->json($validator->errors(), 500);
         }
 
         $modulo = new Modulo();
         $modulo->nombre = $request->input('nombre');
         $modulo->estado = $request->input('estado');
         $modulo->curso_id = $request->input('curso_id');
+
+        $sugerencia = $request->input('sugerencia_id');
+        if(isset($sugerencia)){
+            $modulo->sugerencia_id = $sugerencia;
+        }
         $modulo->save();
 
         $clases = $request->input('clases');
@@ -58,23 +64,18 @@ class ModuloController extends Controller
         foreach ($clases as $clase) {
             $claseToSave = new Clase();
             $claseToSave->nombre = $clase['nombre'];
-
-            // $video = $clase['video'];
-            // echo var_dump($video);
-
-
-            //$url = url('/videos/upload-video');
-            //$response = Http::attach('video', file_get_contents($video), "video")
-            //->post($url);
-            //$videoPath = $response->json()['video_path'];
-
-            $videoController = new VideoController();
-            // $videoPath = $videoController->saveVideo($video);
-            
+            if (isset($clase['descripcion'])) {
+                $claseToSave->descripcion = $clase['descripcion'];
+            } else {
+                $claseToSave->descripcion = "";
+            }
             $claseToSave->video = "";
-
-            $claseToSave->duracion = $clase['duracion'];
-            $claseToSave->estado = 'aprobado';
+            if(isset($sugerencia)){
+                $claseToSave->sugerencia_id = $sugerencia;
+                $claseToSave->estado = 'pendiente';
+            }else{
+                $claseToSave->estado = 'aprobado';
+            }
             $claseToSave->modulo_id = $modulo->id;
             $claseToSave->save();
             array_push($clasesCreated, $claseToSave);

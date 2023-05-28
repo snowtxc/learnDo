@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Support\Facades\DB;
 use App\Http\Utils\CursoUtils;
+use App\Models\Estudiante;
 
 class CursoController extends Controller
 {
@@ -99,7 +100,7 @@ class CursoController extends Controller
                 throw new Exception("Error al obtener la informacion del curso");
             }
 
-            $organizadorInfo = Usuario::where("id",$cursoInfo->organizador_id)->first();
+            $organizadorInfo = Usuario::where("id", $cursoInfo->organizador_id)->first();
             $categorias = DB::table('categoriaeventos')
                 ->join('categorias', 'categoriaeventos.categoria_id', '=', 'categorias.id')
                 ->select('categorias.nombre')
@@ -108,21 +109,12 @@ class CursoController extends Controller
             $esComprado = DB::table("compraevento")->where("evento_id", "=", $cursoId)
                 ->where("estudiante_id", "=", $myId)->first();
 
-            $puntuaciones = DB::table("puntuacions")->where("curso_id", "=", $cursoId)->get();
-            // echo $puntuaciones;
-            $averageCalificaciones = 0;
-            $countPuntuaciones = 0;
-            if (isset($puntuaciones) && sizeof($puntuaciones) > 0) {
-                $sumPuntuaciones = 0;
-                $countPuntuaciones = sizeof($puntuaciones);
-                foreach ($puntuaciones as $puntuacion) {
-                    $userInfo = Usuario::find($puntuacion->estudiante_id);
-                    $puntuacion->userName = $userInfo->nickname;
-                    $puntuacion->userImage = $userInfo->imagen;
-                    $sumPuntuaciones += $puntuacion->puntuacion;
-                }
-                $averageCalificaciones = $sumPuntuaciones / $countPuntuaciones;
-            }
+            $cursoUtils = new CursoUtils();
+            $calificacionCurso = $cursoUtils->calificacionesOfCurso($cursoId);
+            $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
+            $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
+            $puntuaciones = $calificacionCurso["puntuaciones"];
+            
 
             $modulos = DB::table("modulos")->where("curso_id", "=", $cursoId)->get();
             $formattedModulos = array();
@@ -145,7 +137,7 @@ class CursoController extends Controller
                         } else {
                             $modulo->calificacion = 0;
                         }
-                        
+
 
                         $modulo->evaluacionId = $evaluacionOfModulo->id;
                     } else {
@@ -181,6 +173,57 @@ class CursoController extends Controller
         //
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Models\Curso  $curso
+     * @return \Illuminate\Http\Response
+     */
+    public function getCursoAndClases(Request $req)
+    {
+        try {
+            $cursoId = $req->cursoId;
+            if (!isset($cursoId)) {
+                throw new Exception("Error al obtener la informacion del curso");
+            }
+            $meInfo = auth()->user();
+            $myId = $meInfo->id;
+            $cursoInfo = DB::table('eventos')
+                ->join('cursos', 'cursos.evento_id_of_curso', '=', 'eventos.id')
+                ->select('eventos.id', 'eventos.nombre', 'eventos.imagen', 'eventos.descripcion', 'eventos.es_pago', 'eventos.precio', 'eventos.organizador_id', 'cursos.porcentaje_aprobacion', 'eventos.organizador_id')
+                ->where("id", $cursoId)->first();
+            if (!isset($cursoInfo)) {
+                throw new Exception("Error al obtener la informacion del curso");
+            }
+
+            $modulos = DB::table("modulos")->where("curso_id", "=", $cursoId)->get();
+            $formattedModulos = array();
+            if (isset($modulos) && sizeof($modulos) > 0) {
+                foreach ($modulos as $modulo) {
+                    $clasesOfModulo = DB::table("clases")->where("modulo_id", "=", $modulo->id)->get();
+
+                    if (isset($clasesOfModulo) && sizeof($clasesOfModulo) > 0) {
+                        $modulo->clases = $clasesOfModulo;
+                    } else {
+                        $modulo->clases = array();
+                    }
+
+                    array_push($formattedModulos, $modulo);
+                }
+            }
+            return response()->json([
+                "ok" => true,
+                "curso" => $cursoInfo,
+                "modulos" => $formattedModulos,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage(),
+            ]);
+        }
+        //
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -191,6 +234,64 @@ class CursoController extends Controller
     public function store(Request $request)
     {
         //
+    }
+
+    public function getCursosComprados(Request $req)
+    {
+        try {
+            $validator = Validator::make($req->all(), [
+                "estudianteId" => "required|string",
+            ]);
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+            $estudianteInfo = Estudiante::where("user_id", "=", $req->estudianteId)->first();
+            if (!isset($estudianteInfo)) {
+                throw new Exception("El estudiante no existe");
+            }
+            $misCursos = DB::table("compraevento")->where("estudiante_id", "=", $req->estudianteId)->get();
+            $foramtResponse = array();
+
+            if (isset($misCursos) && sizeof($misCursos) > 0) {
+                foreach ($misCursos as $miCurso) {
+                    $cursoInfo = DB::table('cursos')
+                        ->join('eventos', 'cursos.evento_id_of_curso', '=', 'eventos.id')
+                        ->select(
+                            'eventos.id',
+                            'eventos.nombre',
+                            'eventos.descripcion',
+                            'eventos.imagen',
+                            'eventos.es_pago',
+                            'eventos.precio',
+                            'eventos.organizador_id',
+                            'eventos.tipo',
+                        )
+                        ->where("cursos.evento_id_of_curso", $miCurso->evento_id)->first();
+                    $cursoUtils = new CursoUtils();
+                    $calificacionCurso = $cursoUtils->calificacionesOfCurso($miCurso->evento_id);
+                    $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
+                    $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
+
+                    if (isset($cursoInfo)) {
+                        $cursoInfo->starts = $averageCalificaciones;
+                        $cursoInfo->countPuntuaciones = $countPuntuaciones;
+
+                        array_push($foramtResponse, $cursoInfo);
+                    }
+                }
+            }
+
+            return response()->json([
+                "ok" => true,
+                "cursos" => $foramtResponse
+            ]);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage()
+            ]);
+        }
     }
 
     /**

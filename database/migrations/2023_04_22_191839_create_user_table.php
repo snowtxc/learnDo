@@ -25,6 +25,7 @@ class CreateUserTable extends Migration
             $table->integer("status_id")->unsigned()->nullable();
             $table->integer("creditos_number")->default(0)->nullable();
             $table->string("type")->nullable();
+            $table->string("oauthId")->nullable()->default("");
             $table->timestamps();
         });
         }

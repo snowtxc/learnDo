@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Sugerencia;
 use Illuminate\Http\Request;
+use Validator;
 
 class SugerenciaController extends Controller
 {
@@ -22,9 +23,32 @@ class SugerenciaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'contenido' => 'required',
+            'estado' => 'required|in:aprobado,rechazado,pendiente',
+            'curso_id' => 'required',
+            'estudiante_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $sugerencia = new Sugerencia();
+        $sugerencia->contenido = $request->contenido;
+        $sugerencia->estado = $request->estado;
+        $sugerencia->curso_id = $request->curso_id;
+        $sugerencia->estudiante_id = $request->estudiante_id;
+        $sugerencia->save();
+
+        // Clase::where("id", $request->id_clase)->update(['video' => $videoPath]);
+
+        return response()->json([
+            'message' => 'La sugerencia se ha creado correctamente.',
+            'sugerencia' => $sugerencia,
+        ], 201);
     }
 
     /**

@@ -119,11 +119,17 @@ class Relations extends Migration
             $table->foreign('modulo_id')
                 ->references('id')
                 ->on('modulos');
+            $table->foreign('sugerencia_id')
+                ->references('id')
+                ->on('sugerencias');
         });
         Schema::table('modulos', function (Blueprint $table) {
             $table->foreign('curso_id')
                 ->references('evento_id_of_curso')
                 ->on('cursos');
+            $table->foreign('sugerencia_id')
+                ->references('id')
+                ->on('sugerencias');
         });
 
         Schema::table('foros', function (Blueprint $table) {

@@ -4,6 +4,7 @@ use App\Http\Controllers\CalificacionController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ColaboracionController;
 use App\Http\Controllers\MensajeController;
+use App\Http\Controllers\SugerenciaController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\EventoController;
@@ -48,6 +49,8 @@ Route::group([
     Route::get("/me", [UsuarioController::class, "me"])->name("me");
     Route::put("/me", [UsuarioController::class, "editMeInfo"])->name("editMeInfo");
     Route::get("/checkNickname", [UsuarioController::class, "checkNickname"])->name("login");
+    Route::post("/signupWithOauth", [UsuarioController::class, "createUserWithOauth"])->name("createUserWithOauth");
+    Route::put("/changeRole", [UsuarioController::class, "changeUserRole"])->name("changeRole");
 });
 
 Route::group([
@@ -63,6 +66,8 @@ Route::group([
 ], function () {
     Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
     Route::get("/getCompleteInfoCurso", [CursoController::class, "getCursoInfo"])->name("getCursoInfo");
+    Route::get("/getCursosComprados", [CursoController::class, "getCursosComprados"])->name("getCursosComprados");
+    Route::get("/getCursoAndClases", [CursoController::class, "getCursoAndClases"])->name("getCursoAndClases"); // solo info del curso, modulos y clases. (sin evaluación también)
 });
 
 Route::group([
@@ -147,12 +152,6 @@ Route::group([
 
 
 Route::group([
-    "prefix" => "usuarios",
-], function () {
-    Route::get('/filterByNicknameOrEmail', [UsuarioController::class, "filterByNicknameOrEmail"]);
-});
-
-Route::group([
     "prefix" => "colaboraciones",
 ], function () {
     Route::post('/createColaboraciones', [ColaboracionController::class, "create"]);
@@ -170,7 +169,6 @@ Route::group([
     Route::post('/upload-video', [VideoController::class, 'uploadVideo']);
 });
 
-
 Route::group([
     "prefix" => "puntuacion",
 ], function() {
@@ -182,12 +180,18 @@ Route::group([
 ], function () {
     Route::post('/', [CalificacionController::class, "correjirCalificacion"]);
 
-});
 
+});
 
 Route::group([
     "prefix" => "certificaciones",
 ], function () {
     Route::get('/{id}/getCertificationPDF', [CertificadoController::class, "getCertificationPdf"]);
 
+});
+
+Route::group([
+    "prefix" => "sugerencias",
+], function () {
+    Route::post('/createSugerencia', [SugerenciaController::class, "create"]);
 });

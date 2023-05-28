@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Validator;
 use App\Http\Controllers\MailController;
+use App\Http\Utils\UserUtils;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class UsuarioController extends Controller
 {
@@ -101,10 +103,141 @@ class UsuarioController extends Controller
         $mailController = new MailController("Account Activation", $user->email);
         $mailController->html_email_confirm_account($user->id);
 
-
         return response()->json([
             "ok" => true,
             "message" => "Cuenta creada correctamente"
+        ]);
+    }
+
+    public function changeUserRole(Request $req)
+    {
+        //
+        //
+        $validator = Validator::make($req->all(), [
+            "uid" => "required|int|max:100",
+            "role" => [
+                "required",
+                Rule::in(['organizador', 'estudiante'])
+            ],
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $userExists = DB::table("usuarios")->where("id", $req->uid)->first();
+
+        if (!isset($userExists)) {
+            return response()->json([
+                "ok" => false,
+                "msg" => "Error, el usuario no existe",
+            ], 401);
+        }
+        
+        Usuario::where("id", $req->uid)->update(['type' => $req->role]);
+
+        // Creo el user en la tabla estudiante / organizador
+        if ($req->role === 'estudiante') {
+            $estudiante = new Estudiante();
+            $estudiante->user_id = $req->uid;
+            $estudiante->save();
+        } else if ($req->role === 'organizador') {
+            $organizador = new Organizador();
+            $organizador->user_id = $req->id;
+            $organizador->save();
+        };
+
+        return response()->json([
+            "ok" => true,
+            "msg" => "Usuario actualizado correctamente"
+        ]);
+    }
+
+    public function createUserWithOauth(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            "nickname" => "string|max:100",
+            "email" => "required|string",
+            "password" => "string",
+            "telefono" => "string",
+            "nombre" => "required",
+            "rol" => "string",
+            "imagen" => "string",
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $emailAlreadyExists = DB::table("usuarios")->where("email", $req->email)->first();
+        $uidAlreadyExists = DB::table("usuarios")->where("oauthId", $req->uid)->first();
+
+
+        if (isset($emailAlreadyExists) || isset($uidAlreadyExists)) {
+            $emailToValidate = isset($emailAlreadyExists) ? $emailAlreadyExists->email : $uidAlreadyExists->email;
+            $credentials = [
+                "email" => $emailToValidate
+            ];
+            $token = ($user = Auth::getProvider()->retrieveByCredentials($credentials))
+            ? Auth::login($user)
+            : false;
+            return response()->json([
+                "ok" => true,
+                "token" => $token,
+            ], 200);
+        }
+
+
+        $nicknameAlreadyExists = DB::table("usuarios")->where("nickname", $req->nickname)->first();
+
+        $userNickname = $req->nickname;
+        if (isset($nicknameAlreadyExists)) {
+            $userNickname = $req->nickname . rand(1, 1000);
+        }
+
+        $user = new Usuario();
+
+        // al insertar, pasarle el user_id al new estudiante
+
+        $user->nickname = $userNickname;
+        $user->email = $req->email;
+        $user->telefono = $req->telefono ? $req->telefono : 0;
+        $user->nombre = $req->nombre; 
+        $user->oauthId = $req->uid; 
+        $user->imagen = $req->imagen;
+        $user->creditos_number = 0;
+        $user->biografia = $req->biografia ? $req->biografia : "";
+        $user->type = $req->rol ? $req->rol : "";
+        $user->password = "NO_PROVIDE_OAUTH";
+        $user->status_id = 2;
+        $user->save();
+
+        // Creo el user en la tabla estudiante / organizador
+        if ($req->rol === 'estudiante') {
+            $estudiante = new Estudiante();
+            // $statement = DB::select("SHOW TABLE STATUS LIKE 'usuarios'");
+            // $nextId = $statement[0]->Auto_increment; // obtengo el siguiente id autogenerado por la secuencia
+            $estudiante->user_id = $user->id;
+            $estudiante->save();
+        } else if ($req->rol === 'organizador') {
+            $organizador = new Organizador();
+            // $statement = DB::select("SHOW TABLE STATUS LIKE 'usuarios'");
+            // $nextId = $statement[0]->Auto_increment; // obtengo el siguiente id autogenerado por la secuencia
+            $organizador->user_id = $user->id;
+            $organizador->save();
+        };
+
+        $credentials = [
+            "email" => $req["email"],
+        ];
+
+        $token = ($user = Auth::getProvider()->retrieveByCredentials($credentials))
+            ? Auth::login($user)
+            : false;
+
+        return response()->json([
+            "ok" => true,
+            "token" => $token
         ]);
     }
 
@@ -144,7 +277,7 @@ class UsuarioController extends Controller
      * @return void
      */
     public function __construct() {
-        $this->middleware('jwt', ['except' => ['signin', 'create', 'activate', 'checkNickname', 'filterByNicknameOrEmail',]]);
+        $this->middleware('jwt', ['except' => ['signin', 'create', 'activate', 'checkNickname', "signupWithOauth", 'filterByNicknameOrEmail', "createUserWithOauth", "changeUserRole"]]);
     }
     /**
      * Get a JWT via given credentials.
