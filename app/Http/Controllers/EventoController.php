@@ -10,6 +10,8 @@ use App\Models\SeminarioPresencial;
 use App\Models\SeminarioVirtual;
 use App\Models\Foro;
 use Spatie\GoogleCalendar\Event;
+use Illuminate\Support\Facades\Auth;
+
 
 use Exception;
 use Illuminate\Http\Request;
@@ -105,23 +107,25 @@ class EventoController extends Controller
         $categoriaFilterIds = $request->query('categoria') != null ? $request->query('categoria') : null; //array con las categorias a filtrar
         $busqueda = ($request->query('busqueda') != null && $request->query('busqueda') != '') ? $request->query('busqueda') : null; //array con las categorias a filtrar
 
-
-        $tipoFilter = $request->query('categoria') != null ? $request->query('tipo') : null;
-
-
+        $tipo = $request->query('tipo') != null ? $request->query('tipo') : null;
+      
         $eventos = Evento::whereHas('categorias', function ($query) use ($categoriaFilterIds) {
             if ($categoriaFilterIds != null) {
                 $query->whereIn('categorias.id', $categoriaFilterIds);
             }
 
         })->when(isset($busqueda), function ($query) use ($busqueda) {
-            $query->where('nombre', 'like', '%' . $busqueda . '%');
+            $query->where('nombre', 'like', '%' . $busqueda . '%'); 
+        })->when(isset($tipo), function ($query) use ($tipo) {
+          
+
+            $query->where("tipo","=",$tipo);
         })
             ->skip($offset)->take($maxRows)->get();
 
 
         //Queda hacer un filtro por tipo/
-
+ 
         $result = array();
         foreach ($eventos as $evento) {
             $organizadorID = $evento['organizador_id'];
@@ -233,6 +237,28 @@ class EventoController extends Controller
             'message' => 'El evento se ha creado correctamente.',
             'evento' => $evento,
         ], 201);
+    }
+    
+
+    public function userIsStudentOrOwner($eventoID, Request $req)
+    {
+        try{
+            $userInfo = auth()->user();
+            $userId  = $userInfo["id"];
+
+            $eventoInfo = Evento::find($eventoID);
+            if(!isset($eventoInfo)){
+                return response()->json(["message" => "El evento no existe"] ,404);
+            }
+            $userAlreadyHasEvento = CompraEvento::where(["evento_id" => $eventoID, "estudiante_id" => $userId])->count() > 0 ? true : false; //check if user is student of event
+            $userIsOwner =  Evento::where(["id" => $eventoID, "organizador_id" => $userId])->count() > 0 ? true : false;  //check if user is owner of event
+            return response()->json(["result" => $userAlreadyHasEvento || $userIsOwner],200);
+
+        } catch(Exception $e){
+            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+
+        }
+        
     }
 
     /**

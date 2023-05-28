@@ -77,7 +77,7 @@ class Relations extends Migration
         Schema::table('comentarios', function (Blueprint $table) {
             $table->foreign('publicacion_id')
                 ->references('id')
-                ->on('publicacions');
+                ->on('publicacions')->onDelete('cascade');
         });
         Schema::table('comentarios', function (Blueprint $table) {
             $table->foreign('user_id')
@@ -142,20 +142,13 @@ class Relations extends Migration
             $table->foreign('curso_id')
                 ->references('evento_id_of_curso')
                 ->on('cursos');
-        });
 
-        Schema::table('certificadousers', function (Blueprint $table) {
-            $table->foreign('estudiante_id')
+         $table->foreign('estudiante_id')
                 ->references('user_id')
                 ->on('estudiantes');
         });
 
-        Schema::table('certificadousers', function (Blueprint $table) {
-            $table->foreign('certificado_id')
-                ->references('id')
-                ->on('certificados');
-        });
-
+       
         Schema::table('puntuacions', function (Blueprint $table) {
             $table->foreign('estudiante_id')
                 ->references('user_id')

@@ -1,24 +1,29 @@
 <?php
 
+
 use App\Http\Controllers\CalificacionController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ColaboracionController;
 use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\SugerenciaController;
 use App\Http\Controllers\UsuarioController;
-use App\Http\Controllers\CursoController;
 use App\Http\Controllers\EventoController;
+use App\Http\Controllers\CursoController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\OpcionController;
 use App\Http\Controllers\ClaseController;
 use App\Http\Controllers\EvaluacionController;
 use App\Http\Controllers\PreguntaController;
-use App\Http\Controllers\SeminarioPresencialController;
-use App\Http\Controllers\SeminarioVirtualController;
-use App\Http\Controllers\VideoController;
+
 use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\ComentarioController;
+use App\Http\Controllers\SeminarioPresencialController;
+use App\Http\Controllers\SeminarioVirtualController;
+
+use App\Http\Controllers\VideoController;
 use App\Http\Controllers\PuntuacionController;
+use App\Http\Controllers\CertificadoController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -51,6 +56,16 @@ Route::group([
     Route::put("/changeRole", [UsuarioController::class, "changeUserRole"])->name("changeRole");
 });
 
+
+Route::group([
+    "prefix" => "eventos",
+    'middleware' => ['cors'] 
+], function() {
+    Route::get("/", [EventoController::class, "listar"])->name("listar"); 
+    Route::get("{id}/userIsStudentOrOwner", [EventoController::class, "userIsStudentOrOwner"])->name("userIsStudentOrOwner");  
+
+});
+
 Route::group([
     "prefix" => "messages",
 ], function () {
@@ -62,10 +77,11 @@ Route::group([
 Route::group([
     "prefix" => "cursos",
 ], function () {
-    Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
+    Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso"); 
     Route::get("/getCompleteInfoCurso", [CursoController::class, "getCursoInfo"])->name("getCursoInfo");
     Route::get("/getCursosComprados", [CursoController::class, "getCursosComprados"])->name("getCursosComprados");
     Route::get("/getCursoAndClases", [CursoController::class, "getCursoAndClases"])->name("getCursoAndClases"); // solo info del curso, modulos y clases. (sin evaluación también)
+    Route::get("/{id}/canGetCertificate", [CursoController::class, "canGetCertificate"])->name("canGetCertificate");
 });
 
 Route::group([
@@ -79,7 +95,7 @@ Route::group([
 
 Route::group([
     "prefix" => "modulos",
-], function () {
+], function () { 
     Route::post('/createModulo', [ModuloController::class, "create"]);
     Route::get('/listByEventoId/{eventoId}', [ModuloController::class, "listByEventoId"]);
     Route::get('/{id}', [ModuloController::class, "show"]);
@@ -135,6 +151,7 @@ Route::group([
 Route::group([
     "prefix" => "publicaciones",
 ], function () {
+    Route::get('/listByForoId/{foroId}', [PublicacionController::class, "list"]); 
     Route::post('/', [PublicacionController::class, "create"]);
     Route::put('/{id}', [PublicacionController::class, "edit"]);
     Route::delete('/{id}', [PublicacionController::class, "destroy"]);
@@ -143,6 +160,7 @@ Route::group([
 Route::group([
     "prefix" => "comentarios",
 ], function () {
+    Route::get('/listByPublicacionId/{publicacionId}', [ComentarioController::class, "listByPublicacionId"]);
     Route::post('/', [ComentarioController::class, "create"]);
     Route::put('/{id}', [ComentarioController::class, "edit"]);
     Route::delete('/{id}', [ComentarioController::class, "destroy"]);
@@ -158,7 +176,7 @@ Route::group([
 Route::group([
     "prefix" => "categorias",
 ], function () {
-    Route::get('/', [CategoriaController::class, "litarCategorias"]);
+    Route::get('/', [CategoriaController::class, "gettAll"]);
 });
 
 Route::group([
@@ -177,6 +195,16 @@ Route::group([
     "prefix" => "calificacion",
 ], function () {
     Route::post('/', [CalificacionController::class, "correjirCalificacion"]);
+
+
+
+});
+
+Route::group([
+    "prefix" => "certificaciones",
+], function () {
+    Route::get('/{id}/getCertificationPDF', [CertificadoController::class, "getCertificationPdf"]);
+
 });
 
 Route::group([
@@ -184,3 +212,5 @@ Route::group([
 ], function () {
     Route::post('/createSugerencia', [SugerenciaController::class, "create"]);
 });
+
+

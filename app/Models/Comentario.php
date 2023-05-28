@@ -14,4 +14,9 @@ class Comentario extends Model
         return $this->belongsTo(Publicacion::class);
 
     }
+
+    
+    public function user(){
+        return $this->belongsTo(Usuario::class);
+    }
 }

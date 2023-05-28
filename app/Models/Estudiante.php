@@ -5,12 +5,13 @@ namespace App\Models;
 
 // use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Estudiante extends Usuario
 {
     public function certificados()
     {
-        return $this->hasMany(Certificado::class);
+        return $this->hasMany(Certificado::class,"estudiante_id","user_id");
     }
     
     public function evaluaciones()
@@ -20,6 +21,8 @@ class Estudiante extends Usuario
     
     public function compras()
     {
-        return $this->belongsToMany(Evento::class, 'compra_evento', 'estudiante_id','evento_id');
+        return $this->hasMany(Compra::class, 'compra_evento', 'estudiante_id','user_id');
     }
+
+
 }

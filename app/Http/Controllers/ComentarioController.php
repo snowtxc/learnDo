@@ -66,9 +66,19 @@ class ComentarioController extends Controller
             $newComment->publicacion_id = $request->input("publicacionId");
             $newComment->user_id = $userId;
 
+            $newComment->user;
+
             $newComment->save();
 
-            return response()->json($newComment);
+            $result = [
+                'enableDelete' => true, 
+                'contenido' => $newComment->contenido, 
+                "id" => $newComment->id,
+                "created_at" => $newComment->created_at,
+                "user" => $newComment->user
+            ]; 
+
+            return response()->json($result);
 
         }catch(Exception $e){
             return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
@@ -150,7 +160,6 @@ class ComentarioController extends Controller
 
             $userIsCourseOwner =  Evento::where(["id" => $cursoId, "organizador_id" => $userId])->count() > 0 ? true : false;  //check if user is owner of event
 
-
             if($comment->user_id != $userId && !$userIsCourseOwner){
                 return response()->json(["message" => "No puedes eliminar este comentario por que no eres propietario ni administrador del curso"] ,404);
             }
@@ -162,4 +171,42 @@ class ComentarioController extends Controller
 
         }
     }
+
+
+    function listByPublicacionId($publicacionId){
+        try{
+            $comments = Comentario::where("publicacion_id", "=", $publicacionId)->orderBy("created_at","DESC")->get();
+            $result = array();
+ 
+            $userInfo = auth()->user();
+            $userId  = $userInfo["id"];
+
+            $userIsEventoOwner = Evento::find(Publicacion::find($publicacionId)->foro->id_curso)->organizador_id == $userId ? true : false;
+
+            
+            foreach($comments as $comment){
+               $userData = $comment->user;
+               unset($userData->password);
+               
+               $userIsCommentOwner = $comment->user_id == $userId ? true : false;
+               $data = array(
+                "id" => $comment->id,
+                "contenido" => $comment->contenido,
+                "created_at" => $comment->created_at,
+                "user" => $comment->user,
+                "enableDelete" => ($userIsEventoOwner || $userIsCommentOwner) ,
+                "publicacion_id" => $comment->publicacion_id
+               );
+
+               array_push($result,$data);
+            }
+            return response()->json($result);
+        }catch(Exception $e){
+            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+        }
+      
+    }
+   
+
+    
 }

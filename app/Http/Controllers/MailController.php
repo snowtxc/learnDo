@@ -5,9 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Mail;
 
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Address;
+
+
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Mail\ReminderSeminarVEmail;
 
 
 class MailController extends Controller
@@ -15,7 +20,7 @@ class MailController extends Controller
    public $subject = "Default Subject";
    public $to = "";
 
-   function __construct($subject, $to)
+   function __construct($subject = "", $to = "")
    {
       $this->subject = $subject;
       $this->to = $to;
@@ -72,5 +77,10 @@ class MailController extends Controller
          $message->attach('C:\laravel-master\laravel\public\uploads\test.txt');
          $message->from('xyz@gmail.com', 'Virat Gandhi');
       });
+   }
+
+   public function send_seminario_reminder($to, $subject, $reminderData)
+   {
+         Mail::to($to)->send(new ReminderSeminarVEmail($reminderData)); 
    }
 }
