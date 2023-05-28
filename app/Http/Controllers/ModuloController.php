@@ -6,6 +6,8 @@ use App\Models\Clase;
 use App\Models\Evaluacion;
 use App\Models\Modulo;
 use App\Http\Controllers\VideoController;
+use App\Models\Evento;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Validator;
@@ -45,8 +47,8 @@ class ModuloController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 500);
         }
-        $evento = Evento::find($request->input('evento_id')); 
-        if(empty($evento)){
+        $evento = Evento::find($request->input('curso_id')); 
+        if(!isset($evento)){
             return response()->json(["message" => "Evento no existe"] ,404);  
         }  
         $modulo = new Modulo();

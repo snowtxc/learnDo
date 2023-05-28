@@ -51,7 +51,7 @@ Route::group([
     Route::put("/activate", [UsuarioController::class, "activate"])->name("activate");
     Route::get("/me", [UsuarioController::class, "me"])->name("me");
     Route::put("/me", [UsuarioController::class, "editMeInfo"])->name("editMeInfo");
-    Route::get("/checkNickname", [UsuarioController::class, "checkNickname"])->name("login");
+    Route::get("/checkNickname", [UsuarioController::class, "checkNickname"])->name("checkNickname");
     Route::post("/signupWithOauth", [UsuarioController::class, "createUserWithOauth"])->name("createUserWithOauth");
     Route::put("/changeRole", [UsuarioController::class, "changeUserRole"])->name("changeRole");
 });
@@ -70,7 +70,7 @@ Route::group([
     "prefix" => "messages",
 ], function () {
     Route::post("/create", [MensajeController::class, "create"])->name("create");
-    Route::get("/", [MensajeController::class, "getMensajes"])->name("create");
+    Route::get("/", [MensajeController::class, "getMensajes"])->name("getMessages");
     Route::post("/changeIsRead", [MensajeController::class, "changeMessageIsRead"])->name("changeIsRead");
 });
 
@@ -176,7 +176,7 @@ Route::group([
 Route::group([
     "prefix" => "categorias",
 ], function () {
-    Route::get('/', [CategoriaController::class, "gettAll"]);
+    Route::get('/', [CategoriaController::class, "getAll"]);
 });
 
 Route::group([

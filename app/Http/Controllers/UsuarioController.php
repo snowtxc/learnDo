@@ -341,7 +341,7 @@ class UsuarioController extends Controller
 
     public function activate(Request $req)
     {
-        $token = $req->uid;
+        $userId = $req->uid;
         if (!isset($token) || $token == null) {
             return response()->json([
                 "ok" => false,

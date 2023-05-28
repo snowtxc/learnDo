@@ -11,6 +11,7 @@ use Illuminate\Mail\Mailables\Address;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use App\Mail\AddColaboradorMail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Mail\ReminderSeminarVEmail;
 
@@ -59,12 +60,7 @@ class MailController extends Controller
          "eventoName" => $eventoName,
          "link" => "http://localhost:300/auth/login",
       );
-      Mail::send(['html' => "addColaborador"], $data, function ($message) {
-
-         $message->to($this->to, 'Tutorials Point')->subject
-         ($this->subject);
-         $message->from('angelotunado02@gmail.com', 'LearnDo');
-      });
+      Mail::to($this->to)->send(new AddColaboradorMail($data)); 
    }
 
    public function attachment_email()
