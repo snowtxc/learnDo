@@ -20,6 +20,7 @@ class CreateClasesTable extends Migration
             $table->string('video');
             $table->string('estado');
             $table->integer('modulo_id')->unsigned()->nullable();
+            $table->integer('sugerencia_id')->unsigned()->nullable();
             $table->timestamps();
         });
     }

@@ -29,18 +29,9 @@ class EvaluacionController extends Controller
     public function create(Request $request)
     {
         $validator = Validator::make($request->evaluacion, [
-            // para enviar en el body evaluacion: data,
             'nombre' => 'required',
-            'maximo_puntuacion' => 'required',
             'preguntas' => 'required|array',
             'modulo_id' => '',
-            /*
-            'preguntas' => 'required|array|min:1',
-            'preguntas.*.texto' => 'required',
-            'preguntas.*.opciones' => 'required|array|min:4',
-            'preguntas.*.opciones.*.texto' => 'required',
-            'preguntas.*.opciones.*.correcta' => 'required|boolean',
-            */
         ]);
 
         if ($validator->fails()) {
@@ -51,7 +42,6 @@ class EvaluacionController extends Controller
         // echo $request->evaluacion['nombre'];
         // echo var_dump($request->evaluacion);
         $evaluacion->nombre = $request->evaluacion['nombre'];
-        $evaluacion->maximo_puntuacion = $request->evaluacion['maximo_puntuacion'];
         $evaluacion->modulo_id = $request->evaluacion['modulo_id'];
         $evaluacion->save();
 
@@ -75,7 +65,6 @@ class EvaluacionController extends Controller
     {
         $validator = Validator::make($evaluacionACrear, [
             'nombre' => 'required',
-            'maximo_puntuacion' => 'required',
             'preguntas' => 'required|array',
         ]);
 
@@ -87,7 +76,6 @@ class EvaluacionController extends Controller
         // echo $request->evaluacion['nombre'];
         // echo var_dump($evaluacion);
         $evaluacion->nombre = $evaluacionACrear['nombre'];
-        $evaluacion->maximo_puntuacion = $evaluacionACrear['maximo_puntuacion'];
         $evaluacion->modulo_id = $modulo_id;
         $evaluacion->save();
 

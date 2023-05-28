@@ -33,7 +33,8 @@ class ModuloController extends Controller
             'nombre' => 'required',
             'estado' => 'required|in:aprobado,rechazado,pendiente',
             'curso_id' => 'required',
-            'evaluacion' => 'required',
+            'sugerencia_id' => '',
+            'evaluacion' => '',
             'clases' => '',
         ]);
 
@@ -45,6 +46,11 @@ class ModuloController extends Controller
         $modulo->nombre = $request->input('nombre');
         $modulo->estado = $request->input('estado');
         $modulo->curso_id = $request->input('curso_id');
+
+        $sugerencia = $request->input('sugerencia_id');
+        if(isset($sugerencia)){
+            $modulo->sugerencia_id = $sugerencia;
+        }
         $modulo->save();
 
         $clases = $request->input('clases');
@@ -64,7 +70,12 @@ class ModuloController extends Controller
                 $claseToSave->descripcion = "";
             }
             $claseToSave->video = "";
-            $claseToSave->estado = 'aprobado';
+            if(isset($sugerencia)){
+                $claseToSave->sugerencia_id = $sugerencia;
+                $claseToSave->estado = 'pendiente';
+            }else{
+                $claseToSave->estado = 'aprobado';
+            }
             $claseToSave->modulo_id = $modulo->id;
             $claseToSave->save();
             array_push($clasesCreated, $claseToSave);

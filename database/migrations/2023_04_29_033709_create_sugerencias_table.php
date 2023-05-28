@@ -15,7 +15,7 @@ class CreateSugerenciasTable extends Migration
     {
         Schema::create('sugerencias', function (Blueprint $table) {
             $table->increments('id');
-            $table->boolean('estado')->default(0); // si esta aprobada o no
+            $table->string('estado'); // aprobado, rechazado, pendiente
             $table->string('contenido');
             $table->integer('curso_id')->unsigned()->nullable();
             $table->integer('estudiante_id')->unsigned()->nullable();
@@ -30,6 +30,8 @@ class CreateSugerenciasTable extends Migration
      */
     public function down()
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         Schema::dropIfExists('sugerencias');
+        DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 }

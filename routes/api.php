@@ -4,6 +4,7 @@ use App\Http\Controllers\CalificacionController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ColaboracionController;
 use App\Http\Controllers\MensajeController;
+use App\Http\Controllers\SugerenciaController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\EventoController;
@@ -62,6 +63,7 @@ Route::group([
     Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
     Route::get("/getCompleteInfoCurso", [CursoController::class, "getCursoInfo"])->name("getCursoInfo");
     Route::get("/getCursosComprados", [CursoController::class, "getCursosComprados"])->name("getCursosComprados");
+    Route::get("/getCursoAndClases", [CursoController::class, "getCursoAndClases"])->name("getCursoAndClases"); // solo info del curso, modulos y clases. (sin evaluación también)
 });
 
 Route::group([
@@ -179,4 +181,10 @@ Route::group([
     "prefix" => "calificacion",
 ], function () {
     Route::post('/', [CalificacionController::class, "correjirCalificacion"]);
+});
+
+Route::group([
+    "prefix" => "sugerencias",
+], function () {
+    Route::post('/createSugerencia', [SugerenciaController::class, "create"]);
 });
