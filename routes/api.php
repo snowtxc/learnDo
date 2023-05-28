@@ -18,6 +18,8 @@ use App\Http\Controllers\VideoController;
 use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\ComentarioController;
 use App\Http\Controllers\PuntuacionController;
+use App\Http\Controllers\CertificadoController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -179,4 +181,13 @@ Route::group([
     "prefix" => "calificacion",
 ], function () {
     Route::post('/', [CalificacionController::class, "correjirCalificacion"]);
+
+});
+
+
+Route::group([
+    "prefix" => "certificaciones",
+], function () {
+    Route::get('/{id}/getCertificationPDF', [CertificadoController::class, "getCertificationPdf"]);
+
 });

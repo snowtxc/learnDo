@@ -7,9 +7,7 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
 {
-    protected $commands = [
-        'App\Console\Commands\RecordatorioSeminarioVirtual',
-    ];
+    
     /**
      * Define the application's command schedule.
      *
@@ -19,7 +17,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('inspire')->hourly();
-        $schedule->command('recordatorios_seminarios:send')->cron('* * * * *');
+        $schedule->command('recordatorios_seminarios:send')->everyMinute();	
     }
 
     /**
