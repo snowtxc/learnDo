@@ -41,8 +41,9 @@ class CursoUtils
             "countPuntuaciones" => $countPuntuaciones,
             "puntuaciones" => $puntuaciones,
         );
-
     }
+
+    
 
 
 }
