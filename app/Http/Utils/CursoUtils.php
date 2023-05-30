@@ -2,6 +2,9 @@
 
 namespace App\Http\Utils;
 
+use App\Models\Evaluacion;
+use App\Models\Opcion;
+use App\Models\Pregunta;
 use App\Models\Usuario;
 use Illuminate\Support\Facades\DB;
 
@@ -43,6 +46,31 @@ class CursoUtils
             "puntuaciones" => $puntuaciones,
             "countEstudiantes" => $countEstudiantes,
         );
+    }
+
+    public function getCompleteEvaluacionInfo($evaluacionId)
+    {
+       try {
+        $evaluacionInfo = Evaluacion::find($evaluacionId);
+        if (!isset($evaluacionInfo)) return null;
+
+        $preguntas = Pregunta::where("evaluacion_id", "=", $evaluacionId)->get();
+        $formatPreguntas = array();
+        if (isset($preguntas)) {
+            foreach($preguntas as $pregunta) {
+                $opciones = Opcion::where("pregunta_id", "=", $pregunta->id)->get();
+                if (isset($opciones)) {
+                    $pregunta->opciones = $opciones;
+                }
+                array_push($formatPreguntas, $pregunta);
+            }
+        }
+        $evaluacionInfo->preguntas = $formatPreguntas;
+        return $evaluacionInfo;
+       } catch (\Throwable $th) {
+        echo "Error getting completeEvaluacionInfo";
+        return null;
+       }
     }
 
     

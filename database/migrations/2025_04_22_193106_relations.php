@@ -47,32 +47,45 @@ class Relations extends Migration
         Schema::table('cursos', function (Blueprint $table) {
             $table->foreign('evento_id_of_curso')
                 ->references('id')
-                ->on('eventos');
+                ->on('eventos')
+                ->onDelete('cascade');
+
         });
         Schema::table('mensajes', function (Blueprint $table) {
             $table->foreign('user_from_id')
                 ->references('id')
-                ->on('usuarios');
+                ->on('usuarios')
+                ->onDelete('cascade');
+
         });
         Schema::table('mensajes', function (Blueprint $table) {
             $table->foreign('user_to_id')
                 ->references('id')
-                ->on('usuarios');
+                ->on('usuarios')
+                ->onDelete('cascade');
+
         });
         Schema::table('mensaje_salas', function (Blueprint $table) {
             $table->foreign('user_id')
                 ->references('id')
-                ->on('usuarios');
+                ->on('usuarios')
+                ->onDelete('cascade');
+
+
         });
         Schema::table('mensaje_salas', function (Blueprint $table) {
             $table->foreign('seminario_virtual_id')
                 ->references('evento_id')
-                ->on('seminario_virtuals');
+                ->on('seminario_virtuals')
+                ->onDelete('cascade');
+
         });
         Schema::table('publicacions', function (Blueprint $table) {
             $table->foreign('user_id')
                 ->references('id')
-                ->on('usuarios');
+                ->on('usuarios')
+                ->onDelete('cascade');
+
         });
         Schema::table('comentarios', function (Blueprint $table) {
             $table->foreign('publicacion_id')
@@ -82,137 +95,186 @@ class Relations extends Migration
         Schema::table('comentarios', function (Blueprint $table) {
             $table->foreign('user_id')
                 ->references('id')
-                ->on('usuarios');
+                ->on('usuarios')
+                ->onDelete('cascade');
+
                 
         });
         Schema::table('publicacions', function (Blueprint $table) {
             $table->foreign('foro_id')
                 ->references('id')
-                ->on('foros');
+                ->on('foros')
+                ->onDelete('cascade');
+
         });
         Schema::table('calificacions', function (Blueprint $table) {
             $table->foreign('estudiante_id')
                 ->references('user_id')
-                ->on('estudiantes');
+                ->on('estudiantes')
+                ->onDelete('cascade');
+
         });
         Schema::table('calificacions', function (Blueprint $table) {
             $table->foreign('evaluacion_id')
                 ->references('id')
-                ->on('evaluacions');
+                ->on('evaluacions')
+                ->onDelete('cascade');
+
         });
         Schema::table('preguntas', function (Blueprint $table) {
             $table->foreign('evaluacion_id')
                 ->references('id')
-                ->on('evaluacions');
+                ->on('evaluacions')
+                ->onDelete('cascade');
+
         });
         Schema::table('opcions', function (Blueprint $table) {
             $table->foreign('pregunta_id')
                 ->references('id')
-                ->on('preguntas');
+                ->on('preguntas')
+                ->onDelete('cascade');
+
         });
         Schema::table('evaluacions', function (Blueprint $table) {
             $table->foreign('modulo_id')
                 ->references('id')
-                ->on('modulos');
+                ->on('modulos')
+                ->onDelete('cascade');
+
         });
         Schema::table('clases', function (Blueprint $table) {
             $table->foreign('modulo_id')
                 ->references('id')
-                ->on('modulos');
+                ->on('modulos')
+                ->onDelete('cascade');
+
             $table->foreign('sugerencia_id')
                 ->references('id')
-                ->on('sugerencias');
+                ->on('sugerencias')
+                ->onDelete('cascade');
+
         });
         Schema::table('modulos', function (Blueprint $table) {
             $table->foreign('curso_id')
                 ->references('evento_id_of_curso')
-                ->on('cursos');
+                ->on('cursos')
+                ->onDelete('cascade');
+
             $table->foreign('sugerencia_id')
                 ->references('id')
-                ->on('sugerencias');
+                ->on('sugerencias')
+                ->onDelete('cascade');
+
         });
 
         Schema::table('foros', function (Blueprint $table) {
             $table->foreign('id_curso')
                 ->references('evento_id_of_curso')
-                ->on('cursos');
+                ->on('cursos')
+                ->onDelete('cascade');
+
         });
 
         Schema::table('certificados', function (Blueprint $table) {
             $table->foreign('curso_id')
                 ->references('evento_id_of_curso')
-                ->on('cursos');
+                ->on('cursos')
+                ->onDelete('cascade');
+
 
          $table->foreign('estudiante_id')
                 ->references('user_id')
-                ->on('estudiantes');
+                ->on('estudiantes')
+                ->onDelete('cascade');
+
         });
 
        
         Schema::table('puntuacions', function (Blueprint $table) {
             $table->foreign('estudiante_id')
                 ->references('user_id')
-                ->on('estudiantes');
+                ->on('estudiantes')
+                ->onDelete('cascade');
+
         });
 
         Schema::table('puntuacions', function (Blueprint $table) {
             $table->foreign('curso_id')
                 ->references('evento_id_of_curso')
-                ->on('cursos');
+                ->on('cursos')
+                ->onDelete('cascade');
+
         });
 
         Schema::table('sugerencias', function (Blueprint $table) {
             $table->foreign('curso_id')
                 ->references('evento_id_of_curso')
-                ->on('cursos');
+                ->on('cursos')
+                ->onDelete('cascade');
+
         });
 
         Schema::table('sugerencias', function (Blueprint $table) {
             $table->foreign('estudiante_id')
                 ->references('user_id')
-                ->on('estudiantes');
+                ->on('estudiantes')
+                ->onDelete('cascade');
+
         });
 
         Schema::table('eventos', function (Blueprint $table) {
             $table->foreign('organizador_id')
                 ->references('user_id')
-                ->on('organizadors');
+                ->on('organizadors')
+                ->onDelete('cascade');
+
         });
 
         Schema::table('categoriaeventos', function (Blueprint $table) {
             $table->foreign('categoria_id')
                 ->references('id')
-                ->on('categorias');
+                ->on('categorias')
+                ->onDelete('cascade');
+
         });
 
         Schema::table('categoriaeventos', function (Blueprint $table) {
             $table->foreign('evento_id')
                 ->references('id')
-                ->on('eventos');
+                ->on('eventos')
+                ->onDelete('cascade');
+
         });
 
         Schema::table('colaboracions', function (Blueprint $table) {
             $table->foreign('evento_id')
                 ->references('id')
-                ->on('eventos');
+                ->on('eventos')
+                ->onDelete('cascade');
+
         });
 
         Schema::table('colaboracions', function (Blueprint $table) {
             $table->foreign('user_id')
                 ->references('id')
-                ->on('usuarios');
+                ->on('usuarios')
+                ->onDelete('cascade');
+
         });
 
         Schema::table('cupons', function (Blueprint $table) {
             $table->foreign('user_id_from')
                 ->references('id')
-                ->on('usuarios');
+                ->on('usuarios')
+                ->onDelete('cascade');
+
         });
 
         Schema::table('cupons', function (Blueprint $table) {
             $table->foreign('user_id_to')
                 ->references('id')
-                ->on('usuarios');
+                ->on('usuarios')
+                ->onDelete('cascade');
         });
 
         Schema::table('compraevento', function (Blueprint $table) {
@@ -221,7 +283,9 @@ class Relations extends Migration
                 ->on('eventos');
             $table->foreign('estudiante_id')
             ->references('user_id')
-            ->on('estudiantes');
+            ->on('estudiantes')
+            ->onDelete('cascade');
+
         });
 
         Schema::enableForeignKeyConstraints();

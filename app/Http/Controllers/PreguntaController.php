@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pregunta;
+use Exception;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -99,8 +100,20 @@ class PreguntaController extends Controller
      * @param  \App\Models\Pregunta  $pregunta
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Pregunta $pregunta)
+    public function destroy($id)
     {
-        //
+        try {
+            $pregunta = Pregunta::find($id);
+            if (empty($pregunta)) {
+                return response()->json(["message" => "Pregunta no existe"], 404);
+            }
+            $pregunta->delete();
+            return response()->json([
+                "ok" => true,
+                "message" => "Pregunta eliminado correctamente"
+            ]);
+        } catch (Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
     }
 }

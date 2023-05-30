@@ -94,6 +94,19 @@ class EvaluacionController extends Controller
         }
     }
 
+    public function createPreguntas($evaluacionId, $preguntaData)
+    {
+        $preguntaToSave = new Pregunta();
+        $preguntaToSave->contenido = $preguntaData['contenido'];
+        $preguntaToSave->evaluacion_id = $evaluacionId;
+        $preguntaToSave->save();
+        $preguntaToSave->opciones = $preguntaData['opciones'];
+        foreach ($preguntaData['opciones'] as $opcion) {
+            $opController = new OpcionController();
+            $opController->createWithoutRequest($preguntaToSave->id, $opcion);
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -124,9 +137,9 @@ class EvaluacionController extends Controller
                 foreach ($preguntas as $pregunta) {
                     $opciones = Opcion::where("pregunta_id", "=", $pregunta->id)->get();
                     $filterOpciones = array();
-                    foreach($opciones as $opcion) {
+                    foreach ($opciones as $opcion) {
                         $newPregunta = [
-                            "id" =>  $opcion->id,
+                            "id" => $opcion->id,
                             "contenido" => $opcion->contenido,
                         ];
                         array_push($filterOpciones, $newPregunta);
@@ -135,8 +148,8 @@ class EvaluacionController extends Controller
                     array_push($filterPreguntas, $pregunta);
                 }
             }
-           
-            
+
+
 
             return response()->json([
                 "ok" => true,
