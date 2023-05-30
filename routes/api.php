@@ -82,6 +82,7 @@ Route::group([
     Route::get("/getCursosComprados", [CursoController::class, "getCursosComprados"])->name("getCursosComprados");
     Route::get("/getCursoAndClases", [CursoController::class, "getCursoAndClases"])->name("getCursoAndClases"); // solo info del curso, modulos y clases. (sin evaluación también)
     Route::get("/{id}/canGetCertificate", [CursoController::class, "canGetCertificate"])->name("canGetCertificate");
+    Route::put("/updateCursoInfo", [CursoController::class, "updateCursoInfo"])->name("updateCursoInfo");
 });
 
 Route::group([
@@ -100,6 +101,7 @@ Route::group([
     Route::get('/listByEventoId/{eventoId}', [ModuloController::class, "listByEventoId"]);
     Route::get('/{id}', [ModuloController::class, "show"]);
     Route::delete('/{id}', [ModuloController::class, "destroy"]);
+    Route::put('/updateAllOfModulo', [ModuloController::class, "updateAllInfoOfModulo"]);
     Route::put('/{id}', [ModuloController::class, "update"]);
 });
 
@@ -108,6 +110,7 @@ Route::group([
 ], function () {
     Route::post('/createClase', [ClaseController::class, "create"]);
     Route::get('/', [ClaseController::class, "getClaseInfo"]);
+    Route::delete('/{id}', [ClaseController::class, "destroy"]);
 
 });
 
@@ -124,6 +127,7 @@ Route::group([
     "prefix" => "preguntas",
 ], function () {
     Route::post('/createPregunta', [PreguntaController::class, "create"]);
+    Route::delete('/{id}', [PreguntaController::class, "destroy"]);
 });
 
 Route::group([
@@ -171,6 +175,7 @@ Route::group([
     "prefix" => "colaboraciones",
 ], function () {
     Route::post('/createColaboraciones', [ColaboracionController::class, "create"]);
+    Route::delete('/', [ColaboracionController::class, "destroy"]);
 });
 
 Route::group([
@@ -211,6 +216,7 @@ Route::group([
     "prefix" => "sugerencias",
 ], function () {
     Route::post('/createSugerencia', [SugerenciaController::class, "create"]);
+    Route::put('/changeStatus', [SugerenciaController::class, "changeStatus"]);
 });
 
 

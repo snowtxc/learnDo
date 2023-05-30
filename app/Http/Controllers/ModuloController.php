@@ -11,6 +11,8 @@ use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Validator;
+use App\Models\Pregunta;
+use App\Models\Opcion;
 
 
 /*
@@ -36,7 +38,7 @@ class ModuloController extends Controller
      */
     public function create(Request $request)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'nombre' => 'required',
             'estado' => 'required|in:aprobado,rechazado,pendiente',
             'curso_id' => 'required',
@@ -47,28 +49,28 @@ class ModuloController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 500);
         }
-        $evento = Evento::find($request->input('curso_id')); 
-        if(!isset($evento)){
-            return response()->json(["message" => "Evento no existe"] ,404);  
-        }  
+        $evento = Evento::find($request->input('curso_id'));
+        if (!isset($evento)) {
+            return response()->json(["message" => "Evento no existe"], 404);
+        }
         $modulo = new Modulo();
         $modulo->nombre = $request->input('nombre');
         $modulo->estado = $request->input('estado');
         $modulo->curso_id = $request->input('curso_id');
 
         $sugerencia = $request->input('sugerencia_id');
-        if(isset($sugerencia)){
+        if (isset($sugerencia)) {
             $modulo->sugerencia_id = $sugerencia;
         }
         $modulo->save();
 
         $clases = $request->input('clases');
         $evaluacion = $request->input('evaluacion');
-        if(isset($evaluacion)){
+        if (isset($evaluacion)) {
             $evController = new EvaluacionController();
             $evController->createWithoutRequest($modulo->id, $evaluacion);
         }
-        
+
         $clasesCreated = array();
         foreach ($clases as $clase) {
             $claseToSave = new Clase();
@@ -79,10 +81,10 @@ class ModuloController extends Controller
                 $claseToSave->descripcion = "";
             }
             $claseToSave->video = "";
-            if(isset($sugerencia)){
+            if (isset($sugerencia)) {
                 $claseToSave->sugerencia_id = $sugerencia;
                 $claseToSave->estado = 'pendiente';
-            }else{
+            } else {
                 $claseToSave->estado = 'aprobado';
             }
             $claseToSave->modulo_id = $modulo->id;
@@ -105,16 +107,16 @@ class ModuloController extends Controller
     public function show($id)
     {
 
-        try{
-            $modulo= Modulo::find($id);
-            if(empty($modulo)){
-                return response()->json(["message" => "Modulo no existe"] ,404);  
-            }  
+        try {
+            $modulo = Modulo::find($id);
+            if (empty($modulo)) {
+                return response()->json(["message" => "Modulo no existe"], 404);
+            }
             return response()->json($modulo);
-        }catch(Exception $e){
-            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+        } catch (Exception $e) {
+            return response()->json(["message" => "Ha ocurrido un error inesperado"], 500);
         }
-       
+
     }
 
     /**
@@ -126,7 +128,7 @@ class ModuloController extends Controller
      */
     public function update($id, Request $request)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'nombre' => 'required',
             'estado' => 'required',
             'evento_id' => 'required',
@@ -134,27 +136,134 @@ class ModuloController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
-          
-        try{
+
+        try {
             $evento = Evento::find($request->input('evento_id'));
-            if(empty($evento)){
-                return response()->json(["message" => "Evento no existe"] ,404);  
-            }  
-            $modulo= Modulo::find($id);
-            if(empty($modulo)){
-                return response()->json(["message" => "Modulo no existe"] ,404);  
-            }  
+            if (empty($evento)) {
+                return response()->json(["message" => "Evento no existe"], 404);
+            }
+            $modulo = Modulo::find($id);
+            if (empty($modulo)) {
+                return response()->json(["message" => "Modulo no existe"], 404);
+            }
             $modulo->nombre = $request->input('nombre');
             $modulo->estado = $request->input('estado');
             $modulo->curso_id = $request->input('evento_id');
 
             $modulo->save();
-            
+
             return response()->json($modulo);
 
-            
-        }catch(Exception $e){
-            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+
+        } catch (Exception $e) {
+            return response()->json(["message" => "Ha ocurrido un error inesperado"], 500);
+        }
+    }
+
+    public function updateAllInfoOfModulo(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'modulos' => 'array',
+            ]);
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+
+            $modulos = $request->modulos;
+            $listOfClasesOfNeedVideo = array();
+
+            if (isset($modulos)) {
+                foreach ($modulos as $modulo) {
+                    if (isset($modulo['moduloId'])) {
+                        Modulo::where("id", "=", $modulo['moduloId'])->update([
+                            "nombre" => $modulo['nombre'],
+                            "estado" => $modulo['estado'],
+                        ]);
+                    }
+
+                    $clases = $modulo['clases'];
+                    if (isset($clases) && sizeof($clases) > 0) {
+                        foreach ($clases as $clase) {
+                            if (isset($clase['claseId'])) {
+                                Clase::where("id", "=", $clase['claseId'])->update([
+                                    "nombre" => $clase['nombre'],
+                                    "descripcion" => $clase['descripcion'],
+                                ]);
+
+                            } else {
+                                $newClase = new Clase();
+                                $newClase->nombre = $clase['nombre'];
+                                if (isset($clase['descripcion'])) {
+                                    $newClase->descripcion = $clase['descripcion'];
+                                } else {
+                                    $newClase->descripcion = "Descripcion";
+                                }
+                                $newClase->video = "";
+                                $newClase->estado = "aprobado";
+
+                                $newClase->modulo_id = $modulo['moduloId'];
+                                $newClase->save();
+                                array_push($listOfClasesOfNeedVideo, $newClase);
+                            }
+                        }
+                    }
+
+                    $evaluacionInfo = $modulo['evaluacion'];
+                    if (isset($evaluacionInfo)) {
+                        if (isset($evaluacionInfo['id'])) {
+                            $evaluacionId = $evaluacionInfo['id'];
+                            Evaluacion::where("id", "=", $evaluacionId)->update([
+                                "nombre" => $evaluacionInfo['nombre'],
+                            ]);
+
+                            //modify preguntas
+                            $preguntas = $evaluacionInfo['preguntas'];
+                            if (isset($preguntas) && sizeof($preguntas) > 0) {
+                                foreach ($preguntas as $pregunta) {
+                                    if (isset($pregunta['preguntaId'])) {
+                                        $pregutnaId = $pregunta['preguntaId'];
+                                        //edit
+                                        Pregunta::where("id", "=", $pregutnaId)->update([
+                                            "contenido" => $pregunta['contenido'],
+                                        ]);
+
+                                        //edit opciones
+                                        $opciones = $pregunta['opciones'];
+                                        if (isset($opciones) && sizeof($opciones) > 0) {
+                                            foreach ($opciones as $opcion) {
+                                                if (isset($opcion['opcionId'])) {
+                                                    $opcionId = $opcion['opcionId'];
+                                                    //edit
+                                                    Opcion::where("id", "=", $opcionId)->update([
+                                                        "contenido" => $opcion['contenido'],
+                                                        "es_correcta" => $opcion['correcta'],
+                                                    ]);
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        $evController = new EvaluacionController();
+                                        $evController->createPreguntas($evaluacionId, $pregunta);
+                                    }
+                                }
+                            }
+
+                        } else {
+                            $evController = new EvaluacionController();
+                            $evController->createWithoutRequest($modulo['moduloId'], $evaluacionInfo);
+                        }
+                    }
+                }
+            }
+
+
+
+            return response()->json([
+                "clases" => $listOfClasesOfNeedVideo,
+            ]);
+        } catch (Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
         }
     }
 
@@ -166,26 +275,29 @@ class ModuloController extends Controller
      */
     public function destroy($id)
     {
-        try{
+        try {
             $modulo = Modulo::find($id);
-            if(empty($modulo)){
-                return response()->json(["message" => "Modulo no existe"] ,404);  
-            } 
+            if (empty($modulo)) {
+                return response()->json(["message" => "Modulo no existe"], 404);
+            }
             $modulo->delete();
-            return response()->json($modulo); 
-        }catch(Exception $e){
-            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+            return response()->json([
+                "ok" => true,
+                "message" => "Modulo eliminado correctamente"
+            ]);
+        } catch (Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
         }
     }
 
     public function listByEventoId($eventoId)
     {
-        $evento = Evento::find($eventoId); 
-        if(empty($evento)){
-            return response()->json(["message" => "Evento no existe"] ,404);  
-        }  
+        $evento = Evento::find($eventoId);
+        if (empty($evento)) {
+            return response()->json(["message" => "Evento no existe"], 404);
+        }
         $modulo = Modulo::where("curso_id", "=", $eventoId)->get();
-        return response()->json($modulo); 
+        return response()->json($modulo);
 
     }
 }

@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Clase;
+use App\Models\Modulo;
 use App\Models\Sugerencia;
+use Exception;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -49,6 +52,47 @@ class SugerenciaController extends Controller
             'message' => 'La sugerencia se ha creado correctamente.',
             'sugerencia' => $sugerencia,
         ], 201);
+    }
+
+    public function changeStatus(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'sugerencia_id' => 'required|int',
+                'estado' => 'required|in:aprobado,rechazado,pendiente',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+
+            $sugerencia = Sugerencia::find($request->sugerencia_id);
+            if (!isset($sugerencia)) {
+                throw new Exception("Sugerencia no encontrada");
+            }
+
+            Sugerencia::where("id", "=", $sugerencia->id)->update([
+                "estado" => $request->estado,
+            ]);
+
+            Modulo::where("sugerencia_id", "=", $sugerencia->id)->update([
+                "estado" => $request->estado,
+            ]);
+
+            Clase::where("sugerencia_id", "=", $sugerencia->id)->update([
+                "estado" => $request->estado,
+            ]);
+
+            return response()->json([
+                'message' => 'La sugerencia se ha actualizado correctamente.',
+                'ok' => true,
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+                'ok' => false,
+            ], 201);
+        }
     }
 
     /**

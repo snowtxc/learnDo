@@ -10,13 +10,17 @@ use App\Models\Usuario;
 use App\Models\CompraEvento;
 use App\Models\Evaluacion;
 use App\Models\Calificacion;
-
+use App\Models\Evento;
+use App\Models\categoriaevento;
+use App\Models\Sugerencia;
+use App\Models\Clase;
 
 use Exception;
 use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Support\Facades\DB;
 use App\Http\Utils\CursoUtils;
+use App\Models\colaboracion;
 use App\Models\Estudiante;
 use Illuminate\Support\Facades\Auth;
 
@@ -33,7 +37,8 @@ class CursoController extends Controller
         //
     }
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('jwt');
     }
 
@@ -95,6 +100,8 @@ class CursoController extends Controller
      * @param  \App\Models\Curso  $curso
      * @return \Illuminate\Http\Response
      */
+
+
     public function getCursoInfo(Request $req)
     {
         try {
@@ -102,6 +109,7 @@ class CursoController extends Controller
             if (!isset($cursoId)) {
                 throw new Exception("Error al obtener la informacion del curso");
             }
+            $withDetails = $req->withDetails;
             $meInfo = auth()->user();
             $myId = $meInfo->id;
             $cursoInfo = DB::table('eventos')
@@ -115,7 +123,7 @@ class CursoController extends Controller
             $organizadorInfo = Usuario::where("id", $cursoInfo->organizador_id)->first();
             $categorias = DB::table('categoriaeventos')
                 ->join('categorias', 'categoriaeventos.categoria_id', '=', 'categorias.id')
-                ->select('categorias.nombre')
+                ->select('categorias.nombre', 'categorias.id')
                 ->where("categoriaeventos.evento_id", $cursoId)->get();
 
             $esComprado = DB::table("compraevento")->where("evento_id", "=", $cursoId)
@@ -126,13 +134,15 @@ class CursoController extends Controller
             $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
             $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
             $puntuaciones = $calificacionCurso["puntuaciones"];
-            
+
 
             $modulos = DB::table("modulos")->where("curso_id", "=", $cursoId)->get();
             $formattedModulos = array();
             if (isset($modulos) && sizeof($modulos) > 0) {
                 foreach ($modulos as $modulo) {
-                    $clasesOfModulo = DB::table("clases")->where("modulo_id", "=", $modulo->id)->get();
+                    
+                    if ($modulo->estado == "aprobado") {
+                        $clasesOfModulo = DB::table("clases")->where("modulo_id", "=", $modulo->id)->get();
                     $evaluacionOfModulo = DB::table("evaluacions")->where("modulo_id", "=", $modulo->id)->first();
 
                     if (isset($clasesOfModulo) && sizeof($clasesOfModulo) > 0) {
@@ -152,13 +162,56 @@ class CursoController extends Controller
 
 
                         $modulo->evaluacionId = $evaluacionOfModulo->id;
+                        if ($withDetails == true) {
+                            $modulo->evaluacionInfo = $cursoUtils->getCompleteEvaluacionInfo($evaluacionOfModulo->id);
+                        }
                     } else {
                         $modulo->evaluacionId = null;
                     }
 
                     array_push($formattedModulos, $modulo);
+                    }
                 }
             }
+            $formatColaboradores = array();
+            if ($withDetails) {
+                $colaboraciones = colaboracion::where("evento_id", "=", $cursoId)->get();
+                if (isset($colaboraciones) && sizeof($colaboraciones) > 0) {
+                    foreach ($colaboraciones as $colaboracion) {
+                        $infoUser = Usuario::find($colaboracion->user_id);
+                        if (isset($infoUser)) {
+                            array_push($formatColaboradores, $infoUser);
+                            $infoUser = null;
+                        }
+                    }
+                }
+            }
+
+            $formatSugerencias = array();
+            if ($withDetails) {
+                $sugerencias = Sugerencia::where("curso_id", "=", $cursoId)->get();
+                if (isset($sugerencias) && sizeof($sugerencias) > 0) {
+                    foreach($sugerencias as $sugerencia) {
+                        $userInfo = Usuario::find($sugerencia->estudiante_id);
+                        
+                        $formatModulos = array();
+                        $modulos = DB::table("modulos")->where("sugerencia_id", "=",$sugerencia->id)->get();
+                        if (isset($modulos)) {
+                            foreach($modulos as $modulo) {
+                                $clases = Clase::where("sugerencia_id", "=", $sugerencia->id)->where("modulo_id", "=", $modulo->id)->get();
+                                if (isset($clases) && sizeof($clases) > 0) {
+                                    $modulo->clases = $clases;
+                                }
+                                array_push($formatModulos, $modulo);
+                            }
+                        }
+                        $sugerencia->userInfo = $userInfo;
+                        $sugerencia->modulos = $formatModulos;
+                        array_push($formatSugerencias, $sugerencia);
+                    }   
+                }
+            }
+
             $foro = Foro::where("id_curso", $cursoId)->first();
             $foroId = 0;
             if (isset($foro)) {
@@ -175,6 +228,8 @@ class CursoController extends Controller
                 "puntuaciones" => $puntuaciones,
                 "profesor" => $organizadorInfo->nombre,
                 "foroId" => $foroId,
+                "colaboradores" => $formatColaboradores,
+                "sugerencias" => $formatSugerencias,
             ]);
         } catch (\Throwable $th) {
             return response()->json([
@@ -251,6 +306,7 @@ class CursoController extends Controller
     public function getCursosComprados(Request $req)
     {
         try {
+            $cursoUtils = new CursoUtils();
             $validator = Validator::make($req->all(), [
                 "estudianteId" => "required|string",
             ]);
@@ -279,7 +335,6 @@ class CursoController extends Controller
                             'eventos.tipo',
                         )
                         ->where("cursos.evento_id_of_curso", $miCurso->evento_id)->first();
-                    $cursoUtils = new CursoUtils();
                     $calificacionCurso = $cursoUtils->calificacionesOfCurso($miCurso->evento_id);
                     $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
                     $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
@@ -346,49 +401,127 @@ class CursoController extends Controller
      * @param  \App\Models\Curso  $curso
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Curso $curso)
+    public function destroy(Request $req)
     {
         //
     }
 
-    public function canGetCertificate($cursoId, Request $req){
+    public function canGetCertificate($cursoId, Request $req)
+    {
 
-       /* try{*/
-            $userInfo = auth()->user();
-            $userId  = $userInfo["id"];
-    
-            $curso = Curso::where(["evento_id_of_curso" => $cursoId])->first();
-            if($curso == null){
-                return response()->json(["message" => "El curso no existe"] ,404);
-            }
-            $userHasPurchasedCourse =  CompraEvento::where(["estudiante_id" => $userId, "evento_id" => $cursoId])->count() ? true : false;
-            if(!$userHasPurchasedCourse){
-                return response()->json(["message" => "No tienes comprado el curso"] ,400);
-            }
+        /* try{*/
+        $userInfo = auth()->user();
+        $userId = $userInfo["id"];
 
-            $countEvaluations = Modulo::where(["curso_id" => $cursoId])->count();  //la cantidad de modulos es igual a la cantidad de evaluaciones
-
-            if($countEvaluations <= 0){
-                return response()->json(["message" => "El curso debe tener al menos una evaluacion"] ,400);
-            }
-            $approvalRate = $curso->porcentaje_aprobacion;
-            $califications = Calificacion::where(["estudiante_id" => $userId])->get();
-            $sumCalifications = 0;
-            foreach($califications as $calification){
-                $sumCalifications += $calification->puntuacion;
-            }
-            
-            $avgCalifications  = floor($sumCalifications/$countEvaluations);
-
-            $isApproved = $avgCalifications >= $approvalRate;
-
-            return response()->json(["result" => $isApproved] ,200);
-
-       /* }catch(Exception $e){
-            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+        $curso = Curso::where(["evento_id_of_curso" => $cursoId])->first();
+        if ($curso == null) {
+            return response()->json(["message" => "El curso no existe"], 404);
         }
-         */   
+        $userHasPurchasedCourse = CompraEvento::where(["estudiante_id" => $userId, "evento_id" => $cursoId])->count() ? true : false;
+        if (!$userHasPurchasedCourse) {
+            return response()->json(["message" => "No tienes comprado el curso"], 400);
+        }
 
-        
+        $countEvaluations = Modulo::where(["curso_id" => $cursoId])->count(); //la cantidad de modulos es igual a la cantidad de evaluaciones
+
+        if ($countEvaluations <= 0) {
+            return response()->json(["message" => "El curso debe tener al menos una evaluacion"], 400);
+        }
+        $approvalRate = $curso->porcentaje_aprobacion;
+        $califications = Calificacion::where(["estudiante_id" => $userId])->get();
+        $sumCalifications = 0;
+        foreach ($califications as $calification) {
+            $sumCalifications += $calification->puntuacion;
+        }
+
+        $avgCalifications = floor($sumCalifications / $countEvaluations);
+
+        $isApproved = $avgCalifications >= $approvalRate;
+
+        return response()->json(["result" => $isApproved], 200);
+
+        /* }catch(Exception $e){
+             return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+         }
+          */
+
+
+    }
+
+    public function updateCursoInfo(Request $req)
+    {
+        try {
+            $validator = Validator::make($req->all(), [
+                'nombre' => 'required|string',
+                'descripcion' => 'required|string',
+                'imagen' => 'required|string',
+                'es_pago' => 'required|boolean',
+                'precio' => 'required_if:es_pago,true',
+                'organizador' => 'required',
+                'porcentaje_aprobacion' => 'required_if:tipo,curso',
+                'categorias' => "array|required",
+                'cursoId' => "required"
+            ]);
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+
+            $eventoInfo = Evento::find($req->cursoId);
+            $curoInfo = Curso::where("evento_id_of_curso", "=", $req->cursoId)->first();
+            if (!isset($eventoInfo)) {
+                throw new Exception("Evento no encontrado");
+            }
+            if (!isset($eventoInfo)) {
+                throw new Exception("Evento no encontrado");
+            }
+
+            Evento::where("id", "=", $req->cursoId)->update([
+                "nombre" => $req->nombre,
+                "descripcion" => $req->descripcion,
+                "imagen" => $req->imagen,
+                "es_pago" => $req->es_pago,
+                "precio" => $req->precio,
+            ]);
+            Curso::where("evento_id_of_curso", "=", $req->cursoId)->update([
+                "porcentaje_aprobacion" => $req->porcentaje_aprobacion,
+            ]);
+
+
+            $categorias = $req->categorias;
+            if (isset($categorias) && sizeof($categorias) > 0) {
+                foreach ($categorias as $categoria) {
+                    $categoriaExists = categoriaevento::where("evento_id", "=", $req->cursoId)->where("categoria_id", "=", $categoria)->first();
+                    if (!isset($categoriaExists)) {
+                        $categoriaEvento = new categoriaevento();
+                        $categoriaEvento->evento_id = $req->cursoId;
+                        $categoriaEvento->categoria_id = $categoria;
+                        $categoriaEvento->save();
+                    }
+                }
+            }
+
+            $categoriasOfEvento = categoriaevento::where("evento_id", "=",  $req->cursoId)->get();
+            if (isset($categoriasOfEvento) && sizeof($categoriasOfEvento) > 0) {
+                echo "1";
+                if (sizeof($categorias) < sizeof($categoriasOfEvento)) {
+                    foreach($categoriasOfEvento as $catEvento) {
+                        if (!in_array($catEvento->categoria_id, $categorias)) {
+                            // delete
+                            $catEvento->delete();
+                        }
+                    }
+                }
+            }
+            return response()->json([
+                "ok" => false,
+                "message" => "Curso actualizado correctamente",
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage(),
+            ]);
+        }
+
     }
 }

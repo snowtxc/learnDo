@@ -62,7 +62,7 @@ class ClaseController extends Controller
         $clase->estado = $request->input('estado');
         $clase->modulo_id = $request->input('modulo_id');
         $sugerencia = $request->input('sugerencia_id');
-        if(isset($sugerencia)){
+        if (isset($sugerencia)) {
             $clase->sugerencia_id = $sugerencia;
         }
         $clase->save();
@@ -131,10 +131,10 @@ class ClaseController extends Controller
             ]);
 
         } catch (\Throwable $th) {
-                return response()->json([
-                    "ok" => false,
-                    "message" => $th->getMessage()
-                ]);
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage()
+            ]);
         }
     }
 
@@ -178,8 +178,20 @@ class ClaseController extends Controller
      * @param  \App\Models\Clase  $clase
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Clase $clase)
+    public function destroy($id)
     {
-        //
+        try {
+            $clase = Clase::find($id);
+            if (empty($clase)) {
+                return response()->json(["message" => "Clase no encontrada"], 404);
+            }
+            $clase->delete();
+            return response()->json([
+                "ok" => true,
+                "message" => "Clase eliminada correctamente"
+            ]);
+        } catch (Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
     }
 }
