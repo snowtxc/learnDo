@@ -63,6 +63,7 @@ Route::group([
 ], function() {
     Route::get("/", [EventoController::class, "listar"])->name("listar"); 
     Route::get("{id}/userIsStudentOrOwner", [EventoController::class, "userIsStudentOrOwner"])->name("userIsStudentOrOwner");  
+    Route::get("/getEventosAdmin", [EventoController::class, "getEventosAdmin"])->name("getEventosAdmin");  
 
 });
 
@@ -175,6 +176,7 @@ Route::group([
     "prefix" => "colaboraciones",
 ], function () {
     Route::post('/createColaboraciones', [ColaboracionController::class, "create"]);
+    Route::post('/isUserColaborador', [ColaboracionController::class, "isUserColaborador"]);
     Route::delete('/', [ColaboracionController::class, "destroy"]);
 });
 

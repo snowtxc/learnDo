@@ -60,6 +60,34 @@ class ColaboracionController extends Controller
         ], 201);
     }
 
+    public function isUserColaborador(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+            'evento_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+
+        $colabInfo = colaboracion::where("user_id", $request->user_id)
+            ->where("evento_id", $request->evento_id)->first();
+        if (!isset($colabInfo)) {
+            return response()->json([
+                "ok" => false,
+                'message' => 'Permiso denegado, no eres colaborador para este curso.',
+            ], 403);
+        }
+
+        return response()->json([
+            "ok" => true,
+            'message' => 'Éxito, el usuario es colaborador.',
+            'colaboracion' => $colabInfo,
+        ], 200);
+    }
+
     /**
      * Store a newly created resource in storage.
      *

@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Utils\CursoUtils;
 use App\Models\CompraEvento;
 use App\Models\Evento;
+use App\Models\Organizador;
 use App\Models\Usuario;
 use App\Models\Curso;
 use App\Models\SeminarioPresencial;
 use App\Models\SeminarioVirtual;
 use App\Models\Foro;
+use Illuminate\Support\Facades\DB;
 use Spatie\GoogleCalendar\Event;
 use Illuminate\Support\Facades\Auth;
 
@@ -259,6 +262,111 @@ class EventoController extends Controller
 
         }
         
+    }
+
+    public function getEventosAdmin(Request $req)
+    {
+        try {
+            $validator = Validator::make($req->all(), [
+                "organizadorId" => "required|string",
+            ]);
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+            $organizadorInfo = Organizador::where("user_id", "=", $req->organizadorId)->first();
+            if (!isset($organizadorInfo)) {
+                throw new Exception("El organizador no existe");
+            }
+            $misEventos = DB::table("eventos")->where("organizador_id", "=", $req->organizadorId)->get();
+            $cursos = array();
+            $seminariosP = array();
+            $seminariosV = array();
+
+            if (isset($misEventos) && sizeof($misEventos) > 0) {
+                foreach ($misEventos as $miEvento) {
+                    // echo var_dump($miEvento);
+                    if ($miEvento->tipo === "curso") {
+                        $cursoInfo = DB::table('cursos')
+                            ->join('eventos', 'cursos.evento_id_of_curso', '=', 'eventos.id')
+                            ->select(
+                                'eventos.id',
+                                'eventos.nombre',
+                                'eventos.descripcion',
+                                'eventos.imagen',
+                                'eventos.es_pago',
+                                'eventos.precio',
+                                'eventos.organizador_id',
+                                'eventos.tipo',
+                            )
+                            ->where("cursos.evento_id_of_curso", $miEvento->id)->first();
+                    $cursoUtils = new CursoUtils();
+                    $calificacionCurso = $cursoUtils->calificacionesOfCurso($miEvento->id);
+                    $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
+                    $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
+                    $countEstudiantes = $calificacionCurso["countEstudiantes"];
+
+                    if (isset($cursoInfo)) {
+                            $cursoInfo->stars = $averageCalificaciones;
+                            $cursoInfo->countPuntuaciones = $countPuntuaciones;
+                            $cursoInfo->countEstudiantes = $countEstudiantes;
+                            array_push($cursos, $cursoInfo);
+                        }
+                    }
+
+                    if ($miEvento->tipo === "seminarioP") {
+                        $cursoInfo = DB::table('seminario_presencials')
+                            ->join('eventos', 'seminario_presencials.evento_id', '=', 'eventos.id')
+                            ->select(
+                                'eventos.id',
+                                'eventos.nombre',
+                                'eventos.descripcion',
+                                'eventos.imagen',
+                                'eventos.es_pago',
+                                'eventos.precio',
+                                'eventos.organizador_id',
+                                'eventos.tipo',
+                            )
+                            ->where("seminario_presencials.evento_id", $miEvento->id)->first();
+
+                        if (isset($cursoInfo)) {
+                            array_push($seminariosP, $cursoInfo);
+                        }
+                    }
+
+                    if ($miEvento->tipo === "seminarioV") {
+                        $cursoInfo = DB::table('seminario_virtuals')
+                            ->join('eventos', 'seminario_virtuals.evento_id', '=', 'eventos.id')
+                            ->select(
+                                'eventos.id',
+                                'eventos.nombre',
+                                'eventos.descripcion',
+                                'eventos.imagen',
+                                'eventos.es_pago',
+                                'eventos.precio',
+                                'eventos.organizador_id',
+                                'eventos.tipo',
+                            )
+                            ->where("seminario_virtuals.evento_id", $miEvento->id)->first();
+                        if (isset($cursoInfo)) {
+                            array_push($seminariosV, $cursoInfo);
+                        }
+                    }
+                }
+            }
+
+            return response()->json([
+                "ok" => true,
+                "cursos" => $cursos,
+                "seminariosP" => $seminariosP,
+                "seminariosV" => $seminariosV,
+            ]);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage()
+            ]);
+        }
     }
 
     /**
