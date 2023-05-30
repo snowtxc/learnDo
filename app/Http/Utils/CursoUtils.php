@@ -21,6 +21,7 @@ class CursoUtils
 
     public function calificacionesOfCurso($cursoId)
     {
+        $countEstudiantes = DB::table("compraevento")->where("evento_id", "=", $cursoId)->count();
         $puntuaciones = DB::table("puntuacions")->where("curso_id", "=", $cursoId)->get();
         // echo $puntuaciones;
         $averageCalificaciones = 0;
@@ -40,6 +41,7 @@ class CursoUtils
             "averageCalificaciones" => $averageCalificaciones,
             "countPuntuaciones" => $countPuntuaciones,
             "puntuaciones" => $puntuaciones,
+            "countEstudiantes" => $countEstudiantes,
         );
     }
 
