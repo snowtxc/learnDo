@@ -10,6 +10,7 @@ use App\Models\Usuario;
 use App\Models\CompraEvento;
 use App\Models\Evaluacion;
 use App\Models\Calificacion;
+use App\Models\Certificado;
 
 
 use Exception;
@@ -164,6 +165,8 @@ class CursoController extends Controller
             if (isset($foro)) {
                 $foroId = $foro->id;
             }
+            $certificate = Certificado::where(["estudiante_id" => $myId, "curso_id"=> $cursoInfo->id])->first();
+
             return response()->json([
                 "ok" => true,
                 "curso" => $cursoInfo,
@@ -175,6 +178,7 @@ class CursoController extends Controller
                 "puntuaciones" => $puntuaciones,
                 "profesor" => $organizadorInfo->nombre,
                 "foroId" => $foroId,
+                "certificateID" => $certificate != null ? $certificate->id : null 
             ]);
         } catch (\Throwable $th) {
             return response()->json([
@@ -250,7 +254,10 @@ class CursoController extends Controller
 
     public function getCursosComprados(Request $req)
     {
+        
         try {
+           
+
             $validator = Validator::make($req->all(), [
                 "estudianteId" => "required|string",
             ]);
@@ -262,6 +269,7 @@ class CursoController extends Controller
                 throw new Exception("El estudiante no existe");
             }
             $misCursos = DB::table("compraevento")->where("estudiante_id", "=", $req->estudianteId)->get();
+
             $foramtResponse = array();
 
             if (isset($misCursos) && sizeof($misCursos) > 0) {
@@ -283,6 +291,10 @@ class CursoController extends Controller
                     $calificacionCurso = $cursoUtils->calificacionesOfCurso($miCurso->evento_id);
                     $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
                     $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
+
+                    $certificate = Certificado::where(["estudiante_id" => $req->estudianteId , "curso_id"=> $cursoInfo->id])->first();
+                    $cursoInfo->certificateID = $certificate != null ? $certificate->id : null;
+
 
                     if (isset($cursoInfo)) {
                         $cursoInfo->starts = $averageCalificaciones;
@@ -353,7 +365,7 @@ class CursoController extends Controller
 
     public function canGetCertificate($cursoId, Request $req){
 
-       /* try{*/
+        try{
             $userInfo = auth()->user();
             $userId  = $userInfo["id"];
     
@@ -361,34 +373,40 @@ class CursoController extends Controller
             if($curso == null){
                 return response()->json(["message" => "El curso no existe"] ,404);
             }
-            $userHasPurchasedCourse =  CompraEvento::where(["estudiante_id" => $userId, "evento_id" => $cursoId])->count() ? true : false;
-            if(!$userHasPurchasedCourse){
-                return response()->json(["message" => "No tienes comprado el curso"] ,400);
-            }
 
-            $countEvaluations = Modulo::where(["curso_id" => $cursoId])->count();  //la cantidad de modulos es igual a la cantidad de evaluaciones
+            $cursoUtils = new CursoUtils();
+            $result =  $cursoUtils->canStudentGetCertificate($userId, $cursoId,$curso->porcentaje_aprobacion);  
+            return response()->json( $result ,200);   
 
-            if($countEvaluations <= 0){
-                return response()->json(["message" => "El curso debe tener al menos una evaluacion"] ,400);
-            }
-            $approvalRate = $curso->porcentaje_aprobacion;
-            $califications = Calificacion::where(["estudiante_id" => $userId])->get();
-            $sumCalifications = 0;
-            foreach($califications as $calification){
-                $sumCalifications += $calification->puntuacion;
-            }
-            
-            $avgCalifications  = floor($sumCalifications/$countEvaluations);
-
-            $isApproved = $avgCalifications >= $approvalRate;
-
-            return response()->json(["result" => $isApproved] ,200);
-
-       /* }catch(Exception $e){
+         }catch(Exception $e){
             return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
         }
-         */   
+           
 
         
     }
+
+
+      /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function studentAlreadyHasCertificate($cursoId ,Request $req){
+
+        $userInfo = auth()->user();
+        $userId  = $userInfo["id"];
+
+        $curso = Curso::where(["evento_id_of_curso"=> $cursoId]);  
+
+        if($curso == null){
+            return response()->json(["message" => "Curso no existe"] ,400);
+        }
+        $alreadyHasCertificate =  Certificado::where(["estudiante_id" => $userId,  "curso_id" => $curso->id])->count() > 0;
+        
+        return response()->json( $alreadyHasCertificate ,200);  
+
+    }
+
 }

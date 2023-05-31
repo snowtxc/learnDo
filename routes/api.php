@@ -63,6 +63,8 @@ Route::group([
 ], function() {
     Route::get("/", [EventoController::class, "listar"])->name("listar"); 
     Route::get("{id}/userIsStudentOrOwner", [EventoController::class, "userIsStudentOrOwner"])->name("userIsStudentOrOwner");  
+    Route::get("/getMyEventos", [EventoController::class, "getMyEventos"])->name("getMyEventos");  
+
 
 });
 
@@ -82,6 +84,8 @@ Route::group([
     Route::get("/getCursosComprados", [CursoController::class, "getCursosComprados"])->name("getCursosComprados");
     Route::get("/getCursoAndClases", [CursoController::class, "getCursoAndClases"])->name("getCursoAndClases"); // solo info del curso, modulos y clases. (sin evaluación también)
     Route::get("/{id}/canGetCertificate", [CursoController::class, "canGetCertificate"])->name("canGetCertificate");
+    Route::get("/{id}/studentAlreadyHasCertificate", [CursoController::class, "studentAlreadyHasCertificate"])->name("studentAlreadyHasCertificate");
+
 });
 
 Route::group([
@@ -203,7 +207,8 @@ Route::group([
 Route::group([
     "prefix" => "certificaciones",
 ], function () {
-    Route::get('/{id}/getCertificationPDF', [CertificadoController::class, "getCertificationPdf"]);
+    Route::post("/", [CertificadoController::class, "create"])->name("create");
+    Route::get('/{id}/getCertificationPDF', [CertificadoController::class, "getCertificationPdf"]); 
 
 });
 

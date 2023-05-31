@@ -3,6 +3,13 @@
 namespace App\Http\Utils;
 
 use App\Models\Usuario;
+use App\Models\CompraEvento; 
+use App\Models\Modulo; 
+use App\Models\Certificado; 
+use App\Models\Calificacion; 
+use App\Models\Evaluacion; 
+
+
 use Illuminate\Support\Facades\DB;
 
 class CursoUtils
@@ -41,6 +48,40 @@ class CursoUtils
             "countPuntuaciones" => $countPuntuaciones,
             "puntuaciones" => $puntuaciones,
         );
+    }
+
+
+    public function canStudentGetCertificate($studentId, $cursoId, $approvalRate)
+    {          
+
+            $userHasPurchasedCourse =  CompraEvento::where(["estudiante_id" => $studentId, "evento_id" => $cursoId])->count() ? true : false;
+            if(!$userHasPurchasedCourse){
+                return false; 
+            }
+            
+            $modulos = Modulo::where(["curso_id" => $cursoId])->get();  
+            $countEvaluations = count($modulos); //la cantidad de modulos es igual a la cantidad de evaluaciones
+            if($countEvaluations <= 0){
+                return false;
+            }
+
+            $sumCalifications = 0;
+            foreach($modulos as $modulo){
+                $evaluacion =  Evaluacion::where(["modulo_id" => $modulo->id])->first();
+                $cal  = Calificacion::where(["estudiante_id" => $studentId, "evaluacion_id" => $evaluacion->id])->first();
+                if($cal != null){
+                    $sumCalifications += $cal->puntuacion;
+                }
+
+            }              
+            $avgCalifications  = floor($sumCalifications/$countEvaluations); 
+            $isApproved = $avgCalifications >= $approvalRate;
+
+            $result = array(
+                "avgCalifications" => $avgCalifications, 
+                "isApproved" => $isApproved
+            );
+            return $result;
     }
 
     

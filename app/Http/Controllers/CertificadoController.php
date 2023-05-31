@@ -5,10 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Certificado;
 use App\Models\Usuario;
 use App\Models\Evento;
-
+use App\Models\Curso;
+use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Http\Request;
 use PDF;
+use Validator;
+use App\Http\Utils\CursoUtils;
+
+
 
 class CertificadoController extends Controller
 {
@@ -23,7 +28,7 @@ class CertificadoController extends Controller
     }
 
     public function __construct() {
-        $this->middleware('jwt');
+       
     }
 
 
@@ -32,9 +37,45 @@ class CertificadoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $req)
     {
-        //
+        $validator = Validator::make($req->all(), [
+            "curso_id" => "required"
+        ]);
+    
+        try{
+            $userInfo = auth()->user();
+            $userId  = $userInfo["id"];
+
+
+            $cursoId = $req->input("curso_id");
+            $curso = Curso::where(["evento_id_of_curso" => $cursoId])->first();
+            if($curso == null){
+                return response()->json(["message" => "El curso no existe"] ,404);
+            }
+
+            if(Certificado::where(["estudiante_id"  => $userId, "curso_id" => $cursoId])->first() != null){
+                return response()->json(["message" => "Ya tienes un certificado de este curso"] ,400);
+            }
+
+            $cursoUtils = new CursoUtils();
+            $canGetCertificate =  $cursoUtils->canStudentGetCertificate($userId, $cursoId, $curso->porcentaje_aprobacion);
+
+            if(!$canGetCertificate["isApproved"]){
+                return response()->json(["message" => "No puedes obtener el certificado de este curso"] ,400);
+            } 
+
+            $newCertificate = new Certificado();
+            $newCertificate->nombre = "";
+            $newCertificate->estudiante_id = $userId;
+            $newCertificate->curso_id  = $cursoId;
+            $newCertificate->save();
+
+            return response()->json($newCertificate ,200);
+
+        }catch(Exception $e){
+            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+        }
     }
 
     /**
@@ -114,8 +155,13 @@ class CertificadoController extends Controller
             "curso_nombre" => $curso->nombre,
             "user_avatar" => $usuario->imagen
         );
+
         $pdf = PDF::loadView('certification',$data);
         return $pdf->download('certification.pdf');
 
     }
+
+
+   
+
 }

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Http\Utils\CursoUtils;
 use App\Models\CompraEvento;
 use App\Models\Evento;
 use App\Models\Usuario;
@@ -11,6 +11,7 @@ use App\Models\SeminarioVirtual;
 use App\Models\Foro;
 use Spatie\GoogleCalendar\Event;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 
 use Exception;
@@ -261,6 +262,109 @@ class EventoController extends Controller
         
     }
 
+    public function getMyEventos(Request $req)
+    {
+        try {
+            $userInfo = auth()->user();
+            $userId  = $userInfo["id"];
+            
+            
+            $misEventos = DB::table("eventos")->join('compraevento', 'compraevento.evento_id', '=', 'eventos.id')->where("compraevento.estudiante_id", $userId)->get();
+
+
+            $cursos = array();
+            $seminariosP = array();
+            $seminariosV = array();
+
+            if (isset($misEventos) && sizeof($misEventos) > 0) {
+                foreach ($misEventos as $miEvento) {
+                    // echo var_dump($miEvento);
+                    if ($miEvento->tipo === "curso") {
+                        $eventoInfo = DB::table('cursos')
+                            ->join('eventos', 'cursos.evento_id_of_curso', '=', 'eventos.id')
+                            ->select(
+                                'eventos.id',
+                                'eventos.nombre',
+                                'eventos.descripcion',
+                                'eventos.imagen',
+                                'eventos.es_pago',
+                                'eventos.precio',
+                                'eventos.organizador_id',
+                                'eventos.tipo',
+                            )
+                            ->where("cursos.evento_id_of_curso", $miEvento->id)->first();
+                            $cursoUtils = new CursoUtils();
+                            $calificacionCurso = $cursoUtils->calificacionesOfCurso($miEvento->id);
+                            $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
+                            $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
+                            $countEstudiantes = $calificacionCurso["countEstudiantes"];
+
+                         if (isset($cursoInfo)) {
+                            $cursoInfo->stars = $averageCalificaciones;
+                            $cursoInfo->countPuntuaciones = $countPuntuaciones;
+                            $cursoInfo->countEstudiantes = $countEstudiantes;
+                            array_push($cursos, $cursoInfo);
+
+                            $certificate = Certificado::where(["estudiante_id" => $userId, "curso_id"=> $cursoInfo->id])->first();
+                            $certificate->certificateID = $certificate != null ? $certificate->id : null;
+                        }
+                    }
+
+                    if ($miEvento->tipo === "seminarioP") {
+                        $eventoInfo = DB::table('seminario_presencials')
+                            ->join('eventos', 'seminario_presencials.evento_id', '=', 'eventos.id')
+                            ->select(
+                                'eventos.id',
+                                'eventos.nombre',
+                                'eventos.descripcion',
+                                'eventos.imagen',
+                                'eventos.es_pago',
+                                'eventos.precio',
+                                'eventos.organizador_id',
+                                'eventos.tipo',
+                            )
+                            ->where("seminario_presencials.evento_id", $miEvento->id)->first();
+
+                        if (isset($cursoInfo)) {
+                            array_push($seminariosP, $eventoInfo);
+                        }
+                    }
+
+                    if ($miEvento->tipo === "seminarioV") {
+                        $eventoInfo = DB::table('seminario_virtuals')
+                            ->join('eventos', 'seminario_virtuals.evento_id', '=', 'eventos.id')
+                            ->select(
+                                'eventos.id',
+                                'eventos.nombre',
+                                'eventos.descripcion',
+                                'eventos.imagen',
+                                'eventos.es_pago',
+                                'eventos.precio',
+                                'eventos.organizador_id',
+                                'eventos.tipo',
+                            )
+                            ->where("seminario_virtuals.evento_id", $miEvento->id)->first();
+                        if (isset($cursoInfo)) {
+                            array_push($seminariosV, $eventoInfo);
+                        }
+                    }
+                }
+            }
+
+            return response()->json([
+                "ok" => true,
+                "cursos" => $cursos,
+                "seminariosP" => $seminariosP,
+                "seminariosV" => $seminariosV,
+            ]);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage()
+            ]);
+        }
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -316,4 +420,7 @@ class EventoController extends Controller
     {
         //
     }
+
+
+
 }
