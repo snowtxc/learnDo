@@ -64,8 +64,7 @@ Route::group([
     Route::get("/", [EventoController::class, "listar"])->name("listar"); 
     Route::get("{id}/userIsStudentOrOwner", [EventoController::class, "userIsStudentOrOwner"])->name("userIsStudentOrOwner");  
     Route::get("/getMyEventos", [EventoController::class, "getMyEventos"])->name("getMyEventos");  
-
-
+    Route::get("/getEventosAdmin", [EventoController::class, "getEventosAdmin"])->name("getEventosAdmin");  
 });
 
 Route::group([
@@ -145,6 +144,7 @@ Route::group([
     "prefix" => "usuarios",
 ], function () {
     Route::get('/filterByNicknameOrEmail', [UsuarioController::class, "filterByNicknameOrEmail"]);
+    Route::get('/userInfoById', [UsuarioController::class, "userInfoById"]);
 });
 
 Route::group([

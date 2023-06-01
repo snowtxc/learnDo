@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Validator;
 use App\Http\Controllers\MailController;
 use App\Http\Utils\UserUtils;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -360,6 +361,35 @@ class UsuarioController extends Controller
         
         return $this->createNewToken($token);
         
+    }
+
+    function userInfoById(Request $req) {
+        try {
+            $uid = $req->uid;
+            if (!isset($uid)) {
+                throw new Exception("Uid no valido");
+            }
+            $userInfo = Usuario::find($req->uid);
+            if (!isset($userInfo)) {
+                throw new Exception("Usuario no valido");
+            }
+
+            $formatUserInfo = [
+                "userName" => $userInfo->nombre,
+                "userImage" => $userInfo->imagen,
+                "userId" => $userInfo->id,
+            ];
+
+             return response()->json([
+                "ok" => true,
+                "userInfo" => $formatUserInfo,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage()
+            ]);
+        }
     }
 
     function editMeInfo(Request $request){
