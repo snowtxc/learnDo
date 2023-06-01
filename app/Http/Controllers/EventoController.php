@@ -9,6 +9,8 @@ use App\Models\Curso;
 use App\Models\SeminarioPresencial;
 use App\Models\SeminarioVirtual;
 use App\Models\Foro;
+use App\Models\Certificado;
+
 use Spatie\GoogleCalendar\Event;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +30,11 @@ class EventoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+     public function __construct() {
+        $this->middleware('jwt');
+    }
+
 
     public function comprarEvento(Request $req)
     {
@@ -265,22 +272,21 @@ class EventoController extends Controller
     public function getMyEventos(Request $req)
     {
         try {
+           
             $userInfo = auth()->user();
             $userId  = $userInfo["id"];
+           
             
-            
-            $misEventos = DB::table("eventos")->join('compraevento', 'compraevento.evento_id', '=', 'eventos.id')->where("compraevento.estudiante_id", $userId)->get();
-
-
-            $cursos = array();
-            $seminariosP = array();
-            $seminariosV = array();
+            $misEventos = DB::table("eventos")->join('compraevento', 'compraevento.evento_id', '=', 'eventos.id')->where("compraevento.estudiante_id", $userId)->select("eventos.id","eventos.tipo")->get();
+           
+            $result = array();
 
             if (isset($misEventos) && sizeof($misEventos) > 0) {
                 foreach ($misEventos as $miEvento) {
                     // echo var_dump($miEvento);
                     if ($miEvento->tipo === "curso") {
-                        $eventoInfo = DB::table('cursos')
+
+                        $cursoInfo = DB::table('cursos')
                             ->join('eventos', 'cursos.evento_id_of_curso', '=', 'eventos.id')
                             ->select(
                                 'eventos.id',
@@ -291,8 +297,12 @@ class EventoController extends Controller
                                 'eventos.precio',
                                 'eventos.organizador_id',
                                 'eventos.tipo',
+                                'cursos.porcentaje_aprobacion'
                             )
-                            ->where("cursos.evento_id_of_curso", $miEvento->id)->first();
+                            ->where("cursos.evento_id_of_curso",$miEvento->id)->first();
+
+
+
                             $cursoUtils = new CursoUtils();
                             $calificacionCurso = $cursoUtils->calificacionesOfCurso($miEvento->id);
                             $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
@@ -303,15 +313,18 @@ class EventoController extends Controller
                             $cursoInfo->stars = $averageCalificaciones;
                             $cursoInfo->countPuntuaciones = $countPuntuaciones;
                             $cursoInfo->countEstudiantes = $countEstudiantes;
-                            array_push($cursos, $cursoInfo);
-
                             $certificate = Certificado::where(["estudiante_id" => $userId, "curso_id"=> $cursoInfo->id])->first();
-                            $certificate->certificateID = $certificate != null ? $certificate->id : null;
-                        }
+                            $cursoInfo->certificateID = $certificate != null ? $certificate->id : null;
+                            $cursoInfo->porcentajeCurso = $cursoUtils->canStudentGetCertificate($userId,$cursoInfo->id , $cursoInfo->porcentaje_aprobacion)["avgCalifications"];
+
+                            array_push($result, $cursoInfo);
+
+                         }
+
                     }
 
                     if ($miEvento->tipo === "seminarioP") {
-                        $eventoInfo = DB::table('seminario_presencials')
+                        $seminarioPInfo = DB::table('seminario_presencials')
                             ->join('eventos', 'seminario_presencials.evento_id', '=', 'eventos.id')
                             ->select(
                                 'eventos.id',
@@ -325,13 +338,13 @@ class EventoController extends Controller
                             )
                             ->where("seminario_presencials.evento_id", $miEvento->id)->first();
 
-                        if (isset($cursoInfo)) {
-                            array_push($seminariosP, $eventoInfo);
+                        if (isset($seminarioPInfo)) {
+                            array_push($result, $seminarioPInfo);
                         }
                     }
 
                     if ($miEvento->tipo === "seminarioV") {
-                        $eventoInfo = DB::table('seminario_virtuals')
+                        $seminarioVInfo = DB::table('seminario_virtuals')
                             ->join('eventos', 'seminario_virtuals.evento_id', '=', 'eventos.id')
                             ->select(
                                 'eventos.id',
@@ -344,21 +357,16 @@ class EventoController extends Controller
                                 'eventos.tipo',
                             )
                             ->where("seminario_virtuals.evento_id", $miEvento->id)->first();
-                        if (isset($cursoInfo)) {
-                            array_push($seminariosV, $eventoInfo);
+                        if (isset($seminariosVInfo)) {
+                            array_push($result, $seminarioVInfo);
                         }
                     }
                 }
             }
 
-            return response()->json([
-                "ok" => true,
-                "cursos" => $cursos,
-                "seminariosP" => $seminariosP,
-                "seminariosV" => $seminariosV,
-            ]);
+            return response()->json( ["eventos" => $result],200);
 
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             return response()->json([
                 "ok" => false,
                 "message" => $th->getMessage()

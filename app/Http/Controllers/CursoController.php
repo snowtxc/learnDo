@@ -11,6 +11,7 @@ use App\Models\CompraEvento;
 use App\Models\Evaluacion;
 use App\Models\Calificacion;
 use App\Models\Certificado;
+use App\Models\Sugerencia;
 
 
 use Exception;
@@ -18,6 +19,7 @@ use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Support\Facades\DB;
 use App\Http\Utils\CursoUtils;
+use App\Models\colaboracion;
 use App\Models\Estudiante;
 use Illuminate\Support\Facades\Auth;
 
@@ -34,7 +36,8 @@ class CursoController extends Controller
         //
     }
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('jwt');
     }
 
@@ -96,6 +99,8 @@ class CursoController extends Controller
      * @param  \App\Models\Curso  $curso
      * @return \Illuminate\Http\Response
      */
+
+
     public function getCursoInfo(Request $req)
     {
         try {
@@ -103,6 +108,7 @@ class CursoController extends Controller
             if (!isset($cursoId)) {
                 throw new Exception("Error al obtener la informacion del curso");
             }
+            $withDetails = $req->withDetails;
             $meInfo = auth()->user();
             $myId = $meInfo->id;
             $cursoInfo = DB::table('eventos')
@@ -116,7 +122,7 @@ class CursoController extends Controller
             $organizadorInfo = Usuario::where("id", $cursoInfo->organizador_id)->first();
             $categorias = DB::table('categoriaeventos')
                 ->join('categorias', 'categoriaeventos.categoria_id', '=', 'categorias.id')
-                ->select('categorias.nombre')
+                ->select('categorias.nombre', 'categorias.id')
                 ->where("categoriaeventos.evento_id", $cursoId)->get();
 
             $esComprado = DB::table("compraevento")->where("evento_id", "=", $cursoId)
@@ -127,13 +133,15 @@ class CursoController extends Controller
             $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
             $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
             $puntuaciones = $calificacionCurso["puntuaciones"];
-            
+
 
             $modulos = DB::table("modulos")->where("curso_id", "=", $cursoId)->get();
             $formattedModulos = array();
             if (isset($modulos) && sizeof($modulos) > 0) {
                 foreach ($modulos as $modulo) {
-                    $clasesOfModulo = DB::table("clases")->where("modulo_id", "=", $modulo->id)->get();
+                    
+                    if ($modulo->estado == "aprobado") {
+                        $clasesOfModulo = DB::table("clases")->where("modulo_id", "=", $modulo->id)->get();
                     $evaluacionOfModulo = DB::table("evaluacions")->where("modulo_id", "=", $modulo->id)->first();
 
                     if (isset($clasesOfModulo) && sizeof($clasesOfModulo) > 0) {
@@ -153,13 +161,56 @@ class CursoController extends Controller
 
 
                         $modulo->evaluacionId = $evaluacionOfModulo->id;
+                        if ($withDetails == true) {
+                            $modulo->evaluacionInfo = $cursoUtils->getCompleteEvaluacionInfo($evaluacionOfModulo->id);
+                        }
                     } else {
                         $modulo->evaluacionId = null;
                     }
 
                     array_push($formattedModulos, $modulo);
+                    }
                 }
             }
+            $formatColaboradores = array();
+            if ($withDetails) {
+                $colaboraciones = colaboracion::where("evento_id", "=", $cursoId)->get();
+                if (isset($colaboraciones) && sizeof($colaboraciones) > 0) {
+                    foreach ($colaboraciones as $colaboracion) {
+                        $infoUser = Usuario::find($colaboracion->user_id);
+                        if (isset($infoUser)) {
+                            array_push($formatColaboradores, $infoUser);
+                            $infoUser = null;
+                        }
+                    }
+                }
+            }
+
+            $formatSugerencias = array();
+            if ($withDetails) {
+                $sugerencias = Sugerencia::where("curso_id", "=", $cursoId)->get();
+                if (isset($sugerencias) && sizeof($sugerencias) > 0) {
+                    foreach($sugerencias as $sugerencia) {
+                        $userInfo = Usuario::find($sugerencia->estudiante_id);
+                        
+                        $formatModulos = array();
+                        $modulos = DB::table("modulos")->where("sugerencia_id", "=",$sugerencia->id)->get();
+                        if (isset($modulos)) {
+                            foreach($modulos as $modulo) {
+                                $clases = Clase::where("sugerencia_id", "=", $sugerencia->id)->where("modulo_id", "=", $modulo->id)->get();
+                                if (isset($clases) && sizeof($clases) > 0) {
+                                    $modulo->clases = $clases;
+                                }
+                                array_push($formatModulos, $modulo);
+                            }
+                        }
+                        $sugerencia->userInfo = $userInfo;
+                        $sugerencia->modulos = $formatModulos;
+                        array_push($formatSugerencias, $sugerencia);
+                    }   
+                }
+            }
+
             $foro = Foro::where("id_curso", $cursoId)->first();
             $foroId = 0;
             if (isset($foro)) {
@@ -256,7 +307,7 @@ class CursoController extends Controller
     {
         
         try {
-           
+
 
             $validator = Validator::make($req->all(), [
                 "estudianteId" => "required|string",
@@ -287,7 +338,6 @@ class CursoController extends Controller
                             'eventos.tipo',
                         )
                         ->where("cursos.evento_id_of_curso", $miCurso->evento_id)->first();
-                    $cursoUtils = new CursoUtils();
                     $calificacionCurso = $cursoUtils->calificacionesOfCurso($miCurso->evento_id);
                     $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
                     $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
@@ -358,12 +408,13 @@ class CursoController extends Controller
      * @param  \App\Models\Curso  $curso
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Curso $curso)
+    public function destroy(Request $req)
     {
         //
     }
 
-    public function canGetCertificate($cursoId, Request $req){
+    public function canGetCertificate($cursoId, Request $req)
+    {
 
         try{
             $userInfo = auth()->user();
@@ -383,7 +434,6 @@ class CursoController extends Controller
         }
            
 
-        
     }
 
 
