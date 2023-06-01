@@ -339,6 +339,7 @@ class CursoController extends Controller
                             'eventos.tipo',
                         )
                         ->where("cursos.evento_id_of_curso", $miCurso->evento_id)->first();
+                    $cursoUtils = new CursoUtils();
                     $calificacionCurso = $cursoUtils->calificacionesOfCurso($miCurso->evento_id);
                     $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
                     $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
