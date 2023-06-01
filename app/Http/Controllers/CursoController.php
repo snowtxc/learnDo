@@ -395,6 +395,17 @@ class CursoController extends Controller
         //
     }
 
+    public function getProgresoEstudiantes(Request $request) {
+        try {
+            //code...
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage()
+            ]);
+        }
+    }
+
     /**
      * Remove the specified resource from storage.
      *

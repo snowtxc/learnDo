@@ -84,6 +84,8 @@ Route::group([
     Route::get("/getCursoAndClases", [CursoController::class, "getCursoAndClases"])->name("getCursoAndClases"); // solo info del curso, modulos y clases. (sin evaluación también)
     Route::get("/{id}/canGetCertificate", [CursoController::class, "canGetCertificate"])->name("canGetCertificate");
     Route::put("/updateCursoInfo", [CursoController::class, "updateCursoInfo"])->name("updateCursoInfo");
+    Route::get("/getProgresoEstudiantes", [CursoController::class, "getProgresoEstudiantes"])->name("getProgresoEstudiantes"); // solo info del curso, modulos y clases. (sin evaluación también)
+
 });
 
 Route::group([
