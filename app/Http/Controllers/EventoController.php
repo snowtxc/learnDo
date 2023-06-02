@@ -102,7 +102,7 @@ class EventoController extends Controller
             return response()->json([
                 "ok" => false,
                 "message" => $th->getMessage()
-            ]);
+            ], 400);
         }
     }
 
@@ -277,7 +277,7 @@ class EventoController extends Controller
             $userInfo = auth()->user();
             $userId  = $userInfo["id"];
            
-            
+
             $misEventos = DB::table("eventos")->join('compraevento', 'compraevento.evento_id', '=', 'eventos.id')->where("compraevento.estudiante_id", $userId)->select("eventos.id","eventos.tipo")->get();
            
             $result = array();
@@ -480,6 +480,91 @@ class EventoController extends Controller
                 "cursos" => $cursos,
                 "seminariosP" => $seminariosP,
                 "seminariosV" => $seminariosV,
+            ]);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage()
+            ]);
+        }
+    }
+
+    public function listarTendencias(Request $req)
+
+    {
+        try {
+            $cursosMasComprados = DB::table('compraevento')
+                ->join('eventos', 'compraevento.evento_id', '=', 'eventos.id')
+                ->select(
+                    'eventos.id',
+                    'eventos.nombre',
+                    'eventos.descripcion',
+                    'eventos.imagen',
+                    'eventos.es_pago',
+                    'eventos.precio',
+                    'eventos.organizador_id',
+                    'eventos.tipo',
+                )
+                ->where("eventos.tipo", "=", "curso")
+                ->groupBy("compraevento.evento_id", "eventos.id", "eventos.nombre", "eventos.descripcion", "eventos.imagen", "eventos.es_pago", "eventos.precio", "eventos.organizador_id", "eventos.tipo")
+                ->orderByDesc(DB::raw('count(compraevento.id)'))
+                ->limit(10)
+            ->get();
+
+            if(sizeof($cursosMasComprados) < 1){ // en caso de que no hayan compras, simplemente traigo 10 cursos random.
+                $cursosMasComprados = DB::table('eventos')
+                ->select(
+                    'eventos.id',
+                    'eventos.nombre',
+                    'eventos.descripcion',
+                    'eventos.imagen',
+                    'eventos.es_pago',
+                    'eventos.precio',
+                    'eventos.organizador_id',
+                    'eventos.tipo',
+                )
+                ->where("eventos.tipo", "=", "curso")
+                ->limit(10)
+                ->get();
+            }
+            $cursosRecientes = DB::table('eventos')
+            ->select(
+                'eventos.id',
+                'eventos.nombre',
+                'eventos.descripcion',
+                'eventos.imagen',
+                'eventos.es_pago',
+                'eventos.precio',
+                'eventos.organizador_id',
+                'eventos.tipo',
+            )
+            ->where("eventos.tipo", "=", "curso")
+            ->orderByDesc('eventos.created_at')
+            ->limit(10)
+            ->get();
+
+            $seminariosRandom = DB::table('eventos')
+            ->select(
+                'eventos.id',
+                'eventos.nombre',
+                'eventos.descripcion',
+                'eventos.imagen',
+                'eventos.es_pago',
+                'eventos.precio',
+                'eventos.organizador_id',
+                'eventos.tipo',
+            )
+            ->where("tipo", "=", "seminarioP")
+            ->orWhere("tipo", "=", "seminarioV")
+            ->limit(5)
+            ->get();
+
+            return response()->json([
+                "ok" => true,
+                "eventosMasComprados" => $cursosMasComprados,
+                "cursosRecientes" => $cursosRecientes,
+                "seminariosRandom" => $seminariosRandom,
             ]);
 
         } catch (\Throwable $th) {
