@@ -44,6 +44,7 @@ class EventoController extends Controller
             $eventoId = $req->eventoId;
             $monto = $req->monto;
             $metodoPago = $req->metodoPago;
+            $useDiscount = $req->useDiscount;
             if (!isset($uid) || !isset($metodoPago) || !isset($monto) || !isset($eventoId)) {
                 throw new Exception("Datos invalidos");
             }
@@ -54,6 +55,12 @@ class EventoController extends Controller
             }
             if ($userInfo->type == "organizador") {
                 throw new Exception("Los organizadores no pueden comprar eventos");
+            }
+
+            if ($useDiscount) {
+                Usuario::where("id", "=",$uid)->update([
+                    "creditos_number" => $userInfo->creditos_number -= 10
+                ]);
             }
 
             $existsSeminarioPresencial = SeminarioPresencial::where("evento_id", $eventoId)->first();

@@ -23,7 +23,7 @@ use App\Http\Controllers\SeminarioVirtualController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\PuntuacionController;
 use App\Http\Controllers\CertificadoController;
-
+use App\Http\Controllers\CuponController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -226,5 +226,14 @@ Route::group([
     Route::post('/createSugerencia', [SugerenciaController::class, "create"]);
     Route::put('/changeStatus', [SugerenciaController::class, "changeStatus"]);
 });
+
+Route::group([
+    "prefix" => "cupon",
+], function () {
+    Route::post('/generateCupon', [CuponController::class, "generateNewCupon"]);
+    Route::get('/validarCupon', [CuponController::class, "validarCupon"]);
+    Route::get('/usarCupon', [CuponController::class, "usarCupon"]);
+});
+
 
 

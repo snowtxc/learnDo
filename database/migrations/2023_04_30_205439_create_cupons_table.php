@@ -19,8 +19,8 @@ class CreateCuponsTable extends Migration
             $table->float('descuento');
             $table->date('fecha_vencimiento');
             $table->integer('user_id_from')->unsigned()->nullable();
-            $table->integer('user_id_to')->unsigned()->nullable();
             $table->integer('evento_id')->unsigned()->nullable();
+            $table->boolean('activo')->nullable();
             $table->timestamps();
         });
     }
