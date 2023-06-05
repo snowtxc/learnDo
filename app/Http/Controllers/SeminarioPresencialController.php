@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Evento;
 use App\Models\SeminarioPresencial;
+use App\Models\Usuario;
 use Illuminate\Http\Request;
 use App\Models\SeminarioVirtual;
 use Validator;
+use Illuminate\Support\Facades\DB;
+use Exception;
 
 class SeminarioPresencialController extends Controller
 {
@@ -51,6 +54,98 @@ class SeminarioPresencialController extends Controller
             'message' => 'El seminario se ha creado correctamente.',
             'curso' => $seminario,
         ], 201);
+    }
+
+    public function getCompleteInfoSeminario(Request $req)
+    {
+        try {
+            $validator = Validator::make($req->all(), [
+                "seminarioId" => "required",
+            ]);
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+            $seminarioId = $req->seminarioId;
+
+            $meInfo = auth()->user();
+            $myId = $meInfo->id;
+            $seminarioType = DB::table('eventos')
+                ->select('eventos.tipo')
+                ->where([["id", $seminarioId], ['tipo', '<>', 'curso']])->first();
+
+                if (!isset($seminarioType)) {
+                throw new Exception("Error, seminario not found.");
+            }
+
+            $seminarioInfo = null;
+            if ($seminarioType->tipo === 'seminarioP') {
+                $seminarioInfo = DB::table('eventos')
+                    ->join('seminario_presencials', 'seminario_presencials.evento_id', '=', 'eventos.id')
+                    ->select(
+                        'eventos.id',
+                        'eventos.nombre',
+                        'eventos.imagen',
+                        'eventos.descripcion',
+                        'eventos.es_pago',
+                        'eventos.precio',
+                        'eventos.tipo',
+                        'eventos.organizador_id',
+                        'seminario_presencials.fecha',
+                        'seminario_presencials.hora',
+                        'seminario_presencials.duracion',
+                        'seminario_presencials.maximo_participantes',
+                        'seminario_presencials.latitud',
+                        'seminario_presencials.longitud'
+                    )
+                    ->where("id", $seminarioId)->first();
+            }
+            if ($seminarioType->tipo === 'seminarioV') {
+                $seminarioInfo = DB::table('eventos')
+                    ->join('seminario_virtuals', 'seminario_virtuals.evento_id', '=', 'eventos.id')
+                    ->select(
+                        'eventos.id',
+                        'eventos.nombre',
+                        'eventos.imagen',
+                        'eventos.descripcion',
+                        'eventos.es_pago',
+                        'eventos.precio',
+                        'eventos.tipo',
+                        'eventos.organizador_id',
+                        'seminario_virtuals.fecha',
+                        'seminario_virtuals.hora',
+                        'seminario_virtuals.duracion',
+                        'seminario_virtuals.link',
+                        'seminario_virtuals.estado',
+                    )
+                    ->where("id", $seminarioId)->first();
+            }
+            if (!isset($seminarioInfo)) {
+                throw new Exception("Error al obtener la informacion del seminario");
+            }
+
+            $organizadorInfo = Usuario::where("id", $seminarioInfo->organizador_id)->first();
+            $categorias = DB::table('categoriaeventos')
+                ->join('categorias', 'categoriaeventos.categoria_id', '=', 'categorias.id')
+                ->select('categorias.nombre', 'categorias.id')
+                ->where("categoriaeventos.evento_id", $seminarioId)->get();
+
+            $esComprado = DB::table("compraevento")->where("evento_id", "=", $seminarioId)
+                ->where("estudiante_id", "=", $myId)->first();
+
+            return response()->json([
+                "ok" => true,
+                "seminario" => $seminarioInfo,
+                "categorias" => $categorias,
+                "comprado" => isset($esComprado),
+                "profesor" => $organizadorInfo->nombre,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage(),
+            ]);
+        }
+        //
     }
 
     /**

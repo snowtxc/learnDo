@@ -23,6 +23,8 @@ use App\Http\Controllers\SeminarioVirtualController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\PuntuacionController;
 use App\Http\Controllers\CertificadoController;
+use App\Http\Controllers\MensajeSalaController;
+
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -104,6 +106,7 @@ Route::group([
     Route::get('/listByEventoId/{eventoId}', [ModuloController::class, "listByEventoId"]);
     Route::get('/{id}', [ModuloController::class, "show"]);
     Route::delete('/{id}', [ModuloController::class, "destroy"]);
+    Route::put('/updateAllOfModulo', [ModuloController::class, "updateAllInfoOfModulo"]);
     Route::put('/{id}', [ModuloController::class, "update"]);
 });
 
@@ -112,6 +115,7 @@ Route::group([
 ], function () {
     Route::post('/createClase', [ClaseController::class, "create"]);
     Route::get('/', [ClaseController::class, "getClaseInfo"]);
+    Route::delete('/{id}', [ClaseController::class, "destroy"]);
 
 });
 
@@ -128,6 +132,7 @@ Route::group([
     "prefix" => "preguntas",
 ], function () {
     Route::post('/createPregunta', [PreguntaController::class, "create"]);
+    Route::delete('/{id}', [PreguntaController::class, "destroy"]);
 });
 
 Route::group([
@@ -148,6 +153,8 @@ Route::group([
     Route::post('/createSeminarioVirtual', [SeminarioVirtualController::class, "create"]);
     Route::post('/createSeminarioPresencial', [SeminarioPresencialController::class, "create"]);
     Route::get('/presenciales', [SeminarioPresencialController::class, "listarSeminariosPresenciales"]);
+    Route::get('/getCompleteInfoSeminario', [SeminarioPresencialController::class, "getCompleteInfoSeminario"]);
+    Route::post("/virtuales/{id}/chat",  [MensajeSalaController::class , "create"]);    
 });
 
 
@@ -175,6 +182,8 @@ Route::group([
     "prefix" => "colaboraciones",
 ], function () {
     Route::post('/createColaboraciones', [ColaboracionController::class, "create"]);
+    Route::post('/isUserColaborador', [ColaboracionController::class, "isUserColaborador"]);
+    Route::delete('/', [ColaboracionController::class, "destroy"]);
 });
 
 Route::group([
@@ -216,6 +225,7 @@ Route::group([
     "prefix" => "sugerencias",
 ], function () {
     Route::post('/createSugerencia', [SugerenciaController::class, "create"]);
+    Route::put('/changeStatus', [SugerenciaController::class, "changeStatus"]);
 });
 
 

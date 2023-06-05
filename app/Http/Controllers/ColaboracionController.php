@@ -38,22 +38,54 @@ class ColaboracionController extends Controller
 
         $colaboradores = $request->input('colaboradores');
         foreach ($colaboradores as $colaborador) {
-            $colabToSave = new colaboracion();
-            $colabToSave->user_id = $colaborador['id'];
-            $userInfo = Usuario::find($colaborador['id']);
+            $existsColaboracion = colaboracion::where("user_id", "=", $colaborador['id'])->where("evento_id", '=', $request->evento_id)->first();
+            if (!isset($existsColaboracion)) {
+                $colabToSave = new colaboracion();
+                $colabToSave->user_id = $colaborador['id'];
+                $userInfo = Usuario::find($colaborador['id']);
 
-            $colabToSave->evento_id = $request->input('evento_id');
-            $eventoInfo = Evento::find($request->input('evento_id'));
-            $me = Usuario::find($eventoInfo->organizador_id);
+                $colabToSave->evento_id = $request->input('evento_id');
+                $eventoInfo = Evento::find($request->input('evento_id'));
+                $me = Usuario::find($eventoInfo->organizador_id);
 
-            $colabToSave->save();
-            $mailController = new MailController("Colaboracion - Learndo", $userInfo->email);
-            $mailController->add_colaborador_email($userInfo->nombre, $me->nombre, $eventoInfo->nombre);
+                $colabToSave->save();
+                $mailController = new MailController("Colaboracion - Learndo", $userInfo->email);
+                $mailController->add_colaborador_email($userInfo->nombre, $me->nombre, $eventoInfo->nombre);
+            }
+
         }
 
         return response()->json([
             'message' => 'Las colaboraciones fueron creadas exitosamente.',
         ], 201);
+    }
+
+    public function isUserColaborador(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+            'evento_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+
+        $colabInfo = colaboracion::where("user_id", $request->user_id)
+            ->where("evento_id", $request->evento_id)->first();
+        if (!isset($colabInfo)) {
+            return response()->json([
+                "ok" => false,
+                'message' => 'Permiso denegado, no eres colaborador para este curso.',
+            ], 403);
+        }
+
+        return response()->json([
+            "ok" => true,
+            'message' => 'Éxito, el usuario es colaborador.',
+            'colaboracion' => $colabInfo,
+        ], 200);
     }
 
     /**
@@ -107,8 +139,25 @@ class ColaboracionController extends Controller
      * @param  \App\Models\colaboracion  $colaboracion
      * @return \Illuminate\Http\Response
      */
-    public function destroy(colaboracion $colaboracion)
+    public function destroy(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'evento_id' => 'required|integer',
+            'user_id' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $colaboracion = colaboracion::where("user_id", "=", $request->user_id)->where("evento_id", '=', $request->evento_id)->first();
+        if (isset($colaboracion)) {
+            $colaboracion->delete();
+        }
+
+        return response()->json([
+            'ok' => true,
+            'message' => "Colaborador eliminado correctamente",
+        ], 201);
     }
 }
