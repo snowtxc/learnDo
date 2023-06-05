@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Http\Utils\CursoUtils;
 use App\Models\CompraEvento;
 use App\Models\Evento;
@@ -32,7 +33,8 @@ class EventoController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-     public function __construct() {
+    public function __construct()
+    {
         $this->middleware('jwt');
     }
 
@@ -48,56 +50,61 @@ class EventoController extends Controller
             if (!isset($uid) || !isset($metodoPago) || !isset($monto) || !isset($eventoId)) {
                 throw new Exception("Datos invalidos");
             }
-            $userInfo = Usuario::find($uid);
-            $eventoInfo = Evento::find($eventoId);
-            if (!isset($userInfo) || !isset($eventoInfo)) {
-                throw new Exception("Usuario o evento invalido");
-            }
-            if ($userInfo->type == "organizador") {
-                throw new Exception("Los organizadores no pueden comprar eventos");
-            }
+            $compraEvento = CompraEvento::where("estudiante_id", "=", $uid)->where("evento_id", "=", $eventoId)->first();
 
-            if ($useDiscount) {
-                Usuario::where("id", "=",$uid)->update([
-                    "creditos_number" => $userInfo->creditos_number -= 10
-                ]);
-            }
-
-            $existsSeminarioPresencial = SeminarioPresencial::where("evento_id", $eventoId)->first();
-            $existsSeminarioVirtual = SeminarioVirtual::where("evento_id", $eventoId)->first();
-
-            $isSeminario = isset($existsSeminarioPresencial) || isset($existsSeminarioVirtual);
-
-            if ($isSeminario == true) {
-                $gcc = new GoogleCalendarController();
-
-                if (isset($existsSeminarioPresencial)) {
-                    $gcc->MakeEvent(
-                        $existsSeminarioPresencial->fecha,
-                        $existsSeminarioPresencial->hora,
-                        $existsSeminarioPresencial->duracion,
-                        $userInfo->email,
-                        $eventoInfo->nombre,
-                        $eventoInfo->descripcion,
-                    );
-                } else if (isset($existsSeminarioVirtual)) {
-                    $gcc->MakeEvent(
-                        $existsSeminarioVirtual->fecha,
-                        $existsSeminarioVirtual->hora,
-                        $existsSeminarioVirtual->duracion,
-                        $userInfo->email,
-                        $eventoInfo->nombre,
-                        $eventoInfo->descripcion,
-                    );
+            if (!isset($compraEvento)) {
+                $userInfo = Usuario::find($uid);
+                $eventoInfo = Evento::find($eventoId);
+                if (!isset($userInfo) || !isset($eventoInfo)) {
+                    throw new Exception("Usuario o evento invalido");
+                }
+                if ($userInfo->type == "organizador") {
+                    throw new Exception("Los organizadores no pueden comprar eventos");
                 }
 
+                if ($useDiscount) {
+                    Usuario::where("id", "=", $uid)->update([
+                        "creditos_number" => $userInfo->creditos_number -= 10
+                    ]);
+                }
+
+                $existsSeminarioPresencial = SeminarioPresencial::where("evento_id", $eventoId)->first();
+                $existsSeminarioVirtual = SeminarioVirtual::where("evento_id", $eventoId)->first();
+
+                $isSeminario = isset($existsSeminarioPresencial) || isset($existsSeminarioVirtual);
+
+                if ($isSeminario == true) {
+                    $gcc = new GoogleCalendarController();
+
+                    // if (isset($existsSeminarioPresencial)) {
+                    //     $gcc->MakeEvent(
+                    //         $existsSeminarioPresencial->fecha,
+                    //         $existsSeminarioPresencial->hora,
+                    //         $existsSeminarioPresencial->duracion,
+                    //         $userInfo->email,
+                    //         $eventoInfo->nombre,
+                    //         $eventoInfo->descripcion,
+                    //     );
+                    // } else if (isset($existsSeminarioVirtual)) {
+                    //     $gcc->MakeEvent(
+                    //         $existsSeminarioVirtual->fecha,
+                    //         $existsSeminarioVirtual->hora,
+                    //         $existsSeminarioVirtual->duracion,
+                    //         $userInfo->email,
+                    //         $eventoInfo->nombre,
+                    //         $eventoInfo->descripcion,
+                    //     );
+                    // }
+
+                }
+                $buyedEvent = new CompraEvento();
+                $buyedEvent->estudiante_id = $uid;
+                $buyedEvent->evento_id = $eventoId;
+                $buyedEvent->metodoPago = $metodoPago;
+                $buyedEvent->monto = $monto;
+                $buyedEvent->save();
+
             }
-            $buyedEvent = new CompraEvento();
-            $buyedEvent->estudiante_id = $uid;
-            $buyedEvent->evento_id = $eventoId;
-            $buyedEvent->metodoPago = $metodoPago;
-            $buyedEvent->monto = $monto;
-            $buyedEvent->save();
 
             return response()->json([
                 "ok" => true,
@@ -124,24 +131,24 @@ class EventoController extends Controller
         $busqueda = ($request->query('busqueda') != null && $request->query('busqueda') != '') ? $request->query('busqueda') : null; //array con las categorias a filtrar
 
         $tipo = $request->query('tipo') != null ? $request->query('tipo') : null;
-      
+
         $eventos = Evento::whereHas('categorias', function ($query) use ($categoriaFilterIds) {
             if ($categoriaFilterIds != null) {
                 $query->whereIn('categorias.id', $categoriaFilterIds);
             }
 
         })->when(isset($busqueda), function ($query) use ($busqueda) {
-            $query->where('nombre', 'like', '%' . $busqueda . '%'); 
+            $query->where('nombre', 'like', '%' . $busqueda . '%');
         })->when(isset($tipo), function ($query) use ($tipo) {
-          
 
-            $query->where("tipo","=",$tipo);
+
+            $query->where("tipo", "=", $tipo);
         })
             ->skip($offset)->take($maxRows)->get();
 
 
         //Queda hacer un filtro por tipo/
- 
+
         $result = array();
         foreach ($eventos as $evento) {
             $organizadorID = $evento['organizador_id'];
@@ -254,39 +261,39 @@ class EventoController extends Controller
             'evento' => $evento,
         ], 201);
     }
-    
+
 
     public function userIsStudentOrOwner($eventoID, Request $req)
     {
-        try{
+        try {
             $userInfo = auth()->user();
-            $userId  = $userInfo["id"];
+            $userId = $userInfo["id"];
 
             $eventoInfo = Evento::find($eventoID);
-            if(!isset($eventoInfo)){
-                return response()->json(["message" => "El evento no existe"] ,404);
+            if (!isset($eventoInfo)) {
+                return response()->json(["message" => "El evento no existe"], 404);
             }
             $userAlreadyHasEvento = CompraEvento::where(["evento_id" => $eventoID, "estudiante_id" => $userId])->count() > 0 ? true : false; //check if user is student of event
-            $userIsOwner =  Evento::where(["id" => $eventoID, "organizador_id" => $userId])->count() > 0 ? true : false;  //check if user is owner of event
-            return response()->json(["result" => $userAlreadyHasEvento || $userIsOwner],200);
+            $userIsOwner = Evento::where(["id" => $eventoID, "organizador_id" => $userId])->count() > 0 ? true : false; //check if user is owner of event
+            return response()->json(["result" => $userAlreadyHasEvento || $userIsOwner], 200);
 
-        } catch(Exception $e){
-            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+        } catch (Exception $e) {
+            return response()->json(["message" => "Ha ocurrido un error inesperado"], 500);
 
         }
-        
+
     }
 
     public function getMyEventos(Request $req)
     {
         try {
-           
+
             $userInfo = auth()->user();
-            $userId  = $userInfo["id"];
-           
-            
-            $misEventos = DB::table("eventos")->join('compraevento', 'compraevento.evento_id', '=', 'eventos.id')->where("compraevento.estudiante_id", $userId)->select("eventos.id","eventos.tipo")->get();
-           
+            $userId = $userInfo["id"];
+
+
+            $misEventos = DB::table("eventos")->join('compraevento', 'compraevento.evento_id', '=', 'eventos.id')->where("compraevento.estudiante_id", $userId)->select("eventos.id", "eventos.tipo")->get();
+
             $result = array();
 
             if (isset($misEventos) && sizeof($misEventos) > 0) {
@@ -307,27 +314,27 @@ class EventoController extends Controller
                                 'eventos.tipo',
                                 'cursos.porcentaje_aprobacion'
                             )
-                            ->where("cursos.evento_id_of_curso",$miEvento->id)->first();
+                            ->where("cursos.evento_id_of_curso", $miEvento->id)->first();
 
 
 
-                            $cursoUtils = new CursoUtils();
-                            $calificacionCurso = $cursoUtils->calificacionesOfCurso($miEvento->id);
-                            $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
-                            $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
-                            $countEstudiantes = $calificacionCurso["countEstudiantes"];
+                        $cursoUtils = new CursoUtils();
+                        $calificacionCurso = $cursoUtils->calificacionesOfCurso($miEvento->id);
+                        $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
+                        $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
+                        $countEstudiantes = $calificacionCurso["countEstudiantes"];
 
-                         if (isset($cursoInfo)) {
+                        if (isset($cursoInfo)) {
                             $cursoInfo->stars = $averageCalificaciones;
                             $cursoInfo->countPuntuaciones = $countPuntuaciones;
                             $cursoInfo->countEstudiantes = $countEstudiantes;
-                            $certificate = Certificado::where(["estudiante_id" => $userId, "curso_id"=> $cursoInfo->id])->first();
+                            $certificate = Certificado::where(["estudiante_id" => $userId, "curso_id" => $cursoInfo->id])->first();
                             $cursoInfo->certificateID = $certificate != null ? $certificate->id : null;
-                            $cursoInfo->porcentajeCurso = $cursoUtils->canStudentGetCertificate($userId,$cursoInfo->id , $cursoInfo->porcentaje_aprobacion)["avgCalifications"];
+                            $cursoInfo->porcentajeCurso = $cursoUtils->canStudentGetCertificate($userId, $cursoInfo->id, $cursoInfo->porcentaje_aprobacion)["avgCalifications"];
 
                             array_push($result, $cursoInfo);
 
-                         }
+                        }
 
                     }
 
@@ -372,7 +379,7 @@ class EventoController extends Controller
                 }
             }
 
-            return response()->json( ["eventos" => $result],200);
+            return response()->json(["eventos" => $result], 200);
 
         } catch (Throwable $th) {
             return response()->json([
@@ -427,13 +434,13 @@ class EventoController extends Controller
                                 'eventos.tipo',
                             )
                             ->where("cursos.evento_id_of_curso", $miEvento->id)->first();
-                    $cursoUtils = new CursoUtils();
-                    $calificacionCurso = $cursoUtils->calificacionesOfCurso($miEvento->id);
-                    $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
-                    $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
-                    $countEstudiantes = $calificacionCurso["countEstudiantes"];
+                        $cursoUtils = new CursoUtils();
+                        $calificacionCurso = $cursoUtils->calificacionesOfCurso($miEvento->id);
+                        $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
+                        $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
+                        $countEstudiantes = $calificacionCurso["countEstudiantes"];
 
-                    if (isset($cursoInfo)) {
+                        if (isset($cursoInfo)) {
                             $cursoInfo->stars = $averageCalificaciones;
                             $cursoInfo->countPuntuaciones = $countPuntuaciones;
                             $cursoInfo->countEstudiantes = $countEstudiantes;

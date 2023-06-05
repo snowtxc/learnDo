@@ -306,10 +306,7 @@ class CursoController extends Controller
 
     public function getCursosComprados(Request $req)
     {
-        
         try {
-
-
             $validator = Validator::make($req->all(), [
                 "estudianteId" => "required|string",
             ]);
