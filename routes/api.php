@@ -61,10 +61,11 @@ Route::group([
     "prefix" => "eventos",
     'middleware' => ['cors'] 
 ], function() {
-    Route::get("/", [EventoController::class, "listar"])->name("listar"); 
-    Route::get("{id}/userIsStudentOrOwner", [EventoController::class, "userIsStudentOrOwner"])->name("userIsStudentOrOwner");  
-    Route::get("/getMyEventos", [EventoController::class, "getMyEventos"])->name("getMyEventos");  
-    Route::get("/getEventosAdmin", [EventoController::class, "getEventosAdmin"])->name("getEventosAdmin");  
+    Route::get("/", [EventoController::class, "listar"])->name("listar");
+    Route::get("{id}/userIsStudentOrOwner", [EventoController::class, "userIsStudentOrOwner"])->name("userIsStudentOrOwner");
+    Route::get("/getMyEventos", [EventoController::class, "getMyEventos"])->name("getMyEventos");
+    Route::get("/getEventosAdmin", [EventoController::class, "getEventosAdmin"])->name("getEventosAdmin");
+    Route::get("/listarTendencias", [EventoController::class, "listarTendencias"])->name("listarTendencias");
 });
 
 Route::group([
