@@ -309,7 +309,9 @@ class EventoController extends Controller
 
             $userInfo = auth()->user();
             $userId  = $userInfo["id"];
-           
+            if ($req->uid) {
+                $userId = $req->uid;
+            }
 
             $misEventos = DB::table("eventos")->join('compraevento', 'compraevento.evento_id', '=', 'eventos.id')->where("compraevento.estudiante_id", $userId)->select("eventos.id","eventos.tipo")->get();
            
