@@ -228,7 +228,7 @@ class CursoController extends Controller
                 "countPuntuaciones" => $countPuntuaciones,
                 "modulos" => $formattedModulos,
                 "puntuaciones" => $puntuaciones,
-                "profesor" => $organizadorInfo->nombre,
+                "profesor" => $organizadorInfo,
                 "foroId" => $foroId,
                 "certificateID" => $certificate != null ? $certificate->id : null 
             ]);
@@ -306,10 +306,7 @@ class CursoController extends Controller
 
     public function getCursosComprados(Request $req)
     {
-        
         try {
-
-
             $validator = Validator::make($req->all(), [
                 "estudianteId" => "required|string",
             ]);
