@@ -228,7 +228,7 @@ class CursoController extends Controller
                 "countPuntuaciones" => $countPuntuaciones,
                 "modulos" => $formattedModulos,
                 "puntuaciones" => $puntuaciones,
-                "profesor" => $organizadorInfo->nombre,
+                "profesor" => $organizadorInfo,
                 "foroId" => $foroId,
                 "certificateID" => $certificate != null ? $certificate->id : null 
             ]);
