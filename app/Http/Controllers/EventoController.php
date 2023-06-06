@@ -284,6 +284,25 @@ class EventoController extends Controller
 
     }
 
+    public function getEventoInfo(Request $req) {
+        try {
+            $eventoId = $req->eventoId;
+            $eventoInfo = Evento::find($eventoId);
+            if (!isset($eventoInfo)) {
+                throw new Exception("Evento inexistente");
+            }
+            return response()->json([
+                "ok" => true,
+                "eventoInfo" => $eventoInfo,
+            ]);
+        } catch(Exception $e) {
+            return response()->json([
+                "ok" => false,
+                "message"=> $e->getMessage(),
+            ]);
+        }
+    }
+
     public function getMyEventos(Request $req)
     {
         try {
