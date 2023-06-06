@@ -372,7 +372,8 @@ class EventoController extends Controller
                                 'eventos.tipo',
                             )
                             ->where("seminario_virtuals.evento_id", $miEvento->id)->first();
-                        if (isset($seminariosVInfo)) {
+
+                        if (isset($seminarioVInfo)) {
                             array_push($result, $seminarioVInfo);
                         }
                     }
