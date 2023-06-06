@@ -27,7 +27,7 @@ class ChatEventController implements ShouldBroadcast
         $this->to_user_id = $to_user_id;
         $this->message = $message;
     }
-
+   
     public function broadcastOn()
     {
         return "MessageFrom-$this->from_user_id-To-$this->to_user_id";

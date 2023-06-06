@@ -23,6 +23,7 @@ use App\Http\Controllers\SeminarioVirtualController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\PuntuacionController;
 use App\Http\Controllers\CertificadoController;
+
 use App\Http\Controllers\CuponController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -155,6 +156,7 @@ Route::group([
     Route::post('/createSeminarioPresencial', [SeminarioPresencialController::class, "create"]);
     Route::get('/presenciales', [SeminarioPresencialController::class, "listarSeminariosPresenciales"]);
     Route::get('/getCompleteInfoSeminario', [SeminarioPresencialController::class, "getCompleteInfoSeminario"]);
+    Route::post("/virtuales/{id}/chat",  [MensajeSalaController::class , "create"]);    
 });
 
 
