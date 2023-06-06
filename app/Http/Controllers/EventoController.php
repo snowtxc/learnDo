@@ -203,7 +203,11 @@ class EventoController extends Controller
         $evento->descripcion = $request->input('descripcion');
         $evento->imagen = $request->input('imagen');
         $evento->es_pago = $request->input('es_pago');
-        $evento->precio = $request->input('precio');
+        if ($request->input('es_pago') == true) {
+            $evento->precio = $request->input('precio');
+        } else {
+            $evento->precio = 0;
+        }
         $evento->organizador_id = $request->input('organizador');
         $evento->tipo = $request->input('tipo');
         // $evento->categoria_id  = $request->input('categoria');
