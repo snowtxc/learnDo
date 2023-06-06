@@ -23,9 +23,8 @@ use App\Http\Controllers\SeminarioVirtualController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\PuntuacionController;
 use App\Http\Controllers\CertificadoController;
-use App\Http\Controllers\MensajeSalaController;
 
-
+use App\Http\Controllers\CuponController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -63,11 +62,11 @@ Route::group([
     "prefix" => "eventos",
     'middleware' => ['cors'] 
 ], function() {
-    Route::get("/", [EventoController::class, "listar"])->name("listar"); 
-    Route::get("{id}/userIsStudentOrOwner", [EventoController::class, "userIsStudentOrOwner"])->name("userIsStudentOrOwner");  
-    Route::get("/getMyEventos", [EventoController::class, "getMyEventos"])->name("getMyEventos");  
-
-
+    Route::get("/", [EventoController::class, "listar"])->name("listar");
+    Route::get("{id}/userIsStudentOrOwner", [EventoController::class, "userIsStudentOrOwner"])->name("userIsStudentOrOwner");
+    Route::get("/getMyEventos", [EventoController::class, "getMyEventos"])->name("getMyEventos");
+    Route::get("/getEventosAdmin", [EventoController::class, "getEventosAdmin"])->name("getEventosAdmin");
+    Route::get("/listarTendencias", [EventoController::class, "listarTendencias"])->name("listarTendencias");
 });
 
 Route::group([
@@ -147,6 +146,7 @@ Route::group([
     "prefix" => "usuarios",
 ], function () {
     Route::get('/filterByNicknameOrEmail', [UsuarioController::class, "filterByNicknameOrEmail"]);
+    Route::get('/userInfoById', [UsuarioController::class, "userInfoById"]);
 });
 
 Route::group([
@@ -229,5 +229,14 @@ Route::group([
     Route::post('/createSugerencia', [SugerenciaController::class, "create"]);
     Route::put('/changeStatus', [SugerenciaController::class, "changeStatus"]);
 });
+
+Route::group([
+    "prefix" => "cupon",
+], function () {
+    Route::post('/generateCupon', [CuponController::class, "generateNewCupon"]);
+    Route::get('/validarCupon', [CuponController::class, "validarCupon"]);
+    Route::get('/usarCupon', [CuponController::class, "usarCupon"]);
+});
+
 
 

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Validator;
 use App\Http\Controllers\MailController;
 use App\Http\Utils\UserUtils;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -44,7 +45,7 @@ class UsuarioController extends Controller
             "rol" => "required|string",
             "imagen" => "required|string",
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
@@ -120,7 +121,7 @@ class UsuarioController extends Controller
                 Rule::in(['organizador', 'estudiante'])
             ],
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
@@ -133,7 +134,7 @@ class UsuarioController extends Controller
                 "msg" => "Error, el usuario no existe",
             ], 401);
         }
-        
+
         Usuario::where("id", $req->uid)->update(['type' => $req->role]);
 
         // Creo el user en la tabla estudiante / organizador
@@ -145,7 +146,8 @@ class UsuarioController extends Controller
             $organizador = new Organizador();
             $organizador->user_id = $req->id;
             $organizador->save();
-        };
+        }
+        ;
 
         return response()->json([
             "ok" => true,
@@ -164,7 +166,7 @@ class UsuarioController extends Controller
             "rol" => "string",
             "imagen" => "string",
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
@@ -179,8 +181,8 @@ class UsuarioController extends Controller
                 "email" => $emailToValidate
             ];
             $token = ($user = Auth::getProvider()->retrieveByCredentials($credentials))
-            ? Auth::login($user)
-            : false;
+                ? Auth::login($user)
+                : false;
             return response()->json([
                 "ok" => true,
                 "token" => $token,
@@ -202,8 +204,8 @@ class UsuarioController extends Controller
         $user->nickname = $userNickname;
         $user->email = $req->email;
         $user->telefono = $req->telefono ? $req->telefono : 0;
-        $user->nombre = $req->nombre; 
-        $user->oauthId = $req->uid; 
+        $user->nombre = $req->nombre;
+        $user->oauthId = $req->uid;
         $user->imagen = $req->imagen;
         $user->creditos_number = 0;
         $user->biografia = $req->biografia ? $req->biografia : "";
@@ -225,7 +227,8 @@ class UsuarioController extends Controller
             // $nextId = $statement[0]->Auto_increment; // obtengo el siguiente id autogenerado por la secuencia
             $organizador->user_id = $user->id;
             $organizador->save();
-        };
+        }
+        ;
 
         $credentials = [
             "email" => $req["email"],
@@ -256,27 +259,29 @@ class UsuarioController extends Controller
         return response()->json(["existe" => isset($user)]);
     }
 
-    public function filterByNicknameOrEmail(Request $req) {
-        $validator = Validator::make($req->all(),[
+    public function filterByNicknameOrEmail(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
             "value" => "required|string|max:100",
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(),500);
+            return response()->json($validator->errors(), 500);
         }
 
-        $users = DB::table("usuarios")->select('id', 'nickname', 'email', 'telefono', 'nombre', 'biografia', 'imagen', 'status_id', 'creditos_number', 'type')->where("nickname", 'LIKE', '%'.$req->value.'%')
-        ->orWhere("email", "LIKE", "%".$req->value."%")
-        ->get();
+        $users = DB::table("usuarios")->select('id', 'nickname', 'email', 'telefono', 'nombre', 'biografia', 'imagen', 'status_id', 'creditos_number', 'type')->where("nickname", 'LIKE', '%' . $req->value . '%')
+            ->orWhere("email", "LIKE", "%" . $req->value . "%")
+            ->get();
         return response()->json($users);
     }
 
-     /**
+    /**
      * Create a new AuthController instance.
      *
      * @return void
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('jwt', ['except' => ['signin', 'create', 'activate', 'checkNickname', "signupWithOauth", 'filterByNicknameOrEmail', "createUserWithOauth", "changeUserRole"]]);
     }
     /**
@@ -357,31 +362,64 @@ class UsuarioController extends Controller
         $token = ($user = Auth::getProvider()->retrieveByCredentials($credentials))
             ? Auth::login($user)
             : false;
-        
+
         return $this->createNewToken($token);
-        
+
     }
 
-    function editMeInfo(Request $request){
+    function userInfoById(Request $req)
+    {
+        try {
+            $uid = $req->uid;
+            if (!isset($uid)) {
+                throw new Exception("Uid no valido");
+            }
+            $userInfo = Usuario::find($req->uid);
+            if (!isset($userInfo)) {
+                throw new Exception("Usuario no valido");
+            }
+            $userInfo->password = null;
+
+            $formatUserInfo = [
+                "userName" => $userInfo->nombre,
+                "userImage" => $userInfo->imagen,
+                "userId" => $userInfo->id,
+                "userData" => $userInfo,
+            ];
+
+            return response()->json([
+                "ok" => true,
+                "userInfo" => $formatUserInfo,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage()
+            ]);
+        }
+    }
+
+    function editMeInfo(Request $request)
+    {
         $user = auth()->user();
         $userId = $user->id;
         $validator = Validator::make($request->all(), [
-                           //faltaria el apellido
-            'nombre' => 'required', 
+            //faltaria el apellido
+            'nombre' => 'required',
             'telefono' => 'required',
             'imagen' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-        Usuario::where("id", $userId)->update(['nombre' => $request->input("nombre"), "telefono" => $request->input("telefono"),"imagen" => $request->input("imagen")]);
+        Usuario::where("id", $userId)->update(['nombre' => $request->input("nombre"), "telefono" => $request->input("telefono"), "imagen" => $request->input("imagen")]);
         return response()->json([
             "message" => "usuario editado correctamente"
-            
+
         ]);
     }
 
-    
+
     /**
      * Get the authenticated User.
      *

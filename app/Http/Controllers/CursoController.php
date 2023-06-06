@@ -12,6 +12,7 @@ use App\Models\Evaluacion;
 use App\Models\Calificacion;
 use App\Models\Certificado;
 use App\Models\Sugerencia;
+use App\Models\Evento;
 
 
 use Exception;
@@ -227,7 +228,7 @@ class CursoController extends Controller
                 "countPuntuaciones" => $countPuntuaciones,
                 "modulos" => $formattedModulos,
                 "puntuaciones" => $puntuaciones,
-                "profesor" => $organizadorInfo->nombre,
+                "profesor" => $organizadorInfo,
                 "foroId" => $foroId,
                 "certificateID" => $certificate != null ? $certificate->id : null 
             ]);
@@ -305,10 +306,7 @@ class CursoController extends Controller
 
     public function getCursosComprados(Request $req)
     {
-        
         try {
-
-
             $validator = Validator::make($req->all(), [
                 "estudianteId" => "required|string",
             ]);
@@ -338,6 +336,7 @@ class CursoController extends Controller
                             'eventos.tipo',
                         )
                         ->where("cursos.evento_id_of_curso", $miCurso->evento_id)->first();
+                    $cursoUtils = new CursoUtils();
                     $calificacionCurso = $cursoUtils->calificacionesOfCurso($miCurso->evento_id);
                     $averageCalificaciones = $calificacionCurso["averageCalificaciones"];
                     $countPuntuaciones = $calificacionCurso["countPuntuaciones"];
@@ -402,8 +401,51 @@ class CursoController extends Controller
         //
     }
 
-    public function getProgresoEstudiantes(Request $request) {
+    public function getProgresoEstudiantes(Request $req) {
         try {
+            $validator = Validator::make($req->all(), [
+                "cursoId" => "required|string",
+                "userId" => "required|string",
+            ]);
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+            $eventoInfo = Evento::find($req->cursoId);
+            $cursoInfo = Curso::where("evento_id_of_curso", "=", $req->cursoId)->first();
+
+            if (!isset($eventoInfo) || !isset($cursoInfo)) {
+                throw new Exception("Curso invalido");
+            }
+            $userInfo = Usuario::find($req->userId);
+            if (!isset($userInfo)) {
+                throw new Exception("Usuario invalido");
+            }
+            if ($eventoInfo->organizador_id != $req->userId) {
+                throw new Exception("Permiso denegado");
+            }
+            $estudianteCompra = CompraEvento::where("evento_id", "=", $req->cursoId)->get();
+            $estudiantesFormat = array();
+            if (isset($estudianteCompra)  && sizeof($estudianteCompra) > 0) {
+                foreach($estudianteCompra as $compraEstu) {
+                    $userInfo = Usuario::find($compraEstu->estudiante_id);
+                    if (isset($userInfo)) {
+                        $compraEstu->userInfo = $userInfo;
+                    }
+                    $cursoUtils = new CursoUtils();
+                    $result =  $cursoUtils->canStudentGetCertificate($userInfo->id, $eventoInfo->id,$cursoInfo->porcentaje_aprobacion);  
+                    if (isset($result)) {
+                        $compraEstu->progreso = $result;
+                    }
+                    array_push($estudiantesFormat, $compraEstu);
+                }
+            }
+    
+            return response()->json([
+                "ok" => true,
+                "cursoInfo" => $cursoInfo,
+                "eventoInfo" => $eventoInfo,
+                "estudiantes" => $estudiantesFormat,
+            ]);
             //code...
         } catch (\Throwable $th) {
             return response()->json([

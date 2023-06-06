@@ -270,13 +270,6 @@ class Relations extends Migration
 
         });
 
-        Schema::table('cupons', function (Blueprint $table) {
-            $table->foreign('user_id_to')
-                ->references('id')
-                ->on('usuarios')
-                ->onDelete('cascade');
-        });
-
         Schema::table('compraevento', function (Blueprint $table) {
             $table->foreign('evento_id')
                 ->references('id')
