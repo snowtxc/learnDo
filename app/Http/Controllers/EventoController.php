@@ -58,6 +58,7 @@ class EventoController extends Controller
                 if (!isset($userInfo) || !isset($eventoInfo)) {
                     throw new Exception("Usuario o evento invalido");
                 }
+
                 if ($userInfo->type == "organizador") {
                     throw new Exception("Los organizadores no pueden comprar eventos");
                 }
@@ -74,6 +75,14 @@ class EventoController extends Controller
                 $isSeminario = isset($existsSeminarioPresencial) || isset($existsSeminarioVirtual);
 
                 if ($isSeminario == true) {
+                    
+                    if (isset($existsSeminarioPresencial)) {
+                        $currentCapacidad = sizeof(CompraEvento::where("evento_id", "=", $eventoId)->get());
+                        $capacidad = $existsSeminarioPresencial->maximo_participantes;
+                        if ($currentCapacidad >= $capacidad) {
+                            throw new Exception("El evento no puede tener mas participantes");
+                        }
+                    }
                     $gcc = new GoogleCalendarController();
 
                     // if (isset($existsSeminarioPresencial)) {
