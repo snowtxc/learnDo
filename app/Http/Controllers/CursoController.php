@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Support\Facades\DB;
 use App\Http\Utils\CursoUtils;
+use App\Models\categoriaevento;
 use App\Models\colaboracion;
 use App\Models\Estudiante;
 use Illuminate\Support\Facades\Auth;
@@ -509,6 +510,82 @@ class CursoController extends Controller
         $alreadyHasCertificate =  Certificado::where(["estudiante_id" => $userId,  "curso_id" => $curso->id])->count() > 0;
         
         return response()->json( $alreadyHasCertificate ,200);  
+
+    }
+
+    public function updateCursoInfo(Request $req)
+    {
+        try {
+            $validator = Validator::make($req->all(), [
+                'nombre' => 'required|string',
+                'descripcion' => 'required|string',
+                'imagen' => 'required|string',
+                'es_pago' => 'required|boolean',
+                'precio' => 'required_if:es_pago,true',
+                'organizador' => 'required',
+                'porcentaje_aprobacion' => 'required_if:tipo,curso',
+                'categorias' => "array|required",
+                'cursoId' => "required"
+            ]);
+            if ($validator->fails()) {
+                return response()->json($validator->errors());
+            }
+
+            $eventoInfo = Evento::find($req->cursoId);
+            $curoInfo = Curso::where("evento_id_of_curso", "=", $req->cursoId)->first();
+            if (!isset($eventoInfo)) {
+                throw new Exception("Evento no encontrado");
+            }
+            if (!isset($eventoInfo)) {
+                throw new Exception("Evento no encontrado");
+            }
+
+            Evento::where("id", "=", $req->cursoId)->update([
+                "nombre" => $req->nombre,
+                "descripcion" => $req->descripcion,
+                "imagen" => $req->imagen,
+                "es_pago" => $req->es_pago,
+                "precio" => $req->precio,
+            ]);
+            Curso::where("evento_id_of_curso", "=", $req->cursoId)->update([
+                "porcentaje_aprobacion" => $req->porcentaje_aprobacion,
+            ]);
+
+
+            $categorias = $req->categorias;
+            if (isset($categorias) && sizeof($categorias) > 0) {
+                foreach ($categorias as $categoria) {
+                    $categoriaExists = categoriaevento::where("evento_id", "=", $req->cursoId)->where("categoria_id", "=", $categoria)->first();
+                    if (!isset($categoriaExists)) {
+                        $categoriaEvento = new categoriaevento();
+                        $categoriaEvento->evento_id = $req->cursoId;
+                        $categoriaEvento->categoria_id = $categoria;
+                        $categoriaEvento->save();
+                    }
+                }
+            }
+
+            $categoriasOfEvento = categoriaevento::where("evento_id", "=",  $req->cursoId)->get();
+            if (isset($categoriasOfEvento) && sizeof($categoriasOfEvento) > 0) {
+                if (sizeof($categorias) < sizeof($categoriasOfEvento)) {
+                    foreach($categoriasOfEvento as $catEvento) {
+                        if (!in_array($catEvento->categoria_id, $categorias)) {
+                            // delete
+                            $catEvento->delete();
+                        }
+                    }
+                }
+            }
+            return response()->json([
+                "ok" => false,
+                "message" => "Curso actualizado correctamente",
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => $th->getMessage(),
+            ]);
+        }
 
     }
 
