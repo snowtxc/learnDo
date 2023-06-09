@@ -87,6 +87,7 @@ class SeminarioPresencialController extends Controller
                         'eventos.imagen',
                         'eventos.descripcion',
                         'eventos.es_pago',
+                        'eventos.ganancias_acumuladas',
                         'eventos.precio',
                         'eventos.tipo',
                         'eventos.organizador_id',
@@ -107,10 +108,11 @@ class SeminarioPresencialController extends Controller
                         'eventos.nombre',
                         'eventos.imagen',
                         'eventos.descripcion',
+                        'eventos.ganancias_acumuladas',
                         'eventos.es_pago',
                         'eventos.precio',
                         'eventos.tipo',
-                        'eventos.organizador_id',
+                        'eventos.organizador_id', 
                         'seminario_virtuals.fecha',
                         'seminario_virtuals.hora',
                         'seminario_virtuals.duracion',
@@ -118,6 +120,7 @@ class SeminarioPresencialController extends Controller
                         'seminario_virtuals.estado',
                     )
                     ->where("id", $seminarioId)->first();
+
             }
             if (!isset($seminarioInfo)) {
                 throw new Exception("Error al obtener la informacion del seminario");
