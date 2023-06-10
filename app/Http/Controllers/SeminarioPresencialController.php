@@ -9,7 +9,8 @@ use Illuminate\Http\Request;
 use App\Models\SeminarioVirtual;
 use Validator;
 use Illuminate\Support\Facades\DB;
-use Exception;
+use Illuminate\Support\Facades\Auth;
+
 
 class SeminarioPresencialController extends Controller
 {
@@ -58,6 +59,7 @@ class SeminarioPresencialController extends Controller
 
     public function getCompleteInfoSeminario(Request $req)
     {
+       
         try {
             $validator = Validator::make($req->all(), [
                 "seminarioId" => "required",
@@ -69,6 +71,8 @@ class SeminarioPresencialController extends Controller
 
             $meInfo = auth()->user();
             $myId = $meInfo->id;
+  
+        
             $seminarioType = DB::table('eventos')
                 ->select('eventos.tipo')
                 ->where([["id", $seminarioId], ['tipo', '<>', 'curso']])->first();
@@ -76,6 +80,10 @@ class SeminarioPresencialController extends Controller
                 if (!isset($seminarioType)) {
                 throw new Exception("Error, seminario not found.");
             }
+
+            
+
+           
 
             $seminarioInfo = null;
             if ($seminarioType->tipo === 'seminarioP') {
@@ -99,6 +107,8 @@ class SeminarioPresencialController extends Controller
                         'seminario_presencials.longitud'
                     )
                     ->where("id", $seminarioId)->first();
+
+                    
             }
             if ($seminarioType->tipo === 'seminarioV') {
                 $seminarioInfo = DB::table('eventos')
@@ -118,8 +128,11 @@ class SeminarioPresencialController extends Controller
                         'seminario_virtuals.duracion',
                         'seminario_virtuals.link',
                         'seminario_virtuals.estado',
+                        'seminario_virtuals.zoomPass'
                     )
                     ->where("id", $seminarioId)->first();
+
+                   
 
             }
             if (!isset($seminarioInfo)) {
@@ -127,13 +140,19 @@ class SeminarioPresencialController extends Controller
             }
 
             $organizadorInfo = Usuario::where("id", $seminarioInfo->organizador_id)->first();
+            
             $categorias = DB::table('categoriaeventos')
                 ->join('categorias', 'categoriaeventos.categoria_id', '=', 'categorias.id')
                 ->select('categorias.nombre', 'categorias.id')
                 ->where("categoriaeventos.evento_id", $seminarioId)->get();
 
+
+            
+
             $esComprado = DB::table("compraevento")->where("evento_id", "=", $seminarioId)
                 ->where("estudiante_id", "=", $myId)->first();
+
+            
 
             return response()->json([
                 "ok" => true,
@@ -142,6 +161,8 @@ class SeminarioPresencialController extends Controller
                 "comprado" => isset($esComprado),
                 "profesor" => $organizadorInfo->nombre,
             ]);
+
+            
         } catch (\Throwable $th) {
             return response()->json([
                 "ok" => false,

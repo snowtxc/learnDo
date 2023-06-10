@@ -223,6 +223,7 @@ class EventoController extends Controller
             $seminarioV->fecha = $request->fecha;
             $seminarioV->duracion = $request->duracion;
             $seminarioV->link = $request->link;
+            $seminarioV->zoomPass = $request->zoomPass; 
             if (isset($request->estado)) {
                 $seminarioV->estado = $request->estado;
             } else {

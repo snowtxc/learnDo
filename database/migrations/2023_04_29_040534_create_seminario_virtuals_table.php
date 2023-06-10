@@ -20,6 +20,7 @@ class CreateSeminarioVirtualsTable extends Migration
             $table->string('hora');
             $table->integer('duracion');
             $table->string('link');
+            $table->string('zoomPass'); 
             $table->enum('estado', ["Live", "NotLive"]); // live or not
             
             $table->timestamps();
