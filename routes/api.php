@@ -199,6 +199,7 @@ Route::group([
     "prefix" => "videos",
 ], function() {
     Route::post('/upload-video', [VideoController::class, 'uploadVideo']);
+    Route::get('/getBase64OfVideo', [VideoController::class, 'getBase64OfVideo']);
 });
 
 Route::group([

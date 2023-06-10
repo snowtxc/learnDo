@@ -113,6 +113,7 @@ class CursoController extends Controller
             $withDetails = $req->withDetails;
             $meInfo = auth()->user();
             $myId = $meInfo->id;
+            $soyColaorador = false;
             $cursoInfo = DB::table('eventos')
                 ->join('cursos', 'cursos.evento_id_of_curso', '=', 'eventos.id')
                 ->select('eventos.id', 'eventos.nombre', 'eventos.imagen', 'eventos.descripcion', 'eventos.es_pago', 'eventos.precio', 'eventos.organizador_id', 'cursos.porcentaje_aprobacion', 'eventos.organizador_id')
@@ -219,6 +220,10 @@ class CursoController extends Controller
                 $foroId = $foro->id;
             }
             $certificate = Certificado::where(["estudiante_id" => $myId, "curso_id"=> $cursoInfo->id])->first();
+            $colaboraciones = colaboracion::where("evento_id", "=", $cursoId)->where("user_id", "=", $myId)->first();
+            if (isset($colaboraciones)) {
+                $soyColaorador = true;
+            }
 
             return response()->json([
                 "ok" => true,
@@ -231,7 +236,8 @@ class CursoController extends Controller
                 "puntuaciones" => $puntuaciones,
                 "profesor" => $organizadorInfo,
                 "foroId" => $foroId,
-                "certificateID" => $certificate != null ? $certificate->id : null 
+                "certificateID" => $certificate != null ? $certificate->id : null,
+                "soyColaorador" => $soyColaorador,
             ]);
         } catch (\Throwable $th) {
             return response()->json([
