@@ -239,6 +239,7 @@ class CursoController extends Controller
                 "certificateID" => $certificate != null ? $certificate->id : null,
                 "soyColaorador" => $soyColaorador,
             ]);
+            
         } catch (\Throwable $th) {
             return response()->json([
                 "ok" => false,
