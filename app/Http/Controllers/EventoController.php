@@ -51,7 +51,7 @@ class EventoController extends Controller
                 throw new Exception("Datos invalidos");
             }
             $compraEvento = CompraEvento::where("estudiante_id", "=", $uid)->where("evento_id", "=", $eventoId)->first();
-
+             
             if (!isset($compraEvento)) {
                 $userInfo = Usuario::find($uid);
                 $eventoInfo = Evento::find($eventoId);
@@ -85,26 +85,6 @@ class EventoController extends Controller
                     }
                     $gcc = new GoogleCalendarController();
 
-                    // if (isset($existsSeminarioPresencial)) {
-                    //     $gcc->MakeEvent(
-                    //         $existsSeminarioPresencial->fecha,
-                    //         $existsSeminarioPresencial->hora,
-                    //         $existsSeminarioPresencial->duracion,
-                    //         $userInfo->email,
-                    //         $eventoInfo->nombre,
-                    //         $eventoInfo->descripcion,
-                    //     );
-                    // } else if (isset($existsSeminarioVirtual)) {
-                    //     $gcc->MakeEvent(
-                    //         $existsSeminarioVirtual->fecha,
-                    //         $existsSeminarioVirtual->hora,
-                    //         $existsSeminarioVirtual->duracion,
-                    //         $userInfo->email,
-                    //         $eventoInfo->nombre,
-                    //         $eventoInfo->descripcion,
-                    //     );
-                    // }
-
                 }
                 $buyedEvent = new CompraEvento();
                 $buyedEvent->estudiante_id = $uid;
@@ -113,6 +93,12 @@ class EventoController extends Controller
                 $buyedEvent->monto = $monto;
                 $buyedEvent->save();
 
+
+                //update ganancias_acumuladas
+                $currentEarnsEvent = Evento::find($eventoId);
+                $currentEarnsEvent->ganancias_acumuladas = ($monto + $currentEarnsEvent->ganancias_acumuladas);
+                $currentEarnsEvent->save();  
+        
             }
 
             return response()->json([
@@ -179,7 +165,7 @@ class EventoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request)
+    public function create(Request $request)    
     {
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|string',
@@ -250,6 +236,7 @@ class EventoController extends Controller
             $seminarioV->fecha = $request->fecha;
             $seminarioV->duracion = $request->duracion;
             $seminarioV->link = $request->link;
+            $seminarioV->zoomPass = $request->zoomPass; 
             if (isset($request->estado)) {
                 $seminarioV->estado = $request->estado;
             } else {
