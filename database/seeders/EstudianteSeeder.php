@@ -26,9 +26,13 @@ class EstudianteSeeder extends Seeder
             'status_id' => 2,
             'creditos_number' => 0,
             'type' => 'estudiante',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
         DB::table('estudiantes')->insert([
             'user_id' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
         
         DB::table('usuarios')->insert([
@@ -42,9 +46,33 @@ class EstudianteSeeder extends Seeder
             'status_id' => '2',
             'creditos_number' => 0,
             'type' => 'estudiante',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
         DB::table('estudiantes')->insert([
             'user_id' => 2,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('usuarios')->insert([
+            'nickname' => 'Carlitos24',
+            'email' => 'carlito@mail.com',
+            'password' => '$2y$10$GwM5aWNpCm0uBxIXgrXmz.odpGUIVHzVqvv8/p0NEQ7SJjctqAWo2',
+            'telefono' => '095987345',
+            'nombre' => 'Carlos Gonsalez',
+            'biografia' => 'esta es mi biografia',
+            'imagen' => 'https://media.istockphoto.com/id/621857498/photo/making-a-decision.jpg?s=612x612&w=0&k=20&c=OJOLnPnnDTCr0pqj1HzYnjC1e9D_vxWTdXco7ppS9Ig=',
+            'status_id' => '2',
+            'creditos_number' => 0,
+            'type' => 'estudiante',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('estudiantes')->insert([
+            'user_id' => 3,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
         
         DB::table('usuarios')->insert([
@@ -58,9 +86,13 @@ class EstudianteSeeder extends Seeder
             'status_id' => '2',
             'creditos_number' => 0,
             'type' => 'organizador',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
         DB::table('organizadors')->insert([
-            'user_id' => 3,
+            'user_id' => 4,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 }
