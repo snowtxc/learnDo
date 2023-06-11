@@ -51,7 +51,7 @@ Route::group([
     Route::post("/login", [UsuarioController::class, "signin"])->name("login");
     Route::post("/signup", [UsuarioController::class, "create"])->name("signup");
     Route::put("/activate", [UsuarioController::class, "activate"])->name("activate");
-    Route::get("/me", [UsuarioController::class, "me"])->name("me");
+    Route::get("/me", [UsuarioController::class, "me"])->name("me"); 
     Route::put("/me", [UsuarioController::class, "editMeInfo"])->name("editMeInfo");
     Route::get("/checkNickname", [UsuarioController::class, "checkNickname"])->name("checkNickname");
     Route::post("/signupWithOauth", [UsuarioController::class, "createUserWithOauth"])->name("createUserWithOauth");
@@ -82,6 +82,7 @@ Route::group([
 Route::group([
     "prefix" => "cursos",
 ], function () {
+    
     Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso"); 
     Route::get("/getCompleteInfoCurso", [CursoController::class, "getCursoInfo"])->name("getCursoInfo");
     Route::get("/getCursosComprados", [CursoController::class, "getCursosComprados"])->name("getCursosComprados");
@@ -91,7 +92,6 @@ Route::group([
     Route::put("/updateCursoInfo", [CursoController::class, "updateCursoInfo"])->name("updateCursoInfo");
     Route::get("/getProgresoEstudiantes", [CursoController::class, "getProgresoEstudiantes"])->name("getProgresoEstudiantes"); // solo info del curso, modulos y clases. (sin evaluación también)
     Route::get("/listarComprados", [EstudiantesEventosController::class, "showNuevosAlumnos"])->name("showNuevosAlumnos");
-
 });
 
 Route::group([

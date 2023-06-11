@@ -26,6 +26,7 @@ use App\Models\Estudiante;
 use Illuminate\Support\Facades\Auth;
 
 
+
 class CursoController extends Controller
 {
     /**
@@ -116,7 +117,7 @@ class CursoController extends Controller
             $soyColaorador = false;
             $cursoInfo = DB::table('eventos')
                 ->join('cursos', 'cursos.evento_id_of_curso', '=', 'eventos.id')
-                ->select('eventos.id', 'eventos.nombre', 'eventos.imagen', 'eventos.descripcion', 'eventos.es_pago', 'eventos.precio', 'eventos.organizador_id', 'cursos.porcentaje_aprobacion', 'eventos.organizador_id')
+                ->select('eventos.id', 'eventos.nombre', 'eventos.imagen', 'eventos.descripcion', 'eventos.es_pago', 'eventos.precio', 'eventos.organizador_id', 'cursos.porcentaje_aprobacion', 'eventos.organizador_id','eventos.ganancias_acumuladas')
                 ->where("id", $cursoId)->first();
             if (!isset($cursoInfo)) {
                 throw new Exception("Error al obtener la informacion del curso");
@@ -509,7 +510,7 @@ class CursoController extends Controller
         $userInfo = auth()->user();
         $userId  = $userInfo["id"];
 
-        $curso = Curso::where(["evento_id_of_curso"=> $cursoId]);  
+        $curso = Curso::where(["evento_id_of_curso"=> $cursoId])->first();  
 
         if($curso == null){
             return response()->json(["message" => "Curso no existe"] ,400);
@@ -519,6 +520,7 @@ class CursoController extends Controller
         return response()->json( $alreadyHasCertificate ,200);  
 
     }
+
 
     public function updateCursoInfo(Request $req)
     {

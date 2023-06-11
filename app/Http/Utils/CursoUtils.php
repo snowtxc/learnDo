@@ -58,11 +58,6 @@ class CursoUtils
     public function canStudentGetCertificate($studentId, $cursoId, $approvalRate)
     {          
 
-            $userHasPurchasedCourse =  CompraEvento::where(["estudiante_id" => $studentId, "evento_id" => $cursoId])->count() ? true : false;
-            if(!$userHasPurchasedCourse){
-                return false; 
-            }
-            
             $modulos = Modulo::where(["curso_id" => $cursoId])->get();  
             $countEvaluations = count($modulos); //la cantidad de modulos es igual a la cantidad de evaluaciones
             if($countEvaluations <= 0){
@@ -112,6 +107,26 @@ class CursoUtils
         echo "Error getting completeEvaluacionInfo";
         return null;
        }
+    }
+
+    public function getProgressByCurso($studentId, $cursoId){
+            $modulos = Modulo::where(["curso_id" => $cursoId])->get();  
+            $countEvaluations = count($modulos); //la cantidad de modulos es igual a la cantidad de evaluaciones
+            if($countEvaluations <= 0){
+                return 0;
+            }
+            $sumCalifications = 0;
+            foreach($modulos as $modulo){
+                $evaluacion =  Evaluacion::where(["modulo_id" => $modulo->id])->first();
+                $cal  = Calificacion::where(["estudiante_id" => $studentId, "evaluacion_id" => $evaluacion->id])->first();
+                if($cal != null){
+                    $sumCalifications += $cal->puntuacion;
+                }
+
+            }              
+            $avgCalifications  = floor($sumCalifications/$countEvaluations); 
+
+            return $avgCalifications;
     }
 
     

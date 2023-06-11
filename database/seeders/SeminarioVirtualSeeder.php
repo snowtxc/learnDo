@@ -13,6 +13,6 @@ class SeminarioVirtualSeeder extends Seeder
      */
     public function run()
     {
-        //
+        
     }
 }
