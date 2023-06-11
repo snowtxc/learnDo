@@ -58,6 +58,7 @@ class EventoController extends Controller
                 if (!isset($userInfo) || !isset($eventoInfo)) {
                     throw new Exception("Usuario o evento invalido");
                 }
+
                 if ($userInfo->type == "organizador") {
                     throw new Exception("Los organizadores no pueden comprar eventos");
                 }
@@ -74,6 +75,14 @@ class EventoController extends Controller
                 $isSeminario = isset($existsSeminarioPresencial) || isset($existsSeminarioVirtual);
 
                 if ($isSeminario == true) {
+                    
+                    if (isset($existsSeminarioPresencial)) {
+                        $currentCapacidad = sizeof(CompraEvento::where("evento_id", "=", $eventoId)->get());
+                        $capacidad = $existsSeminarioPresencial->maximo_participantes;
+                        if ($currentCapacidad >= $capacidad) {
+                            throw new Exception("El evento no puede tener mas participantes");
+                        }
+                    }
                     $gcc = new GoogleCalendarController();
 
                     // if (isset($existsSeminarioPresencial)) {
@@ -203,7 +212,11 @@ class EventoController extends Controller
         $evento->descripcion = $request->input('descripcion');
         $evento->imagen = $request->input('imagen');
         $evento->es_pago = $request->input('es_pago');
-        $evento->precio = $request->input('precio');
+        if ($request->input('es_pago') == true) {
+            $evento->precio = $request->input('precio');
+        } else {
+            $evento->precio = 0;
+        }
         $evento->organizador_id = $request->input('organizador');
         $evento->tipo = $request->input('tipo');
         // $evento->categoria_id  = $request->input('categoria');
@@ -284,13 +297,34 @@ class EventoController extends Controller
 
     }
 
+    public function getEventoInfo(Request $req) {
+        try {
+            $eventoId = $req->eventoId;
+            $eventoInfo = Evento::find($eventoId);
+            if (!isset($eventoInfo)) {
+                throw new Exception("Evento inexistente");
+            }
+            return response()->json([
+                "ok" => true,
+                "eventoInfo" => $eventoInfo,
+            ]);
+        } catch(Exception $e) {
+            return response()->json([
+                "ok" => false,
+                "message"=> $e->getMessage(),
+            ]);
+        }
+    }
+
     public function getMyEventos(Request $req)
     {
         try {
 
             $userInfo = auth()->user();
             $userId  = $userInfo["id"];
-           
+            if ($req->uid) {
+                $userId = $req->uid;
+            }
 
             $misEventos = DB::table("eventos")->join('compraevento', 'compraevento.evento_id', '=', 'eventos.id')->where("compraevento.estudiante_id", $userId)->select("eventos.id","eventos.tipo")->get();
            
@@ -372,7 +406,8 @@ class EventoController extends Controller
                                 'eventos.tipo',
                             )
                             ->where("seminario_virtuals.evento_id", $miEvento->id)->first();
-                        if (isset($seminariosVInfo)) {
+
+                        if (isset($seminarioVInfo)) {
                             array_push($result, $seminarioVInfo);
                         }
                     }

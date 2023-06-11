@@ -68,7 +68,7 @@ Route::group([
     Route::get("/getMyEventos", [EventoController::class, "getMyEventos"])->name("getMyEventos");
     Route::get("/getEventosAdmin", [EventoController::class, "getEventosAdmin"])->name("getEventosAdmin");
     Route::get("/listarTendencias", [EventoController::class, "listarTendencias"])->name("listarTendencias");
-   
+    Route::get("/getEventoInfo", [EventoController::class, "getEventoInfo"])->name("getEventoInfo");
 });
 
 Route::group([
@@ -202,6 +202,7 @@ Route::group([
     "prefix" => "videos",
 ], function() {
     Route::post('/upload-video', [VideoController::class, 'uploadVideo']);
+    Route::get('/getBase64OfVideo', [VideoController::class, 'getBase64OfVideo']);
 });
 
 Route::group([
