@@ -14,6 +14,7 @@ use App\Http\Controllers\OpcionController;
 use App\Http\Controllers\ClaseController;
 use App\Http\Controllers\EvaluacionController;
 use App\Http\Controllers\PreguntaController;
+use App\Http\Controllers\EstudiantesEventosController;
 
 use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\ComentarioController;
@@ -67,6 +68,7 @@ Route::group([
     Route::get("/getMyEventos", [EventoController::class, "getMyEventos"])->name("getMyEventos");
     Route::get("/getEventosAdmin", [EventoController::class, "getEventosAdmin"])->name("getEventosAdmin");
     Route::get("/listarTendencias", [EventoController::class, "listarTendencias"])->name("listarTendencias");
+    Route::get("/getEventoInfo", [EventoController::class, "getEventoInfo"])->name("getEventoInfo");
 });
 
 Route::group([
@@ -89,7 +91,7 @@ Route::group([
     Route::get("/{id}/studentAlreadyHasCertificate", [CursoController::class, "studentAlreadyHasCertificate"])->name("studentAlreadyHasCertificate");
     Route::put("/updateCursoInfo", [CursoController::class, "updateCursoInfo"])->name("updateCursoInfo");
     Route::get("/getProgresoEstudiantes", [CursoController::class, "getProgresoEstudiantes"])->name("getProgresoEstudiantes"); // solo info del curso, modulos y clases. (sin evaluación también)
- 
+    Route::get("/listarComprados", [EstudiantesEventosController::class, "showNuevosAlumnos"])->name("showNuevosAlumnos");
 });
 
 Route::group([
@@ -99,6 +101,7 @@ Route::group([
     Route::post('/createEvento', [EventoController::class, "create"]);
     Route::get("/", [EventoController::class, "listar"])->name("listar");
     Route::post("/comprarEvento", [EventoController::class, "comprarEvento"])->name("comprarEvento");
+   
 });
 
 Route::group([
@@ -199,6 +202,7 @@ Route::group([
     "prefix" => "videos",
 ], function() {
     Route::post('/upload-video', [VideoController::class, 'uploadVideo']);
+    Route::get('/getBase64OfVideo', [VideoController::class, 'getBase64OfVideo']);
 });
 
 Route::group([
