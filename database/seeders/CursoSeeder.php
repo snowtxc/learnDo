@@ -17,7 +17,6 @@ class CursoSeeder extends Seeder
         DB::table('cursos')->insert([
             'evento_id_of_curso' => '1',
             'porcentaje_aprobacion' => '60',
-            'ganancias_acumuladas' => '0',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -25,7 +24,6 @@ class CursoSeeder extends Seeder
         DB::table('cursos')->insert([
             'evento_id_of_curso' => '2',
             'porcentaje_aprobacion' => '70',
-            'ganancias_acumuladas' => '0',
             'created_at' => now(),
             'updated_at' => now(),
         ]);

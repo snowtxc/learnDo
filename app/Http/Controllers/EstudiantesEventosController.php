@@ -73,7 +73,6 @@ class EstudiantesEventosController extends Controller
                         ->where('eventos.organizador_id', $myId)
                         ->where('compraevento.created_at', '<', $thisMonth);
                 })
-                ->groupBy('compraevento.estudiante_id')
                 ->selectRaw('COUNT(DISTINCT compraevento.estudiante_id) as student_count')
                 ->first();
 

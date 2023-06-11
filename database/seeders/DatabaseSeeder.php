@@ -45,5 +45,8 @@ class DatabaseSeeder extends Seeder
 
         $SeminarioPresencialSeeder = new SeminarioPresencialSeeder();
         $SeminarioPresencialSeeder->run();
+
+        $categoriaeventoSeeder = new CategoriaeventoSeeder();
+        $categoriaeventoSeeder->run();
     }
 }
