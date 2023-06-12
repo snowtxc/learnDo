@@ -53,7 +53,6 @@ class RecordatorioSeminarioVirtual extends Command
 
         //Seleccionar todos los seminarios virtuales con previo aviso de 24 horas
         //acceder a estudiante 1 por 1 y enviarlo un email
-
         $now = new DateTime();
         $nowStr = $now->format('d/m/Y'); 
         $this->info($nowStr);
@@ -78,13 +77,14 @@ class RecordatorioSeminarioVirtual extends Command
                 "evento_nombre" => $evento->nombre,
                 "nombre_user" => $user->nombre
             );
-            $mailController->send_seminario_reminder($user->email, $subject, $reminderData);
+            $emailToSend = trim($user->email);
+            $mailController->send_seminario_reminder($emailToSend, $subject, $reminderData);
 
            }
                        
         }
         
         $this->info('Se ha completado los cursos!');
-
+        return 1;
     }
 }
