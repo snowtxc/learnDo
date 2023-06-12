@@ -27,6 +27,7 @@ class EventoSeeder extends Seeder
             'tipo' => 'curso',
             'created_at' => now(),
             'updated_at' => now(),
+            'ganancias_acumuladas' => 0
         ]);
 
         
@@ -41,6 +42,7 @@ class EventoSeeder extends Seeder
             'tipo' => 'curso',
             'created_at' => now(),
             'updated_at' => now(),
+            'ganancias_acumuladas' => 0
         ]);
 
         DB::table('eventos')->insert([
@@ -53,6 +55,7 @@ class EventoSeeder extends Seeder
             'tipo' => 'seminario',
             'created_at' => now(),
             'updated_at' => now(),
+            'ganancias_acumuladas' => 0
         ]);
 
         DB::table('eventos')->insert([
@@ -66,6 +69,7 @@ class EventoSeeder extends Seeder
             'tipo' => 'seminario',
             'created_at' => now(),
             'updated_at' => now(),
+            'ganancias_acumuladas' => 0
         ]);
 
         DB::table('eventos')->insert([
@@ -79,6 +83,7 @@ class EventoSeeder extends Seeder
             'tipo' => 'seminario',
             'created_at' => now(),
             'updated_at' => now(),
+            'ganancias_acumuladas' => 0
         ]);
 
         DB::table('eventos')->insert([
@@ -92,6 +97,7 @@ class EventoSeeder extends Seeder
             'tipo' => 'seminario',
             'created_at' => now(),
             'updated_at' => now(),
+            'ganancias_acumuladas' => 0
         ]);
     }
 }
