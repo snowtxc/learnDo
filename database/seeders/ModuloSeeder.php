@@ -17,7 +17,7 @@ class ModuloSeeder extends Seeder
         DB::table('modulos')->insert([
             'id' => '1',
             'nombre' => 'Conceptos Basicos de php',
-            'estado' => 'null',
+            'estado' => 'aprobado',
             'curso_id' => '1',
             'created_at' => now(),
             'updated_at' => now(),
@@ -26,7 +26,7 @@ class ModuloSeeder extends Seeder
         DB::table('modulos')->insert([
             'id' => '2',
             'nombre' => 'Conceptos Medios de php',
-            'estado' => 'null',
+            'estado' => 'aprobado',
             'curso_id' => '1',
             'created_at' => now(),
             'updated_at' => now(),
@@ -35,7 +35,7 @@ class ModuloSeeder extends Seeder
         DB::table('modulos')->insert([
             'id' => '3',
             'nombre' => 'Conceptos Avanzados de php',
-            'estado' => 'null',
+            'estado' => 'aprobado',
             'curso_id' => '1',
             'created_at' => now(),
             'updated_at' => now(),
@@ -44,7 +44,7 @@ class ModuloSeeder extends Seeder
         DB::table('modulos')->insert([
             'id' => '4',
             'nombre' => 'Como utilizar las diferentes herramientas de la cocina',
-            'estado' => 'null',
+            'estado' => 'aprobado',
             'curso_id' => '2',
             'created_at' => now(),
             'updated_at' => now(),
@@ -53,7 +53,7 @@ class ModuloSeeder extends Seeder
         DB::table('modulos')->insert([
             'id' => '5',
             'nombre' => 'Ingredientes principales y como se utilizan',
-            'estado' => 'null',
+            'estado' => 'aprobado',
             'curso_id' => '2',
             'created_at' => now(),
             'updated_at' => now(),
@@ -62,7 +62,7 @@ class ModuloSeeder extends Seeder
         DB::table('modulos')->insert([
             'id' => '6',
             'nombre' => 'Recetas y platos',
-            'estado' => 'null',
+            'estado' => 'aprobado',
             'curso_id' => '2',
             'created_at' => now(),
             'updated_at' => now(),
