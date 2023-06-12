@@ -52,7 +52,7 @@ class EventoSeeder extends Seeder
             'imagen' => 'https://firebasestorage.googleapis.com/v0/b/learndo-39568.appspot.com/o/profileImages%2F1686147779446Dimansions.JPG?alt=media&token=4c8444bb-c317-4e31-8943-61816c38f614',
             'es_pago' => '0',
             'organizador_id' => '4',
-            'tipo' => 'seminario',
+            'tipo' => 'seminarioP',
             'created_at' => now(),
             'updated_at' => now(),
             'ganancias_acumuladas' => 0
@@ -66,7 +66,7 @@ class EventoSeeder extends Seeder
             'es_pago' => '1',
             'precio' => '8',
             'organizador_id' => '4',
-            'tipo' => 'seminario',
+            'tipo' => 'seminarioP',
             'created_at' => now(),
             'updated_at' => now(),
             'ganancias_acumuladas' => 0
@@ -80,7 +80,7 @@ class EventoSeeder extends Seeder
             'es_pago' => '1',
             'precio' => '4',
             'organizador_id' => '4',
-            'tipo' => 'seminario',
+            'tipo' => 'seminarioP',
             'created_at' => now(),
             'updated_at' => now(),
             'ganancias_acumuladas' => 0
@@ -94,7 +94,7 @@ class EventoSeeder extends Seeder
             'es_pago' => '1',
             'precio' => '10',
             'organizador_id' => '4',
-            'tipo' => 'seminario',
+            'tipo' => 'seminarioP',
             'created_at' => now(),
             'updated_at' => now(),
             'ganancias_acumuladas' => 0
