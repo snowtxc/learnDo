@@ -174,8 +174,7 @@ class UsuarioController extends Controller
         $emailAlreadyExists = DB::table("usuarios")->where("email", $req->email)->first();
         $uidAlreadyExists = DB::table("usuarios")->where("oauthId", $req->uid)->first();
 
-
-        if (isset($emailAlreadyExists) || isset($uidAlreadyExists)) {
+        if (isset($emailAlreadyExists) || isset($uidAlreadyExists) && $req->uid) {
             $emailToValidate = isset($emailAlreadyExists) ? $emailAlreadyExists->email : $uidAlreadyExists->email;
             $credentials = [
                 "email" => $emailToValidate
