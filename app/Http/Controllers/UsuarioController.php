@@ -140,11 +140,11 @@ class UsuarioController extends Controller
         // Creo el user en la tabla estudiante / organizador
         if ($req->role === 'estudiante') {
             $estudiante = new Estudiante();
-            $estudiante->user_id = $req->uid;
+            $estudiante->user_id = $userExists->id;
             $estudiante->save();
         } else if ($req->role === 'organizador') {
             $organizador = new Organizador();
-            $organizador->user_id = $req->id;
+            $organizador->user_id = $userExists->id;
             $organizador->save();
         }
         ;

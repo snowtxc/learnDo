@@ -7,6 +7,45 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Response;
+
+// use Illuminate\Support\Facades\Storage;
+
+
+// function Download($path, $speed = null)
+// {
+//     if (is_file($path) === true)
+//     {
+//         set_time_limit(0);
+
+//         while (ob_get_level() > 0)
+//         {
+//             ob_end_clean();
+//         }
+
+//         $size = sprintf('%u', filesize($path));
+//         $speed = (is_int($speed) === true) ? $size : intval($speed) * 1024;
+
+//         header('Expires: 0');
+//         header('Pragma: public');
+//         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+//         header('Content-Type: application/octet-stream');
+//         header('Content-Length: ' . $size);
+//         header('Content-Disposition: attachment; filename="' . basename($path) . '"');
+//         header('Content-Transfer-Encoding: binary');
+
+//         for ($i = 0; $i <= $size; $i = $i + $speed)
+//         {
+//             ph()->HTTP->Flush(file_get_contents($path, false, null, $i, $speed));
+//             ph()->HTTP->Sleep(1);
+//         }
+
+//         exit();
+//     }
+
+//     return false;
+// }
 
 function getMyUrl()
 {
@@ -67,11 +106,19 @@ class VideoController extends Controller
             }
             $path = $claseInfo->video;
             $type = pathinfo($path, PATHINFO_EXTENSION);
-            $newUrl = str_replace("http://127.0.0.1:8000/", "", $path);
-            $data = file_get_contents($newUrl);
-            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            $newUrl = str_replace("http://127.0.0.1:8000/storage/", "", $path);
 
-            return response()->json(['ok' => true, "url" => $base64], 200);
+            // /Users/maximilianoolivera/Documents/Projects/LearnDo/Api/learnDo/publicstorage/videos/24/GrFZQPpmHQ35riB6l2GDXyTcMkTxasX8wfojaC67.mp4{
+  
+            // return Storage::download(public_path() . $newUrl);
+            // return Response::download($newUrl);
+            // return Redirect::to($newUrl);
+
+            $file = Storage::disk('public')->get($newUrl);
+            // $file=Storage::disk('storage/app/public/')->get($newUrl);
+            return (new Response($file, 200))
+              ->header('Content-Type', 'video/' . $type);
+
         } catch (\Throwable $th) {
             return response()->json(["ok" => false, 'message' => $th->getMessage(),], 500);
         }
