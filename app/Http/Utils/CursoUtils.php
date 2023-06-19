@@ -6,10 +6,10 @@ use App\Models\Evaluacion;
 use App\Models\Opcion;
 use App\Models\Pregunta;
 use App\Models\Usuario;
-use App\Models\CompraEvento; 
-use App\Models\Modulo; 
-use App\Models\Certificado; 
-use App\Models\Calificacion; 
+use App\Models\CompraEvento;
+use App\Models\Modulo;
+use App\Models\Certificado;
+use App\Models\Calificacion;
 
 
 use Illuminate\Support\Facades\DB;
@@ -56,82 +56,94 @@ class CursoUtils
 
 
     public function canStudentGetCertificate($studentId, $cursoId, $approvalRate)
-    {          
+    {
 
-            $modulos = Modulo::where(["curso_id" => $cursoId])->get();  
-            $countEvaluations = count($modulos); //la cantidad de modulos es igual a la cantidad de evaluaciones
-            if($countEvaluations <= 0){
-                return false;
+        $modulos = Modulo::where(["curso_id" => $cursoId])->get();
+        $countEvaluations = 0;
+        foreach ($modulos as $modulo) {
+            if (isset($modulo)) {
+                $evaluacionInfo = Evaluacion::where("modulo_id" , "=", $modulo->id)->first();
+                if (isset($evaluacionInfo)) {
+                    $countEvaluations += 1;
+                }
             }
+        }
 
-            $sumCalifications = 0;
-            foreach($modulos as $modulo){
-                $evaluacion =  Evaluacion::where(["modulo_id" => $modulo->id])->first();
-                $cal  = Calificacion::where(["estudiante_id" => $studentId, "evaluacion_id" => $evaluacion->id])->first();
-                if($cal != null){
+        if ($countEvaluations <= 0) {
+            return false;
+        }
+
+        $sumCalifications = 0;
+        foreach ($modulos as $modulo) {
+            $evaluacion = Evaluacion::where(["modulo_id" => $modulo->id])->first();
+            if (isset($evaluacion)) {
+                $cal = Calificacion::where(["estudiante_id" => $studentId, "evaluacion_id" => $evaluacion->id])->first();
+                if ($cal != null) {
                     $sumCalifications += $cal->puntuacion;
                 }
+            }
 
-            }              
-            $avgCalifications  = floor($sumCalifications/$countEvaluations); 
-            $isApproved = $avgCalifications >= $approvalRate;
+        }
+        $avgCalifications = floor($sumCalifications / $countEvaluations);
+        $isApproved = $avgCalifications >= $approvalRate;
 
-            $result = array(
-                "avgCalifications" => $avgCalifications, 
-                "isApproved" => $isApproved
-            );
-            return $result;
+        $result = array(
+            "avgCalifications" => $avgCalifications,
+            "isApproved" => $isApproved
+        );
+        return $result;
 
     }
 
     public function getCompleteEvaluacionInfo($evaluacionId)
     {
-       try {
-        $evaluacionInfo = Evaluacion::find($evaluacionId);
-        if (!isset($evaluacionInfo)) return null;
+        try {
+            $evaluacionInfo = Evaluacion::find($evaluacionId);
+            if (!isset($evaluacionInfo))
+                return null;
 
-        $preguntas = Pregunta::where("evaluacion_id", "=", $evaluacionId)->get();
-        $formatPreguntas = array();
-        if (isset($preguntas)) {
-            foreach($preguntas as $pregunta) {
-                $opciones = Opcion::where("pregunta_id", "=", $pregunta->id)->get();
-                if (isset($opciones)) {
-                    $pregunta->opciones = $opciones;
+            $preguntas = Pregunta::where("evaluacion_id", "=", $evaluacionId)->get();
+            $formatPreguntas = array();
+            if (isset($preguntas)) {
+                foreach ($preguntas as $pregunta) {
+                    $opciones = Opcion::where("pregunta_id", "=", $pregunta->id)->get();
+                    if (isset($opciones)) {
+                        $pregunta->opciones = $opciones;
+                    }
+                    array_push($formatPreguntas, $pregunta);
                 }
-                array_push($formatPreguntas, $pregunta);
             }
+            $evaluacionInfo->preguntas = $formatPreguntas;
+            return $evaluacionInfo;
+        } catch (\Throwable $th) {
+            echo "Error getting completeEvaluacionInfo";
+            return null;
         }
-        $evaluacionInfo->preguntas = $formatPreguntas;
-        return $evaluacionInfo;
-       } catch (\Throwable $th) {
-        echo "Error getting completeEvaluacionInfo";
-        return null;
-       }
     }
 
-    public function getProgressByCurso($studentId, $cursoId){
-            $modulos = Modulo::where(["curso_id" => $cursoId])->get();  
-            $countEvaluations = count($modulos); //la cantidad de modulos es igual a la cantidad de evaluaciones
-            if($countEvaluations <= 0){
-                return 0;
+    public function getProgressByCurso($studentId, $cursoId)
+    {
+        $modulos = Modulo::where(["curso_id" => $cursoId])->get();
+        $countEvaluations = count($modulos); //la cantidad de modulos es igual a la cantidad de evaluaciones
+        if ($countEvaluations <= 0) {
+            return 0;
+        }
+        $sumCalifications = 0;
+        foreach ($modulos as $modulo) {
+            $evaluacion = Evaluacion::where(["modulo_id" => $modulo->id])->first();
+            $cal = Calificacion::where(["estudiante_id" => $studentId, "evaluacion_id" => $evaluacion->id])->first();
+            if ($cal != null) {
+                $sumCalifications += $cal->puntuacion;
             }
-            $sumCalifications = 0;
-            foreach($modulos as $modulo){
-                $evaluacion =  Evaluacion::where(["modulo_id" => $modulo->id])->first();
-                $cal  = Calificacion::where(["estudiante_id" => $studentId, "evaluacion_id" => $evaluacion->id])->first();
-                if($cal != null){
-                    $sumCalifications += $cal->puntuacion;
-                }
 
-            }              
-            $avgCalifications  = floor($sumCalifications/$countEvaluations); 
+        }
+        $avgCalifications = floor($sumCalifications / $countEvaluations);
 
-            return $avgCalifications;
+        return $avgCalifications;
     }
 
-    
+
 
 
 }
 ?>
-

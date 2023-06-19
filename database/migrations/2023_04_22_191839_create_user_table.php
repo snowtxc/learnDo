@@ -21,7 +21,7 @@ class CreateUserTable extends Migration
             $table->string("telefono");
             $table->string("nombre");
             $table->string("biografia");
-            $table->string("imagen");
+            $table->text("imagen");
             $table->integer("status_id")->unsigned()->nullable();
             $table->integer("creditos_number")->default(0)->nullable();
             $table->string("type")->nullable();

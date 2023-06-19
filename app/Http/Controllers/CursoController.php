@@ -21,6 +21,7 @@ use Validator;
 use Illuminate\Support\Facades\DB;
 use App\Http\Utils\CursoUtils;
 use App\Models\categoriaevento;
+use App\Models\Clase;
 use App\Models\colaboracion;
 use App\Models\Estudiante;
 use Illuminate\Support\Facades\Auth;
@@ -239,6 +240,8 @@ class CursoController extends Controller
                 "foroId" => $foroId,
                 "certificateID" => $certificate != null ? $certificate->id : null,
                 "soyColaorador" => $soyColaorador,
+                "colaboradores" => $formatColaboradores,
+                "sugerencias" => $formatSugerencias,
             ]);
             
         } catch (\Throwable $th) {
@@ -492,7 +495,7 @@ class CursoController extends Controller
             return response()->json( $result ,200);   
 
          }catch(Exception $e){
-            return response()->json(["message" => "Ha ocurrido un error inesperado"] ,500);
+            return response()->json(["message" => $e->getMessage()] ,500);
         }
            
 

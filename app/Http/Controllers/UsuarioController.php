@@ -345,26 +345,57 @@ class UsuarioController extends Controller
 
     public function activate(Request $req)
     {
-        $userId = $req->uid;
+        $token = $req->uid;
         if (!isset($token) || $token == null) {
             return response()->json([
                 "ok" => false,
                 "message" => "Error validando token",
             ]);
         }
-        Usuario::where("id", $userId)->update(['status_id' => 2]);
-        $updatedUserInfo = Usuario::find($userId)->toArray();
-        // echo var_dump($updatedUserInfo);
-        $credentials = [
-            "email" => $updatedUserInfo["email"],
-        ];
-        $token = ($user = Auth::getProvider()->retrieveByCredentials($credentials))
-            ? Auth::login($user)
-            : false;
 
-        return $this->createNewToken($token);
+        try {
+            list($header, $payload, $signature) = explode('.', $token);
+            $jsonToken = base64_decode($payload);
+            $claims = json_decode($jsonToken, true);
 
+            $userId = $claims["user_id"];
+            $userInfo = Usuario::find($userId);
+            // DB::table("usuarios")->where("id", "$req->uid")->first();
+            if ($userId === null || $userInfo === null) {
+                return response()->json([
+                    "ok" => false,
+                    "message" => "User not found",
+                ]);
+                return;
+            }
+            Usuario::where("id", $userId)->update(['status_id' => 2]);
+            $updatedUserInfo = Usuario::find($userId)->toArray();
+            // echo var_dump($updatedUserInfo);
+            $credentials = [
+                "email" => $updatedUserInfo["email"],
+            ];
+            $token = ($user = Auth::getProvider()->retrieveByCredentials($credentials))
+                ? Auth::login($user)
+                : false;
+
+            return $this->createNewToken($token);
+            //code...
+        } catch (\Throwable $th) {
+            return response()->json([
+                "ok" => false,
+                "message" => "Error validando token",
+            ]);
+            //throw $th;
+        }
+
+
+        // return response()->json([
+        //     "ok" => true,
+        //     "message" => "Account activated",
+        //     "userInfo" => $user,
+        // ]);
     }
+
 
     function userInfoById(Request $req)
     {

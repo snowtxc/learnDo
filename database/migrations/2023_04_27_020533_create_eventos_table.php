@@ -19,7 +19,7 @@ class CreateEventosTable extends Migration
             $table->increments('id');
             $table->string("nombre");
             $table->string("descripcion");
-            $table->string("imagen")->default("https://xegmenta.com/wp-content/uploads/2019/06/organizar-evento-corp-opt.jpg");
+            $table->text("imagen");
             $table->boolean('es_pago')->default(0);
             $table->integer("precio")->default(null)->nullable();
             $table->float('ganancias_acumuladas')->default(0);

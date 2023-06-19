@@ -48,6 +48,10 @@ class PuntuacionController extends Controller
             if (!isset($cursoExists)) {
                 throw new Exception("Error, el curso no existe");
             }
+            $puntuacionInfo = Puntuacion::where("curso_id", "=", $req->cursoId)->where("estudiante_id", "=", $req->userId)->first();
+            if (isset($puntuacionInfo)) {
+                return;
+            }
 
             $puntuacion = new Puntuacion();
             $puntuacion->puntuacion = $req->rating;
