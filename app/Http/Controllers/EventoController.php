@@ -263,11 +263,17 @@ class EventoController extends Controller
     }
 
 
-    public function userIsStudentOrOwner($eventoID, Request $req)
+    public function userIsStudentOrOwner($foroId, Request $req)
     {
         try {
             $userInfo = auth()->user();
             $userId = $userInfo["id"];
+
+            $foroInfo = Foro::find($foroId);
+            if (!isset($foroInfo)) {
+                throw new Exception("El foro no existe");
+            }
+            $eventoID = $foroInfo->id_curso;
 
             $eventoInfo = Evento::find($eventoID);
             if (!isset($eventoInfo)) {
@@ -275,7 +281,7 @@ class EventoController extends Controller
             }
             $userAlreadyHasEvento = CompraEvento::where(["evento_id" => $eventoID, "estudiante_id" => $userId])->count() > 0 ? true : false; //check if user is student of event
             $userIsOwner = Evento::where(["id" => $eventoID, "organizador_id" => $userId])->count() > 0 ? true : false; //check if user is owner of event
-            return response()->json(["result" => $userAlreadyHasEvento || $userIsOwner], 200);
+            return response()->json(["result" => $userAlreadyHasEvento || $userIsOwner, "eventoInfo" => $eventoInfo], 200);
 
         } catch (Exception $e) {
             return response()->json(["message" => "Ha ocurrido un error inesperado"], 500);
