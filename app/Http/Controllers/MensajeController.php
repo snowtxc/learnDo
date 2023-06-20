@@ -6,6 +6,7 @@ use App\Models\Mensaje;
 use Illuminate\Http\Request;
 use App\Http\Utils\UserUtils;
 use Carbon\Carbon;
+use Pusher\Pusher;
 use Validator;
 
 class MensajeController extends Controller
@@ -135,6 +136,12 @@ class MensajeController extends Controller
         $newEvent = new ChatEventController($req->user_from_id, $req->user_to_id, $mensaje);
         $newEvent->broadcastOn();
         event($newEvent);
+        $pusher = new Pusher('be1fb10ab5b04b4d40c9','4192987d8053f5352aba', '1622177', [
+            "cluster" => 'us2'
+        ]);
+        $channelName = "MessageFrom-$req->user_from_id-To-$req->user_to_id";
+        $pusher->trigger($channelName, 'createMessage', ['message' => $mensaje]);
+
 
         return response()->json([
             "ok" => true,
