@@ -15,7 +15,8 @@ return [
 
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',
-        'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
+        'https://062e-2800-a4-13c1-6800-e536-ab92-6723-3a65.ngrok-free.app, 062e-2800-a4-13c1-6800-e536-ab92-6723-3a65.ngrok-free.app',
+        // 'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1, 6e8d-2800-a4-13c1-6800-e536-ab92-6723-3a65.ngrok-free.app, *, 192.168.1.2',
         env('APP_URL') ? ','.parse_url(env('APP_URL'), PHP_URL_HOST) : ''
     ))),
 

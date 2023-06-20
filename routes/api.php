@@ -26,6 +26,11 @@ use App\Http\Controllers\PuntuacionController;
 use App\Http\Controllers\CertificadoController;
 
 use App\Http\Controllers\CuponController;
+use App\Http\Controllers\MailController;
+use App\Models\CompraEvento;
+use App\Models\Evento;
+use App\Models\SeminarioVirtual;
+use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -51,7 +56,7 @@ Route::group([
     Route::post("/login", [UsuarioController::class, "signin"])->name("login");
     Route::post("/signup", [UsuarioController::class, "create"])->name("signup");
     Route::put("/activate", [UsuarioController::class, "activate"])->name("activate");
-    Route::get("/me", [UsuarioController::class, "me"])->name("me"); 
+    Route::get("/me", [UsuarioController::class, "me"])->name("me");
     Route::put("/me", [UsuarioController::class, "editMeInfo"])->name("editMeInfo");
     Route::get("/checkNickname", [UsuarioController::class, "checkNickname"])->name("checkNickname");
     Route::post("/signupWithOauth", [UsuarioController::class, "createUserWithOauth"])->name("createUserWithOauth");
@@ -61,8 +66,8 @@ Route::group([
 
 Route::group([
     "prefix" => "eventos",
-    'middleware' => ['cors'] 
-], function() {
+    'middleware' => ['cors']
+], function () {
     Route::get("/", [EventoController::class, "listar"])->name("listar");
     Route::get("{id}/userIsStudentOrOwner", [EventoController::class, "userIsStudentOrOwner"])->name("userIsStudentOrOwner");
     Route::get("/getMyEventos", [EventoController::class, "getMyEventos"])->name("getMyEventos");
@@ -82,8 +87,8 @@ Route::group([
 Route::group([
     "prefix" => "cursos",
 ], function () {
-    
-    Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso"); 
+
+    Route::get("/getInfoCurso", [CursoController::class, "getInfoCurso"])->name("getInfoCurso");
     Route::get("/getCompleteInfoCurso", [CursoController::class, "getCursoInfo"])->name("getCursoInfo");
     Route::get("/getCursosComprados", [CursoController::class, "getCursosComprados"])->name("getCursosComprados");
     Route::get("/getCursoAndClases", [CursoController::class, "getCursoAndClases"])->name("getCursoAndClases"); // solo info del curso, modulos y clases. (sin evaluación también)
@@ -101,12 +106,12 @@ Route::group([
     Route::post('/createEvento', [EventoController::class, "create"]);
     Route::get("/", [EventoController::class, "listar"])->name("listar");
     Route::post("/comprarEvento", [EventoController::class, "comprarEvento"])->name("comprarEvento");
-   
+
 });
 
 Route::group([
     "prefix" => "modulos",
-], function () { 
+], function () {
     Route::post('/createModulo', [ModuloController::class, "create"]);
     Route::get('/listByEventoId/{eventoId}', [ModuloController::class, "listByEventoId"]);
     Route::get('/{id}', [ModuloController::class, "show"]);
@@ -160,7 +165,7 @@ Route::group([
     Route::post('/createSeminarioPresencial', [SeminarioPresencialController::class, "create"]);
     Route::get('/presenciales', [SeminarioPresencialController::class, "listarSeminariosPresenciales"]);
     Route::get('/getCompleteInfoSeminario', [SeminarioPresencialController::class, "getCompleteInfoSeminario"]);
-    Route::post("/virtuales/{id}/chat",  [MensajeSalaController::class , "create"]);    
+    Route::post("/virtuales/{id}/chat", [MensajeSalaController::class, "create"]);
 });
 
 
@@ -168,7 +173,7 @@ Route::group([
 Route::group([
     "prefix" => "publicaciones",
 ], function () {
-    Route::get('/listByForoId/{foroId}', [PublicacionController::class, "list"]); 
+    Route::get('/listByForoId/{foroId}', [PublicacionController::class, "list"]);
     Route::post('/', [PublicacionController::class, "create"]);
     Route::put('/{id}', [PublicacionController::class, "edit"]);
     Route::delete('/{id}', [PublicacionController::class, "destroy"]);
@@ -200,14 +205,14 @@ Route::group([
 
 Route::group([
     "prefix" => "videos",
-], function() {
+], function () {
     Route::post('/upload-video', [VideoController::class, 'uploadVideo']);
     Route::get('/getBase64OfVideo', [VideoController::class, 'getBase64OfVideo']);
 });
 
 Route::group([
     "prefix" => "puntuacion",
-], function() {
+], function () {
     Route::post('/', [PuntuacionController::class, 'puntuarCurso']);
 });
 
@@ -224,7 +229,7 @@ Route::group([
     "prefix" => "certificaciones",
 ], function () {
     Route::post("/", [CertificadoController::class, "create"])->name("create");
-    Route::get('/{id}/getCertificationPDF', [CertificadoController::class, "getCertificationPdf"]); 
+    Route::get('/{id}/getCertificationPDF', [CertificadoController::class, "getCertificationPdf"]);
 
 });
 
@@ -242,6 +247,3 @@ Route::group([
     Route::get('/validarCupon', [CuponController::class, "validarCupon"]);
     Route::get('/usarCupon', [CuponController::class, "usarCupon"]);
 });
-
-
-

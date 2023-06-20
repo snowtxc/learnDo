@@ -53,6 +53,7 @@ class RecordatorioSeminarioVirtual extends Command
 
         //Seleccionar todos los seminarios virtuales con previo aviso de 24 horas
         //acceder a estudiante 1 por 1 y enviarlo un email
+        date_default_timezone_set('America/Montevideo');
         $now = new DateTime();
         $nowStr = $now->format('d/m/Y'); 
         $this->info($nowStr);
