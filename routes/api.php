@@ -58,7 +58,6 @@ Route::group([
     Route::put("/activate", [UsuarioController::class, "activate"])->name("activate");
     Route::get("/me", [UsuarioController::class, "me"])->name("me");
     Route::put("/me", [UsuarioController::class, "editMeInfo"])->name("editMeInfo");
-    Route::get("/checkNickname", [UsuarioController::class, "checkNickname"])->name("checkNickname");
     Route::post("/signupWithOauth", [UsuarioController::class, "createUserWithOauth"])->name("createUserWithOauth");
     Route::put("/changeRole", [UsuarioController::class, "changeUserRole"])->name("changeRole");
 });
@@ -156,6 +155,7 @@ Route::group([
 ], function () {
     Route::get('/filterByNicknameOrEmail', [UsuarioController::class, "filterByNicknameOrEmail"]);
     Route::get('/userInfoById', [UsuarioController::class, "userInfoById"]);
+    Route::get("/checkNickname", [UsuarioController::class, "checkNickname"])->name("checkNickname");
 });
 
 Route::group([

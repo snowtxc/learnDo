@@ -246,7 +246,8 @@ class UsuarioController extends Controller
 
     public function checkNickname(Request $req)
     {
-        $validator = Validator::make($req->all(), [
+        try {
+            $validator = Validator::make($req->all(), [
             "nickname" => "required|string|max:100",
         ]);
 
@@ -256,6 +257,9 @@ class UsuarioController extends Controller
 
         $user = DB::table("usuarios")->where("nickname", $req->nickname)->first();
         return response()->json(["existe" => isset($user)]);
+        } catch (\Throwable $th) {
+            return response()->json(["ok" => false, "error" => $th->getMessage()]);
+        }
     }
 
     public function filterByNicknameOrEmail(Request $req)
