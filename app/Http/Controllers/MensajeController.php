@@ -136,7 +136,7 @@ class MensajeController extends Controller
         $newEvent = new ChatEventController($req->user_from_id, $req->user_to_id, $mensaje);
         $newEvent->broadcastOn();
         event($newEvent);
-        $pusher = new Pusher('be1fb10ab5b04b4d40c9','4192987d8053f5352aba', '1622177', [
+        $pusher = new Pusher('73c7a4829d7d8e48d310','c6f4c3ce7aafc2c7496f', '1596858', [
             "cluster" => 'us2'
         ]);
         $channelName = "MessageFrom-$req->user_from_id-To-$req->user_to_id";
