@@ -106,7 +106,10 @@ class VideoController extends Controller
             }
             $path = $claseInfo->video;
             $type = pathinfo($path, PATHINFO_EXTENSION);
-            $newUrl = str_replace("http://127.0.0.1:8000/storage/", "", $path);
+            $hostname = $_SERVER['SERVER_NAME'];
+
+            $url = getMyUrl();
+            $newUrl = str_replace("$url/storage/", "", $path);
 
             // /Users/maximilianoolivera/Documents/Projects/LearnDo/Api/learnDo/publicstorage/videos/24/GrFZQPpmHQ35riB6l2GDXyTcMkTxasX8wfojaC67.mp4{
   
