@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PreguntaSeeder extends Seeder
 {
@@ -14,88 +15,19 @@ class PreguntaSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('preguntas')->insert([
-            'contenido' => 'Pregunta 1',
-            'evaluacion_id' => '1',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $evaluaciones = DB::table('evaluacions')->pluck('id');
 
-        DB::table('preguntas')->insert([
-            'contenido' => 'Pregunta 2',
-            'evaluacion_id' => '1',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        foreach ($evaluaciones as $evaluacionId) {
+            $numPreguntas = rand(5, 7); // Genera un número aleatorio entre 5 y 7
 
-        DB::table('preguntas')->insert([
-            'contenido' => 'Pregunta 1',
-            'evaluacion_id' => '2',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('preguntas')->insert([
-            'contenido' => 'Pregunta 2',
-            'evaluacion_id' => '2',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('preguntas')->insert([
-            'contenido' => 'Pregunta 1',
-            'evaluacion_id' => '3',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('preguntas')->insert([
-            'contenido' => 'Pregunta 2',
-            'evaluacion_id' => '3',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('preguntas')->insert([
-            'contenido' => 'Pregunta 1',
-            'evaluacion_id' => '4',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('preguntas')->insert([
-            'contenido' => 'Pregunta 2',
-            'evaluacion_id' => '4',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('preguntas')->insert([
-            'contenido' => 'Pregunta 1',
-            'evaluacion_id' => '5',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('preguntas')->insert([
-            'contenido' => 'Pregunta 2',
-            'evaluacion_id' => '5',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('preguntas')->insert([
-            'contenido' => 'Pregunta 1',
-            'evaluacion_id' => '6',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('preguntas')->insert([
-            'contenido' => 'Pregunta 2',
-            'evaluacion_id' => '6',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+            for ($i = 1; $i <= $numPreguntas; $i++) {
+                DB::table('preguntas')->insert([
+                    'contenido' => 'Pregunta ' . $i,
+                    'evaluacion_id' => $evaluacionId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
     }
 }

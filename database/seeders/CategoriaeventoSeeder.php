@@ -14,16 +14,16 @@ class CategoriaeventoSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('categoriaeventos')->insert([
-            'evento_id' => '1',
-            'categoria_id' => '1',
-            'id' => 1,
-        ]);
+        $eventos = DB::table('eventos')->select('id')->get();
+        $categorias = DB::table('categorias')->select('id')->get();
 
-        DB::table('categoriaeventos')->insert([
-            'evento_id' => '2',
-            'categoria_id' => '2',
-            'id' => 2,
-        ]);
+        foreach ($eventos as $evento) {
+            $categoriaAleatoria = $categorias->random();
+
+            DB::table('categoriaeventos')->insert([
+                'evento_id' => $evento->id,
+                'categoria_id' => $categoriaAleatoria->id,
+            ]);
+        }
     }
 }

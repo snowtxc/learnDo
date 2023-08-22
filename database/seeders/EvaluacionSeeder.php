@@ -14,46 +14,13 @@ class EvaluacionSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('evaluacions')->insert([
-            'nombre' => 'Evaluacion Modulo 1',
-            'modulo_id' => '1',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('evaluacions')->insert([
-            'nombre' => 'Evaluacion Modulo 2',
-            'modulo_id' => '2',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('evaluacions')->insert([
-            'nombre' => 'Evaluacion Modulo 3',
-            'modulo_id' => '3',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('evaluacions')->insert([
-            'nombre' => 'Evaluacion Modulo 1',
-            'modulo_id' => '4',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('evaluacions')->insert([
-            'nombre' => 'Evaluacion Modulo 2',
-            'modulo_id' => '5',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('evaluacions')->insert([
-            'nombre' => 'Evaluacion Modulo 3',
-            'modulo_id' => '6',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        for ($i = 1; $i <= 53; $i++) {
+            DB::table('evaluacions')->insert([
+                'nombre' => 'Evaluacion Módulo ' . $i,
+                'modulo_id' => $i,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 }

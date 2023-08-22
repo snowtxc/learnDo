@@ -14,58 +14,20 @@ class ModuloSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('modulos')->insert([
-            'id' => '1',
-            'nombre' => 'Conceptos Basicos de php',
-            'estado' => 'aprobado',
-            'curso_id' => '1',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $eventosCount = 18; // Cantidad total de cursos/eventos
 
-        DB::table('modulos')->insert([
-            'id' => '2',
-            'nombre' => 'Conceptos Medios de php',
-            'estado' => 'aprobado',
-            'curso_id' => '1',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        for ($i = 1; $i <= $eventosCount; $i++) {
+            $numModulos = rand(2, 4); // Generar cantidad aleatoria de módulos
 
-        DB::table('modulos')->insert([
-            'id' => '3',
-            'nombre' => 'Conceptos Avanzados de php',
-            'estado' => 'aprobado',
-            'curso_id' => '1',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('modulos')->insert([
-            'id' => '4',
-            'nombre' => 'Como utilizar las diferentes herramientas de la cocina',
-            'estado' => 'aprobado',
-            'curso_id' => '2',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('modulos')->insert([
-            'id' => '5',
-            'nombre' => 'Ingredientes principales y como se utilizan',
-            'estado' => 'aprobado',
-            'curso_id' => '2',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('modulos')->insert([
-            'id' => '6',
-            'nombre' => 'Recetas y platos',
-            'estado' => 'aprobado',
-            'curso_id' => '2',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+            for ($j = 1; $j <= $numModulos; $j++) {
+                DB::table('modulos')->insert([
+                    'nombre' => 'Módulo ' . $j . ' - Curso ' . $i,
+                    'estado' => 'aprobado',
+                    'curso_id' => $i,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
     }
 }

@@ -14,18 +14,13 @@ class CursoSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('cursos')->insert([
-            'evento_id_of_curso' => '1',
-            'porcentaje_aprobacion' => '60',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('cursos')->insert([
-            'evento_id_of_curso' => '2',
-            'porcentaje_aprobacion' => '70',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        for ($i = 1; $i <= 18; $i++) {
+            DB::table('cursos')->insert([
+                'evento_id_of_curso' => $i,
+                'porcentaje_aprobacion' => rand(50, 80),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 }

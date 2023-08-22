@@ -14,186 +14,22 @@ class ClaseSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('clases')->insert([
-            'nombre' => 'Introduccion',
-            'descripcion' => 'Clase introductoria para incio del curso',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '1',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $modulosCount = 53; // Cantidad total de módulos
 
-        DB::table('clases')->insert([
-            'nombre' => 'Clase 2',
-            'descripcion' => 'Segunda clase del modulo_id 1',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '1',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        for ($i = 1; $i <= $modulosCount; $i++) {
+            $numClases = rand(2, 4); // Generar cantidad aleatoria de clases
 
-        DB::table('clases')->insert([
-            'nombre' => 'Clase 23',
-            'descripcion' => 'tercera clase del modulo_id 1',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '1',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('clases')->insert([
-            'nombre' => 'Introduccion',
-            'descripcion' => 'Clase introductoria del modulo_id 2',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '2',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('clases')->insert([
-            'nombre' => 'Clase 2',
-            'descripcion' => 'Segunda clase del modulo_id 2',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '2',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('clases')->insert([
-            'nombre' => 'Clase 23',
-            'descripcion' => 'tercera clase del modulo_id 2',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '2',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('clases')->insert([
-            'nombre' => 'Introduccion',
-            'descripcion' => 'Clase introductoria del modulo_id 3',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '3',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('clases')->insert([
-            'nombre' => 'Clase 2',
-            'descripcion' => 'Segunda clase del modulo_id 3',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '3',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('clases')->insert([
-            'nombre' => 'Clase 23',
-            'descripcion' => 'tercera clase del modulo_id 3',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '3',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        //===========================================================================
-
-        DB::table('clases')->insert([
-            'nombre' => 'Introduccion',
-            'descripcion' => 'Clase introductoria para incio del curso',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '4',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('clases')->insert([
-            'nombre' => 'Clase 2',
-            'descripcion' => 'Segunda clase del modulo_id 1',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '4',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('clases')->insert([
-            'nombre' => 'Clase 23',
-            'descripcion' => 'tercera clase del modulo_id 1',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '4',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('clases')->insert([
-            'nombre' => 'Introduccion',
-            'descripcion' => 'Clase introductoria del modulo_id 2',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '5',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('clases')->insert([
-            'nombre' => 'Clase 2',
-            'descripcion' => 'Segunda clase del modulo_id 2',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '5',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('clases')->insert([
-            'nombre' => 'Clase 23',
-            'descripcion' => 'tercera clase del modulo_id 2',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '5',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('clases')->insert([
-            'nombre' => 'Introduccion',
-            'descripcion' => 'Clase introductoria del modulo_id 3',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '6',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('clases')->insert([
-            'nombre' => 'Clase 2',
-            'descripcion' => 'Segunda clase del modulo_id 3',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '6',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('clases')->insert([
-            'nombre' => 'Clase 23',
-            'descripcion' => 'tercera clase del modulo_id 3',
-            'video' => 'http://127.0.0.1:8000/storage/videos/1/JDfTU1eWOCKWwU41dSqvSFedsDueKsHc83VGwnsR.mp4',
-            'estado' => 'aprobado',
-            'modulo_id' => '6',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+            for ($j = 1; $j <= $numClases; $j++) {
+                DB::table('clases')->insert([
+                    'nombre' => 'Clase ' . $j . ' - Módulo ' . $i,
+                    'descripcion' => 'Descripción de la Clase ' . $j . ' del Módulo ' . $i,
+                    'video' => 'https://player.vimeo.com/video/374410050',
+                    'estado' => 'aprobado',
+                    'modulo_id' => $i,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
     }
 }

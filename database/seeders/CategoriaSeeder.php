@@ -15,50 +15,91 @@ class CategoriaSeeder extends Seeder
     public function run()
     {
         DB::table('categorias')->insert([
-            'id' => 1,
-            'nombre' => 'Programacion',
+            'nombre' => 'Programación',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
         DB::table('categorias')->insert([
-            'id' => 2,
             'nombre' => 'Cocina',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
         DB::table('categorias')->insert([
-            'id' => 3,
-            'nombre' => 'Economia',
+            'nombre' => 'Economía',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
         DB::table('categorias')->insert([
-            'id' => 4,
             'nombre' => 'Autos',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
         DB::table('categorias')->insert([
-            'id' => 5,
-            'nombre' => 'Algo',
+            'nombre' => 'Tecnología',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
         DB::table('categorias')->insert([
-            'id' => 6,
-            'nombre' => 'Nuevo Algo',
+            'nombre' => 'Salud',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
         DB::table('categorias')->insert([
-            'id' => 7,
-            'nombre' => 'EstaCategoria',
+            'nombre' => 'Educación',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
         DB::table('categorias')->insert([
-            'id' => 8,
-            'nombre' => 'Arquitectura',
+            'nombre' => 'Arte y Cultura',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('categorias')->insert([
+            'nombre' => 'Deportes',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('categorias')->insert([
+            'nombre' => 'Ciencia',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('categorias')->insert([
+            'nombre' => 'Viajes',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('categorias')->insert([
+            'nombre' => 'Negocios',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('categorias')->insert([
+            'nombre' => 'Medio Ambiente',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('categorias')->insert([
+            'nombre' => 'Moda',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('categorias')->insert([
+            'nombre' => 'Literatura',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
