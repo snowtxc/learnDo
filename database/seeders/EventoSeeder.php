@@ -53,6 +53,7 @@ class EventoSeeder extends Seeder
                 'descripcion' => 'Aprende los conceptos básicos de la programación en este curso gratuito. ¡No se requieren conocimientos previos!',
                 'imagen' => $imagenes[$i - 1],
                 'es_pago' => 0,
+                'precio' => 0,
                 'organizador_id' => 11,
                 'tipo' => 'curso',
                 'created_at' => now(),
@@ -61,7 +62,7 @@ class EventoSeeder extends Seeder
             ]);
         }
 
-        
+
         for ($i = 1; $i <= 5; $i++) {
             DB::table('eventos')->insert([
                 'nombre' => 'Desarrollo Web Avanzado '.$i,
@@ -98,6 +99,7 @@ class EventoSeeder extends Seeder
                 'descripcion' => 'Descubre cómo desarrollar habilidades de liderazgo efectivas en este seminario gratuito. Aprenderás a inspirar y motivar a tu equipo.',
                 'imagen' => $imagenes[$i + 16],
                 'es_pago' => 0,
+                'precio' => 0,
                 'organizador_id' => 11,
                 'tipo' => 'seminarioP',
                 'created_at' => now(),
@@ -174,9 +176,9 @@ class EventoSeeder extends Seeder
             'ganancias_acumuladas' => 0
         ]);
 
-        
+
     }
 }
-    
-    
+
+
 
